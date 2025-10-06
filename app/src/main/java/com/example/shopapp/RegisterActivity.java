@@ -6,7 +6,9 @@ import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -31,18 +34,23 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView tvBackToLogin;
     private TextView tvFullNameError, tvEmailError, tvPasswordError, tvConfirmPasswordError, tvTermsError;
     private TextView tvTogglePassword, tvToggleConfirmPassword;
-    private android.widget.CheckBox cbTerms;
-    private android.widget.ProgressBar progressBar;
+    private CheckBox cbTerms;
+    private ProgressBar progressBar;
+
+    // Regex patterns
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[\\p{L} ]{2,50}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,32}$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Khởi tạo Firebase Auth
+        // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // Ánh xạ View
+        // Map views
         edtFullName = findViewById(R.id.edtFullName);
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
@@ -63,10 +71,10 @@ public class RegisterActivity extends AppCompatActivity {
         tvTogglePassword.setOnClickListener(v -> togglePasswordVisibility(edtPassword, tvTogglePassword));
         tvToggleConfirmPassword.setOnClickListener(v -> togglePasswordVisibility(edtConfirmPassword, tvToggleConfirmPassword));
 
-        // Sự kiện nút đăng ký
+        // Register button
         btnRegister.setOnClickListener(v -> registerUser());
 
-        // Quay lại trang đăng nhập (MainActivity)
+        // Back to login
         tvBackToLogin.setOnClickListener(v -> {
             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
             startActivity(intent);
@@ -83,32 +91,54 @@ public class RegisterActivity extends AppCompatActivity {
         clearErrors();
 
         boolean hasError = false;
+
+        // Validate full name
         if (TextUtils.isEmpty(fullName)) {
-            tvFullNameError.setText("Vui lòng nhập họ tên");
+            tvFullNameError.setText("Vui lòng nhập họ và tên");
+            tvFullNameError.setVisibility(android.view.View.VISIBLE);
+            hasError = true;
+        } else if (!NAME_PATTERN.matcher(fullName).matches()) {
+            tvFullNameError.setText("Họ tên chỉ chứa chữ cái và khoảng trắng (2-50 ký tự)");
             tvFullNameError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
-        if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            tvEmailError.setText("Email không hợp lệ");
+
+        // Validate email
+        if (TextUtils.isEmpty(email)) {
+            tvEmailError.setText("Vui lòng nhập email");
+            tvEmailError.setVisibility(android.view.View.VISIBLE);
+            hasError = true;
+        } else if (!EMAIL_PATTERN.matcher(email).matches()) {
+            tvEmailError.setText("Email không đúng định dạng");
             tvEmailError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
+
+        // Validate password
         if (TextUtils.isEmpty(password)) {
             tvPasswordError.setText("Vui lòng nhập mật khẩu");
             tvPasswordError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
-        } else if (password.length() < 6) {
-            tvPasswordError.setText("Mật khẩu ít nhất 6 ký tự");
+        } else if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            tvPasswordError.setText("Mật khẩu phải có 8-32 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
             tvPasswordError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
-        if (!TextUtils.equals(password, confirmPassword)) {
+
+        // Validate confirm password
+        if (TextUtils.isEmpty(confirmPassword)) {
+            tvConfirmPasswordError.setText("Vui lòng xác nhận mật khẩu");
+            tvConfirmPasswordError.setVisibility(android.view.View.VISIBLE);
+            hasError = true;
+        } else if (!password.equals(confirmPassword)) {
             tvConfirmPasswordError.setText("Mật khẩu xác nhận không khớp");
             tvConfirmPasswordError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
+
+        // Validate terms
         if (!cbTerms.isChecked()) {
-            tvTermsError.setText("Bạn cần đồng ý với Điều khoản và Chính sách");
+            tvTermsError.setText("Bạn phải đồng ý với điều khoản để tiếp tục");
             tvTermsError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
@@ -119,29 +149,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Kiểm tra hợp lệ
-        if (fullName.isEmpty()) {
-            showToast("Vui lòng nhập họ tên");
-            return;
-        }
-        if (email.isEmpty()) {
-            showToast("Vui lòng nhập email");
-            return;
-        }
-        if (password.isEmpty()) {
-            showToast("Vui lòng nhập mật khẩu");
-            return;
-        }
-        if (password.length() < 6) {
-            showToast("Mật khẩu phải có ít nhất 6 ký tự");
-            return;
-        }
-        if (!password.equals(confirmPassword)) {
-            showToast("Mật khẩu xác nhận không khớp");
-            return;
-        }
-
-        // Tạo tài khoản Firebase Authentication
+        // Create Firebase Authentication account
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -150,29 +158,32 @@ public class RegisterActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
 
                             if (user != null) {
-                                // Lưu thêm thông tin user vào Realtime Database
+                                // Save additional user info to Realtime Database
                                 Map<String, Object> userData = new HashMap<>();
                                 userData.put("fullName", fullName);
                                 userData.put("email", email);
+                                userData.put("createdAt", System.currentTimeMillis());
 
                                 FirebaseDatabase.getInstance().getReference("users")
                                         .child(user.getUid())
                                         .setValue(userData)
                                         .addOnCompleteListener(saveTask -> {
+                                            setLoading(false);
                                             if (saveTask.isSuccessful()) {
-                                                showToast("Đăng ký thành công! Chào mừng " + fullName);
-                                                // Quay lại màn chính (MainActivity)
+                                                showToast("Đăng ký thành công! Chào mừng bạn.");
+                                                // Go to MainActivity
                                                 startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                                                 finish();
                                             } else {
-                                                showToast("Lỗi lưu dữ liệu: " + saveTask.getException().getMessage());
+                                                showToast("Lỗi lưu thông tin: " + saveTask.getException().getMessage());
                                             }
                                         });
                             }
                         } else {
-                            showToast("Đăng ký thất bại: " + task.getException().getMessage());
+                            setLoading(false);
+                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Đăng ký thất bại";
+                            showToast(errorMessage);
                         }
-                        setLoading(false);
                     }
                 });
     }
@@ -192,6 +203,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void setLoading(boolean loading) {
         btnRegister.setEnabled(!loading);
         progressBar.setVisibility(loading ? android.view.View.VISIBLE : android.view.View.GONE);
+        btnRegister.setText(loading ? "ĐANG XỬ LÝ..." : "TẠO TÀI KHOẢN");
     }
 
     private void togglePasswordVisibility(EditText editText, TextView toggleView) {

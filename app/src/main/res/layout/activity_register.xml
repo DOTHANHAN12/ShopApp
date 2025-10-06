@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <!-- Brand / Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SHOP"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:letterSpacing="0.1"
+            android:layout_marginTop="48dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo tài khoản"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="40dp"/>
+
+        <!-- Full name -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HỌ VÀ TÊN"
+            android:textSize="12sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtFullName"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Nguyễn Văn A"
+            android:inputType="textPersonName"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#AAAAAA"
+            android:background="@android:color/transparent"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:id="@+id/tvFullNameError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="-16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EMAIL"
+            android:textSize="12sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="your@email.com"
+            android:inputType="textEmailAddress"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#AAAAAA"
+            android:background="@android:color/transparent"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:id="@+id/tvEmailError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="-16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MẬT KHẨU"
+            android:textSize="12sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Ít nhất 6 ký tự"
+            android:inputType="textPassword"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#AAAAAA"
+            android:background="@android:color/transparent"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvTogglePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HIỂN THỊ"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:layout_gravity="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:id="@+id/tvPasswordError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="-16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Confirm Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="XÁC NHẬN MẬT KHẨU"
+            android:textSize="12sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Nhập lại mật khẩu"
+            android:inputType="textPassword"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#AAAAAA"
+            android:background="@android:color/transparent"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvToggleConfirmPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HIỂN THỊ"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:layout_gravity="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="32dp"/>
+
+        <TextView
+            android:id="@+id/tvConfirmPasswordError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="-16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Terms and conditions -->
+        <CheckBox
+            android:id="@+id/cbTerms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tôi đồng ý với Điều khoản và Chính sách"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvTermsError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Register Button -->
+        <Button
+            android:id="@+id/btnRegister"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="TẠO TÀI KHOẢN"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="#000000"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="16dp"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Back to login link -->
+        <TextView
+            android:id="@+id/tvBackToLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đã có tài khoản? Đăng nhập"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">ShopApp</string>
+    <string name="product_image_desc">Product Image</string>
+    <string name="notification_desc">Notifications</string>
+    <string name="favorite_desc">Favorites</string>
+    <string name="cart_desc">Shopping Cart</string>
+    <string name="search_desc">Search</string>
+    <string name="app_name">AnAn</string>
 </resources>

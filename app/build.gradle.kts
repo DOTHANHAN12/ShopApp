@@ -33,6 +33,8 @@ android {
 }
 
 dependencies {
+    implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -61,4 +63,5 @@ dependencies {
         // When using the BoM, you don't specify versions in Firebase library dependencies
         implementation("com.google.firebase:firebase-firestore")
     }//firestoredb
+
 }

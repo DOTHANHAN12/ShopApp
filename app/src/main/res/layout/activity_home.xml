@@ -5,48 +5,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:fitsSystemWindows="false">
 
-<androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/img_product"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager_featured_products"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:contentDescription="@string/product_image_desc"
-            android:scaleType="centerCrop"
-            android:src="@drawable/your_product_image"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/avatars"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:background="@drawable/gradient_overlay"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
-    <LinearLayout
-        android:id="@+id/layout_top_icons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-
-        android:paddingTop="?attr/actionBarSize"
-
-        app:layout_constraintTop_toTopOf="parent"
-        android:gravity="end">
-
-
+        <LinearLayout
+            android:id="@+id/layout_top_icons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="end">
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -89,7 +72,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="10sp"/>
             </FrameLayout>
-
         </LinearLayout>
 
         <LinearLayout
@@ -102,94 +84,10 @@
             android:paddingVertical="8dp"
             app:layout_constraintTop_toBottomOf="@id/layout_top_icons">
 
-            <TextView android:text="WOMEN" style="@style/CategoryTab"/>
-            <TextView android:text="MEN" style="@style/CategoryTab.Selected"/>
-            <TextView android:text="KIDS" style="@style/CategoryTab"/>
-            <TextView android:text="BABY" style="@style/CategoryTab"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_product_details"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            app:layout_constraintBottom_toTopOf="@id/layout_bottom_nav"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/limited_offer_background"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:text="LIMITED OFFER"
-                android:textColor="@android:color/white"
-                android:textSize="10sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reversible Parka"
-                android:textColor="@android:color/white"
-                android:textSize="28sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:alpha="0.8"
-                android:text="Water-repellent outer with a soft jersey lining."
-                android:textColor="@android:color/white"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="784.000 VND"
-                android:textColor="#FF0000"
-                android:textSize="32sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:alpha="0.6"
-                android:background="@drawable/strikethrough_text"
-                android:text="980.000 VND"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:text="Celebrate Mid-Autumn Festival With Limited Offers"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="From 03.10 - 09.10"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="*The fabric is coated with a water-repellent agent so the effect lasts longer. The finish is not permanent."
-                android:textColor="@android:color/white"
-                android:textSize="10sp"/>
+            <TextView android:id="@+id/tab_women" android:text="WOMEN" style="@style/CategoryTab"/>
+            <TextView android:id="@+id/tab_men" android:text="MEN" style="@style/CategoryTab.Selected"/>
+            <TextView android:id="@+id/tab_kids" android:text="KIDS" style="@style/CategoryTab"/>
+            <TextView android:id="@+id/tab_baby" android:text="BABY" style="@style/CategoryTab"/>
 
         </LinearLayout>
 
@@ -225,7 +123,8 @@
 
             <FrameLayout
                 android:gravity="center"
-                android:layout_height="88dp" android:layout_width="88dp">
+                android:layout_height="88dp"
+                android:layout_width="88dp">
 
                 <ImageView
                     android:background="@drawable/circle_background_black"

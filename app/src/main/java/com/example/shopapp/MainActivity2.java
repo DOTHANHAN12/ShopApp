@@ -67,7 +67,7 @@ public class MainActivity2 extends AppCompatActivity {
     // HÀM GHI DỮ LIỆU SẢN PHẨM MỚI
     // ---------------------------------------------------------------------
 
-    /** TẠO VÀ GHI 50 SẢN PHẨM KHÁC NHAU VÀO COLLECTION 'products' */
+    /** TẠO VÀ GHI 50 SẢN PHẨM KHÁC NUA VÀO COLLECTION 'products' */
     private void write50SampleProducts() {
         WriteBatch batch = db.batch();
         List<Product> products = create50Products();
@@ -76,16 +76,12 @@ public class MainActivity2 extends AppCompatActivity {
 
         for (Product product : products) {
             // TẠM THỜI VẪN DÙNG CẤU TRÚC ID CŨ ĐỂ DỄ QUẢN LÝ KHI TEST
-            // Doc ID: category_type_productId
             String docId = product.category.toLowerCase() + "_"
                     + product.type.toLowerCase().replace(" ", "_") + "_"
                     + product.productId.substring(0, 8);
 
             // Tham chiếu và thêm vào batch
             batch.set(db.collection(PRODUCTS_COLLECTION).document(docId), product);
-
-            // HOẶC: Để Firestore tự sinh ID document, dùng:
-            // batch.set(db.collection(PRODUCTS_COLLECTION).document(), product);
         }
 
         // Thực hiện batch write
@@ -101,7 +97,7 @@ public class MainActivity2 extends AppCompatActivity {
         });
     }
 
-    /** Hàm tạo danh sách 50 sản phẩm mẫu ngẫu nhiên (Đã bổ sung Variants, Rating, Featured) */
+    /** Hàm tạo danh sách 50 sản phẩm mẫu ngẫu nhiên */
     private List<Product> create50Products() {
         List<Product> list = new ArrayList<>();
         String[] categories = {"WOMEN", "MEN", "KIDS", "BABY"};
@@ -129,25 +125,36 @@ public class MainActivity2 extends AppCompatActivity {
                 long varQuantity = (long) (random.nextInt(50) + 10); // Tồn kho 10-60 cho mỗi biến thể
                 String varId = "SKU-" + varSize + "-" + varColor.substring(0, 2).toUpperCase() + "-" + i + "-" + j;
 
-                // Giả lập giá biến thể có thể khác nhau
                 double variantPrice = currentPrice + (random.nextBoolean() ? 0 : random.nextInt(5) * 10000);
 
                 variants.add(new ProductVariant(varId, varSize, varColor, varQuantity, variantPrice));
             }
 
             // --- TẠO RATING và ISFEATURED ---
-            // Đánh giá ngẫu nhiên từ 3.0 đến 5.0
             double rating = Math.round((random.nextDouble() * 2 + 3.0) * 10.0) / 10.0;
-            long totalReviews = (long) (random.nextInt(200) + 50); // 50 đến 250 lượt đánh giá
-            boolean isFeatured = random.nextBoolean(); // 50% là sản phẩm nổi bật
+            long totalReviews = (long) (random.nextInt(200) + 50);
+            boolean isFeatured = random.nextBoolean();
 
+            // --- TẠO ĐỐI TƯỢNG ẢNH MỚI (ProductImageDetails) ---
+            String typeSlug = type.toLowerCase().replace(" ", "-");
+            String mainImageUrl = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fmain%2F" + typeSlug + "_" + i + ".jpg?alt=media";
+            String subCategoryUrl = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/icons%2F" + typeSlug + ".png?alt=media";
+
+            List<String> secondaryUrls = new ArrayList<>();
+            secondaryUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fdetail%2Fview1_" + i + ".jpg?alt=media");
+            secondaryUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fdetail%2Fview2_" + i + ".jpg?alt=media");
+
+            ProductImageDetails imageDetails = new ProductImageDetails(mainImageUrl, secondaryUrls, subCategoryUrl);
+
+
+            // GỌI CONSTRUCTOR MỚI CỦA PRODUCT
             Product p = new Product(
                     UUID.randomUUID().toString(), // Product ID nội bộ
                     name,
                     desc,
                     currentPrice,
                     originalPrice,
-                    "https://your-firebase-storage-url/image_" + i + ".jpg",
+                    imageDetails, // <-- TRUYỀN ĐỐI TƯỢNG IMAGE MỚI
                     category,
                     type,
                     status,
@@ -193,7 +200,9 @@ public class MainActivity2 extends AppCompatActivity {
                                         .append(" 🏷️ Giá: ").append(String.format("%,.0f đ", p.currentPrice)).append("\n")
                                         .append(" ⭐️ Đánh giá: ").append(p.averageRating).append(" (").append(p.totalReviews).append(" lượt)\n")
                                         .append(" 💥 Nổi bật: ").append(p.isFeatured ? "CÓ" : "KHÔNG").append("\n")
-                                        .append(" 🚦 Trạng thái: ").append(p.status).append("\n")
+                                        // HIỂN THỊ CÁC THÔNG TIN ẢNH MỚI
+                                        .append(" 📸 Ảnh Chính: ").append(p.images != null ? p.images.mainImage : "N/A").append("\n")
+                                        .append(" 🖼 Ảnh Sub-Category: ").append(p.images != null ? p.images.subCategoryImage : "N/A").append("\n")
                                         .append(" 🛍 Biến thể (").append(p.variants.size()).append("):\n");
 
                                 // Hiển thị chi tiết từng biến thể

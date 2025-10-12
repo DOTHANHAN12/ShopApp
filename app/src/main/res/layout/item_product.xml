@@ -1,59 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="4dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical"  android:paddingBottom="8dp">
 
         <ImageView
             android:id="@+id/img_product_thumb"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
             android:scaleType="centerCrop"
-            android:layout_marginEnd="12dp"
             android:background="#f0f0f0"
             tools:src="@tools:sample/avatars"
             android:contentDescription="Product Thumbnail" />
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/text_product_name_list"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Airism T-Shirt Mùa Hè"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"/>
 
-            <TextView
-                android:id="@+id/text_product_name_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Airism T-Shirt Mùa Hè"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"/>
+        <TextView
+            android:id="@+id/text_product_type_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="T-SHIRTS, SWEAT  FLEECE"
+            android:textSize="12sp"
+            android:textColor="#555"/>
 
-            <TextView
-                android:id="@+id/text_product_type_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="T-SHIRTS, SWEAT  FLEECE"
-                android:textSize="12sp"
-                android:textColor="#555"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp"
+            android:layout_marginTop="4dp">
 
             <TextView
                 android:id="@+id/text_current_price_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="499.000 VND"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textColor="#FF0000"
                 android:textStyle="bold"/>
 
@@ -61,11 +65,13 @@
                 android:id="@+id/text_original_price_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="699.000 VND"
                 android:textSize="12sp"
                 android:textColor="#888"
-                android:background="@drawable/strikethrough_text_black"
-                tools:ignore="SmallSp" />
+                tools:ignore="SmallSp"
+                android:textStyle="italic"
+                />
 
         </LinearLayout>
     </LinearLayout>

@@ -25,7 +25,6 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
     @NonNull
     @Override
     public FeaturedProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Sử dụng layout mới: item_featured_product.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_featured_product, parent, false);
         return new FeaturedProductViewHolder(view);
     }
@@ -41,7 +40,6 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
         return featuredProducts.size();
     }
 
-    // ViewHolder để giữ các View của mỗi sản phẩm
     public static class FeaturedProductViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imgProduct;
         private final TextView textTitle;
@@ -54,7 +52,6 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
 
         public FeaturedProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Ánh xạ các Views từ item_featured_product.xml
             imgProduct = itemView.findViewById(R.id.img_product);
             textTitle = itemView.findViewById(R.id.text_product_title);
             textCurrentPrice = itemView.findViewById(R.id.text_current_price);
@@ -66,23 +63,17 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
         }
 
         public void bind(Product product) {
-            // Gán Tên
             textTitle.setText(product.name);
-
-            // Sử dụng trường 'desc' cho mô tả
             textDescription.setText(product.desc);
 
-            // Gán Giá
             String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice);
             String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.originalPrice);
             textCurrentPrice.setText(currentPriceFormatted);
             textOriginalPrice.setText(originalPriceFormatted);
 
-            // Gán Thông tin Khuyến mãi
             textOfferDetails.setText(product.offerDetails);
             textDisclaimer.setText(product.extraInfo);
 
-            // Cập nhật Badge "LIMITED OFFER"
             if (product.isOffer) {
                 textLimitedOfferBadge.setVisibility(View.VISIBLE);
             } else {
@@ -90,12 +81,15 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
             }
 
             // Tải Ảnh bằng Picasso
-            if (product.imageUrl != null && !product.imageUrl.isEmpty()) {
+            // SỬ DỤNG product.images.mainImage
+            if (product.images != null && product.images.mainImage != null && !product.images.mainImage.isEmpty()) {
                 Picasso.get()
-                        .load(product.imageUrl)
-                        // Lấy Context từ itemView
+                        .load(product.images.mainImage)
                         .error(R.drawable.ic_launcher_foreground)
                         .into(imgProduct);
+            } else if (product.images == null) {
+                // Xử lý trường hợp images là null
+                imgProduct.setImageResource(R.drawable.ic_launcher_foreground);
             }
         }
     }

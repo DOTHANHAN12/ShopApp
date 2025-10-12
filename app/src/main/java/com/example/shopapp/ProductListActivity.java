@@ -33,77 +33,87 @@ public class ProductListActivity extends AppCompatActivity {
     private List<Product> productList;
 
     private String currentCategory;
+    private String currentSubCategory; // <-- BIẾN MỚI: Thêm Sub-category
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Đảm bảo layout này đã tồn tại và không bị lỗi
         setContentView(R.layout.activity_product_list);
 
         // 1. Khởi tạo Firebase
         db = FirebaseFirestore.getInstance();
 
-        // 2. Lấy Category từ Intent
+        // 2. Lấy Category VÀ Sub-category từ Intent
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
+        // ĐỌC THAM SỐ LỌC SUB-CATEGORY (TYPE_KEY)
+        currentSubCategory = getIntent().getStringExtra("TYPE_KEY");
+
         if (currentCategory == null) {
-            currentCategory = "MEN"; // Giá trị mặc định nếu không nhận được
+            currentCategory = "MEN";
         }
 
         // 3. Khởi tạo UI
         categoryHeader = findViewById(R.id.text_category_header);
         recyclerView = findViewById(R.id.recycler_product_list);
 
-        categoryHeader.setText(currentCategory.toUpperCase(Locale.ROOT) + " Collection");
+        // Cập nhật tiêu đề hiển thị cả Sub-category nếu có
+        String headerText = currentCategory.toUpperCase(Locale.ROOT) + " Collection";
+        if (currentSubCategory != null && !currentSubCategory.isEmpty()) {
+            headerText = currentCategory.toUpperCase(Locale.ROOT) + " / " + currentSubCategory.toUpperCase(Locale.ROOT);
+        }
+        categoryHeader.setText(headerText);
 
         // 4. Thiết lập RecyclerView
         productList = new ArrayList<>();
         adapter = new ProductAdapter(this, productList);
 
-        // Dùng GridLayoutManager cho hiển thị danh sách dạng lưới 2 cột
-        // Hoặc dùng LinearLayoutManager nếu muốn hiển thị dạng danh sách dọc
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        // 5. Tải dữ liệu
-        loadProductsFromFirestore(currentCategory);
+        // 5. Tải dữ liệu, truyền cả Sub-category
+        loadProductsFromFirestore(currentCategory, currentSubCategory);
     }
 
-    /** * Tải danh sách sản phẩm từ Firestore dựa trên Category
-     * Vấn đề thường gặp: Category không khớp (Case Sensitivity)
+    /** * Tải danh sách sản phẩm từ Firestore dựa trên Category VÀ Sub-Category
      */
-    private void loadProductsFromFirestore(String category) {
-        // KIỂM TRA LẠI: Tên trường trong Firestore có đúng là "category" (chữ thường) không?
-        db.collection(PRODUCTS_COLLECTION)
-                .whereEqualTo("category", category) // Lọc theo Category
-                .orderBy("currentPrice", Query.Direction.ASCENDING) // Sắp xếp theo giá
-                .limit(20) // Giới hạn 20 sản phẩm
+    private void loadProductsFromFirestore(String category, String subCategory) {
+        // BẮT ĐẦU VỚI TRUY VẤN CƠ BẢN
+        Query query = db.collection(PRODUCTS_COLLECTION)
+                .whereEqualTo("category", category); // Lọc theo Category
+
+        // BỔ SUNG THÊM LỌC THEO SUB-CATEGORY (FIELD NAME: "type")
+        if (subCategory != null && !subCategory.isEmpty()) {
+            // LƯU Ý: Tên trường trong Firestore phải là "type" để khớp với subCategory.name
+            query = query.whereEqualTo("type", subCategory);
+        }
+
+        // TIẾP TỤC SẮP XẾP VÀ GIỚI HẠN
+        query.orderBy("currentPrice", Query.Direction.ASCENDING)
+                .limit(20)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            productList.clear(); // Xóa dữ liệu cũ (nếu có)
+                            productList.clear();
                             int count = 0;
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 try {
-                                    // Deserialization: Chuyển Document thành đối tượng Product
                                     Product product = document.toObject(Product.class);
                                     productList.add(product);
                                     count++;
                                 } catch (Exception e) {
-                                    // BẮT LỖI DESERIALIZATION - RẤT QUAN TRỌNG
                                     Log.e(TAG, "Lỗi khi chuyển đổi Document ID: " + document.getId(), e);
                                     Toast.makeText(ProductListActivity.this, "Lỗi định dạng dữ liệu (Debug log)", Toast.LENGTH_SHORT).show();
                                 }
                             }
 
-                            // Cập nhật RecyclerView
                             adapter.notifyDataSetChanged();
 
                             if (count == 0) {
                                 Toast.makeText(ProductListActivity.this,
-                                        "Không tìm thấy sản phẩm nào cho danh mục " + category,
+                                        "Không tìm thấy sản phẩm nào.",
                                         Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(ProductListActivity.this,
@@ -112,7 +122,6 @@ public class ProductListActivity extends AppCompatActivity {
                             }
 
                         } else {
-                            // BẮT LỖI KẾT NỐI FIRESTORE
                             Log.e(TAG, "Lỗi truy vấn Firestore: ", task.getException());
                             Toast.makeText(ProductListActivity.this,
                                     "❌ Lỗi tải dữ liệu: " + task.getException().getMessage(),

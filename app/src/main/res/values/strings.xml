@@ -5,4 +5,9 @@
     <string name="cart_desc">Shopping Cart</string>
     <string name="search_desc">Search</string>
     <string name="app_name">AnAn</string>
+
+    <string name="filter_desc">Filter Icon</string>
+    <string name="home_desc">Home Navigation Icon</string>
+    <string name="profile_desc">Profile Navigation Icon</string>
+
 </resources>

@@ -9,5 +9,6 @@
     <string name="filter_desc">Filter Icon</string>
     <string name="home_desc">Home Navigation Icon</string>
     <string name="profile_desc">Profile Navigation Icon</string>
+    <string name="back_desc">Back button</string>
 
 </resources>

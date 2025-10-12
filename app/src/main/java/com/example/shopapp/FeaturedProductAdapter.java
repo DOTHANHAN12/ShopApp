@@ -80,16 +80,12 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
                 textLimitedOfferBadge.setVisibility(View.GONE);
             }
 
-            // Tải Ảnh bằng Picasso
-            // SỬ DỤNG product.images.mainImage
-            if (product.images != null && product.images.mainImage != null && !product.images.mainImage.isEmpty()) {
+            // Tải Ảnh bằng Picasso - SỬ DỤNG TRƯỜNG mainImage MỚI
+            if (product.mainImage != null && !product.mainImage.isEmpty()) {
                 Picasso.get()
-                        .load(product.images.mainImage)
+                        .load(product.mainImage)
                         .error(R.drawable.ic_launcher_foreground)
                         .into(imgProduct);
-            } else if (product.images == null) {
-                // Xử lý trường hợp images là null
-                imgProduct.setImageResource(R.drawable.ic_launcher_foreground);
             }
         }
     }

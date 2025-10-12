@@ -12,15 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 
 public class CategorySearchActivity extends AppCompatActivity {
 
@@ -37,6 +36,14 @@ public class CategorySearchActivity extends AppCompatActivity {
     private SubCategoryAdapter subCategoryAdapter;
     private final List<SubCategory> subCategoryList = new ArrayList<>();
 
+    // Khai báo Map ảnh: Category -> (Type -> URL)
+    private final Map<String, Map<String, String>> categoryTypeImages = new HashMap<>();
+
+    // Lấy hằng số từ Model
+    private static final String SHOW_ALL_TYPE = SubCategory.SHOW_ALL_TYPE;
+    private static final String SHOW_ALL_IMAGE_URL = SubCategory.SHOW_ALL_IMAGE_URL;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +55,9 @@ public class CategorySearchActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
+        // Khởi tạo Map URL ảnh Fix Cứng
+        initializeFixedImages();
+
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
         if (currentCategory == null) {
             currentCategory = "WOMEN";
@@ -58,8 +68,6 @@ public class CategorySearchActivity extends AppCompatActivity {
 
         // Khởi tạo RecyclerView và Adapter
         recyclerView = findViewById(R.id.recycler_category_grid);
-        // Lưu ý: Cần truyền currentCategory vào Adapter để xử lý click item sau này
-        // SubCategoryAdapter hiện đã không dùng iconResId nữa, nhưng ta giữ nguyên cấu trúc này
         subCategoryAdapter = new SubCategoryAdapter(subCategoryList, currentCategory);
 
         // Thiết lập GridLayout 2 cột
@@ -75,8 +83,65 @@ public class CategorySearchActivity extends AppCompatActivity {
         loadSubCategoryData(currentCategory);
     }
 
+    /**
+     * Khởi tạo Map chứa URL ảnh Fix Cứng cho từng TYPE theo từng CATEGORY
+     */
+    // Trong CategorySearchActivity.java
+
+    // Trong CategorySearchActivity.java
+
+    /**
+     * Khởi tạo Map chứa URL ảnh Fix Cứng cho từng TYPE theo từng CATEGORY
+     */
+    private void initializeFixedImages() {
+        // ------------------- DỮ LIỆU CHUNG (DEFAULT) -------------------
+        Map<String, String> commonTypes = new HashMap<>();
+        commonTypes.put("OUTERWEAR", "URL_OUTERWEAR_DEFAULT");
+        commonTypes.put("SWEATERS & KNITWEAR", "URL_SWEATERS_DEFAULT");
+        commonTypes.put("BOTTOMS", "URL_BOTTOMS_DEFAULT"); // Ảnh mặc định cho các Category khác
+        commonTypes.put("T-SHIRTS, SWEAT & FLEECE", "URL_TSHIRTS_DEFAULT");
+        commonTypes.put("INNERWEAR & UNDERWEAR", "URL_INNERWEAR_DEFAULT");
+        commonTypes.put("ACCESSORIES", "URL_ACCESSORIES_DEFAULT");
+
+        // ------------------- WOMEN -------------------
+        Map<String, String> womenTypes = new HashMap<>(commonTypes); // BẮT ĐẦU VỚI CÁC TYPE CHUNG
+
+        // Ghi đè ảnh BOTTOMS của WOMEN
+        womenTypes.put("BOTTOMS", "https://i.pinimg.com/736x/b2/65/10/b2651094216e49852c57c125eddcab83.jpg");
+
+        // Thêm các Type riêng của WOMEN
+        womenTypes.put("DRESSES", "URL_DRESSES_WOMEN");
+        womenTypes.put("MATERNITY CLOTHES", "URL_MATERNITY_WOMEN");
+
+        categoryTypeImages.put("WOMEN", womenTypes);
+
+        // ------------------- MAN -------------------
+        Map<String, String> menTypes = new HashMap<>(commonTypes); // BẮT ĐẦU VỚI CÁC TYPE CHUNG
+
+        // Ghi đè ảnh BOTTOMS của MAN
+        menTypes.put("BOTTOMS", "https://i.pinimg.com/736x/22/d1/05/22d10514c9e010d94e4fc6bc20bdf0aa.jpg");
+        menTypes.put("ACCESSORIES", "https://i.pinimg.com/736x/22/d1/05/22d10514c9e010d94e4fc6bc20bdf0aa.jpg");
+        // Thêm các Type riêng của MAN
+        menTypes.put("SPORT UTILITY WEAR", "URL_SPORT_MAN");
+
+        categoryTypeImages.put("MEN", menTypes);
+
+        // ------------------- KIDS -------------------
+        // SỬA LỖI: Cần sao chép các Type chung
+        Map<String, String> kidsTypes = new HashMap<>(commonTypes);
+        categoryTypeImages.put("KIDS", kidsTypes);
+
+        // ------------------- BABY -------------------
+        // SỬA LỖI: Cần sao chép các Type chung
+        Map<String, String> babyTypes = new HashMap<>(commonTypes);
+        categoryTypeImages.put("BABY", babyTypes);
+
+        // -------------------------------------------------------------------
+        // Vui lòng thay thế tất cả các placeholder URL (URL_...) bằng URL ảnh THẬT của bạn.
+        // -------------------------------------------------------------------
+    }
+
     private void mapViews() {
-        // Ánh xạ các tab category trên màn hình nền trắng
         tabWomen = findViewById(R.id.tab_women_cs);
         tabMen = findViewById(R.id.tab_men_cs);
         tabKids = findViewById(R.id.tab_kids_cs);
@@ -84,19 +149,14 @@ public class CategorySearchActivity extends AppCompatActivity {
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
     }
 
-    /**
-     * Ánh xạ và thiết lập Listener cho Footer (theo yêu cầu phải giống Home)
-     */
     private void mapViewsFooter() {
         navHome = findViewById(R.id.nav_home_cs);
 
-        // Thiết lập Listener chuyển về HomeActivity
         navHome.setOnClickListener(v -> {
             Intent intent = new Intent(CategorySearchActivity.this, HomeActivity.class);
-            // Cờ để xóa stack và quay về màn hình chính
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish(); // Kết thúc CategorySearchActivity
+            finish();
         });
     }
 
@@ -107,7 +167,6 @@ public class CategorySearchActivity extends AppCompatActivity {
             updateCategoryUI(category);
             currentCategory = category;
 
-            // Tải lại dữ liệu và cập nhật Adapter với Category mới
             loadSubCategoryData(category);
         };
 
@@ -139,15 +198,12 @@ public class CategorySearchActivity extends AppCompatActivity {
     }
 
     private void setupSearchBarListener() {
-        // Khi bấm vào Search Bar, chuyển sang ProductListActivity với Category hiện tại
         edtSearchKeyword.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProductListActivity.class);
             intent.putExtra("CATEGORY_KEY", currentCategory);
-            // Có thể thêm tham số để ProductListActivity hiểu đây là "danh sách tổng"
             startActivity(intent);
         });
 
-        // Icon Filter
         findViewById(R.id.img_search_filter).setOnClickListener(v -> {
             // Logic mở màn hình Filter
         });
@@ -155,43 +211,44 @@ public class CategorySearchActivity extends AppCompatActivity {
 
     /**
      * Tải danh sách các TYPE (Danh mục con) duy nhất từ Collection 'products'
-     * dựa trên Category đang được chọn và lấy URL ảnh đại diện cho mỗi Type.
+     * và gán URL ảnh fix cứng cho mỗi Type, bao gồm mục SHOW ALL.
      */
     private void loadSubCategoryData(String category) {
         db.collection("products")
                 .whereEqualTo("category", category)
-                // Lọc thêm điều kiện để tránh tải quá nhiều
                 .limit(50)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         subCategoryList.clear();
+                        Set<String> uniqueTypesFromDB = new HashSet<>();
 
-                        // Map lưu trữ: Type Name -> SubCategory (đã có URL ảnh)
-                        Map<String, SubCategory> subCategoryMap = new HashMap<>();
-
+                        // 1. Lấy danh sách Type THẬT sự có sản phẩm trong DB
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Product product = document.toObject(Product.class);
-                            String type = product.type;
-
-                            if (type != null && !subCategoryMap.containsKey(type)) {
-                                // Chỉ lấy SubCategory đầu tiên tìm thấy cho mỗi Type
-                                String imageUrl = null;
-                                if (product.images != null && product.images.subCategoryImage != null) {
-                                    imageUrl = product.images.subCategoryImage;
-                                }
-
-                                // Tạo SubCategory mới với URL ảnh thay vì Resource ID
-                                SubCategory subCat = new SubCategory(type, -1); // Dùng -1 cho iconResId
-                                subCat.imageUrl = imageUrl; // Đặt URL ảnh mới
-                                subCategoryMap.put(type, subCat);
+                            String type = document.getString("type");
+                            if (type != null) {
+                                uniqueTypesFromDB.add(type.toUpperCase());
                             }
                         }
 
-                        // Thêm tất cả SubCategory đã được ánh xạ vào danh sách
-                        subCategoryList.addAll(subCategoryMap.values());
+                        // Lấy Map ảnh fix cứng cho Category hiện tại
+                        Map<String, String> fixedImageMap = categoryTypeImages.getOrDefault(category, new HashMap<>());
 
-                        // Cập nhật Adapter
+                        // 2. Thêm mục "SHOW ALL" vào đầu danh sách
+                        subCategoryList.add(new SubCategory(SHOW_ALL_TYPE, SHOW_ALL_IMAGE_URL));
+
+                        // 3. Lọc và gán ảnh
+                        for (Map.Entry<String, String> entry : fixedImageMap.entrySet()) {
+                            String typeName = entry.getKey();
+                            String imageUrl = entry.getValue();
+
+                            // CHỈ thêm Type nếu nó có trong DB
+                            if (uniqueTypesFromDB.contains(typeName.toUpperCase())) {
+                                subCategoryList.add(new SubCategory(typeName, imageUrl));
+                            }
+                        }
+
+                        // 4. Cập nhật Adapter (Quan trọng: Cập nhật Adapter sau khi list thay đổi)
                         subCategoryAdapter = new SubCategoryAdapter(subCategoryList, category);
                         recyclerView.setAdapter(subCategoryAdapter);
                         subCategoryAdapter.notifyDataSetChanged();

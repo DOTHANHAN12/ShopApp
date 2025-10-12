@@ -19,7 +19,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -67,7 +70,7 @@ public class MainActivity2 extends AppCompatActivity {
     // HÀM GHI DỮ LIỆU SẢN PHẨM MỚI
     // ---------------------------------------------------------------------
 
-    /** TẠO VÀ GHI 50 SẢN PHẨM KHÁC NUA VÀO COLLECTION 'products' */
+    /** TẠO VÀ GHI 50 SẢN PHẨM KHÁC NHAU VÀO COLLECTION 'products' */
     private void write50SampleProducts() {
         WriteBatch batch = db.batch();
         List<Product> products = create50Products();
@@ -75,16 +78,13 @@ public class MainActivity2 extends AppCompatActivity {
         tvOutput.setText("Đang ghi 50 sản phẩm vào Firestore...");
 
         for (Product product : products) {
-            // TẠM THỜI VẪN DÙNG CẤU TRÚC ID CŨ ĐỂ DỄ QUẢN LÝ KHI TEST
             String docId = product.category.toLowerCase() + "_"
                     + product.type.toLowerCase().replace(" ", "_") + "_"
                     + product.productId.substring(0, 8);
 
-            // Tham chiếu và thêm vào batch
             batch.set(db.collection(PRODUCTS_COLLECTION).document(docId), product);
         }
 
-        // Thực hiện batch write
         batch.commit().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "✅ Ghi 50 sản phẩm thành công!", Toast.LENGTH_LONG).show();
@@ -103,7 +103,6 @@ public class MainActivity2 extends AppCompatActivity {
         String[] categories = {"WOMEN", "MEN", "KIDS", "BABY"};
         String[] types = {"OUTERWEAR", "SWEATERS & KNITWEAR", "BOTTOMS", "T-SHIRTS, SWEAT & FLEECE", "INNERWEAR & UNDERWEAR", "ACCESSORIES", "DRESSES"};
         double[] prices = {399000.0, 499000.0, 599000.0, 784000.0, 980000.0};
-        String[] sizes = {"S", "M", "L", "XL"};
         String[] colors = {"Black", "Navy", "White", "Gray", "Red", "Green", "Beige"};
 
         for (int i = 0; i < 50; i++) {
@@ -118,53 +117,59 @@ public class MainActivity2 extends AppCompatActivity {
 
             // --- TẠO BIẾN THỂ (VARIANTS) ---
             List<ProductVariant> variants = new ArrayList<>();
-            int numVariants = random.nextInt(3) + 2; // 2 đến 4 biến thể
-            for(int j = 0; j < numVariants; j++) {
-                String varSize = sizes[random.nextInt(sizes.length)];
-                String varColor = colors[random.nextInt(colors.length)];
-                long varQuantity = (long) (random.nextInt(50) + 10); // Tồn kho 10-60 cho mỗi biến thể
-                String varId = "SKU-" + varSize + "-" + varColor.substring(0, 2).toUpperCase() + "-" + i + "-" + j;
+            // Giả định chỉ dùng 3 màu đầu tiên trong danh sách cho mỗi sản phẩm
+            List<String> productColors = Arrays.asList(colors).subList(0, 3);
 
-                double variantPrice = currentPrice + (random.nextBoolean() ? 0 : random.nextInt(5) * 10000);
+            // --- CẤU TRÚC ẢNH MỚI (mainImage & colorImages) ---
+            String typeSlug = type.toLowerCase().replace(" ", "-");
+            String mainImage = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/main_" + i + ".jpg?alt=media";
 
-                variants.add(new ProductVariant(varId, varSize, varColor, varQuantity, variantPrice));
+            Map<String, List<String>> colorImages = new HashMap<>();
+
+            for (String color : productColors) {
+                // Giả lập 5 URL ảnh chi tiết cho mỗi màu
+                List<String> detailUrls = new ArrayList<>();
+                String colorSlug = color.toLowerCase();
+                for(int k=1; k<=5; k++) {
+                    // Ví dụ: https://.../detail_black_01.jpg
+                    detailUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/detail_" + colorSlug + "_" + k + "_" + i + ".jpg?alt=media");
+                }
+                colorImages.put(color, detailUrls);
             }
+
+            // --- TẠO BIẾN THỂ CŨ (Cần thiết cho constructor) ---
+            for(String color : productColors) {
+                String varSize = category.equals("BABY") ? "S" : "M"; // Đơn giản hóa size
+                long varQuantity = (long) (random.nextInt(50) + 10);
+                String varId = "SKU-" + varSize + "-" + color.substring(0, 2).toUpperCase() + "-" + i;
+                variants.add(new ProductVariant(varId, varSize, color, varQuantity, currentPrice));
+            }
+
 
             // --- TẠO RATING và ISFEATURED ---
             double rating = Math.round((random.nextDouble() * 2 + 3.0) * 10.0) / 10.0;
             long totalReviews = (long) (random.nextInt(200) + 50);
             boolean isFeatured = random.nextBoolean();
 
-            // --- TẠO ĐỐI TƯỢNG ẢNH MỚI (ProductImageDetails) ---
-            String typeSlug = type.toLowerCase().replace(" ", "-");
-            String mainImageUrl = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fmain%2F" + typeSlug + "_" + i + ".jpg?alt=media";
-            String subCategoryUrl = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/icons%2F" + typeSlug + ".png?alt=media";
-
-            List<String> secondaryUrls = new ArrayList<>();
-            secondaryUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fdetail%2Fview1_" + i + ".jpg?alt=media");
-            secondaryUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/products%2Fdetail%2Fview2_" + i + ".jpg?alt=media");
-
-            ProductImageDetails imageDetails = new ProductImageDetails(mainImageUrl, secondaryUrls, subCategoryUrl);
-
-
             // GỌI CONSTRUCTOR MỚI CỦA PRODUCT
             Product p = new Product(
-                    UUID.randomUUID().toString(), // Product ID nội bộ
+                    UUID.randomUUID().toString(),
                     name,
                     desc,
                     currentPrice,
                     originalPrice,
-                    imageDetails, // <-- TRUYỀN ĐỐI TƯỢNG IMAGE MỚI
+                    mainImage, // <-- ẢNH CHÍNH MỚI
                     category,
                     type,
                     status,
                     isOffer,
                     isOffer ? "From 15.10 - 22.10" : null,
                     "Sản phẩm mới, số lượng có hạn.",
-                    variants,    // Danh sách biến thể
-                    rating,      // Đánh giá trung bình
-                    totalReviews,// Tổng đánh giá
-                    isFeatured   // Nổi bật
+                    variants,
+                    rating,
+                    totalReviews,
+                    isFeatured,
+                    colorImages // <-- MAP ẢNH CHI TIẾT MỚI
             );
             list.add(p);
         }
@@ -200,9 +205,8 @@ public class MainActivity2 extends AppCompatActivity {
                                         .append(" 🏷️ Giá: ").append(String.format("%,.0f đ", p.currentPrice)).append("\n")
                                         .append(" ⭐️ Đánh giá: ").append(p.averageRating).append(" (").append(p.totalReviews).append(" lượt)\n")
                                         .append(" 💥 Nổi bật: ").append(p.isFeatured ? "CÓ" : "KHÔNG").append("\n")
-                                        // HIỂN THỊ CÁC THÔNG TIN ẢNH MỚI
-                                        .append(" 📸 Ảnh Chính: ").append(p.images != null ? p.images.mainImage : "N/A").append("\n")
-                                        .append(" 🖼 Ảnh Sub-Category: ").append(p.images != null ? p.images.subCategoryImage : "N/A").append("\n")
+                                        .append(" 📸 Ảnh Chính: ").append(p.mainImage != null ? p.mainImage : "N/A").append("\n")
+                                        .append(" 🎨 Số lượng Màu có ảnh: ").append(p.colorImages != null ? p.colorImages.size() : 0).append("\n")
                                         .append(" 🛍 Biến thể (").append(p.variants.size()).append("):\n");
 
                                 // Hiển thị chi tiết từng biến thể

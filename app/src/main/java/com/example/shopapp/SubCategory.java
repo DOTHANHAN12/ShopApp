@@ -2,15 +2,14 @@ package com.example.shopapp;
 
 public class SubCategory {
     public String name;
-    public int iconResId; // Giữ lại cho tương thích, nhưng giá trị sẽ là -1
-    public String imageUrl; // <-- TRƯỜNG MỚI ĐỂ LƯU URL ẢNH ICON
+    public String imageUrl; // Dùng để lưu URL ảnh fix cứng
 
-    // Constructor cũ
-    public SubCategory(String name, int iconResId) {
+    /** Tên Sub-Category đặc biệt cho tùy chọn Show All */
+    public static final String SHOW_ALL_TYPE = "SHOW ALL";
+    public static final String SHOW_ALL_IMAGE_URL = "https://i.ibb.co/6y45s1x/showall.png"; // URL icon Show All
+
+    public SubCategory(String name, String imageUrl) {
         this.name = name;
-        this.iconResId = iconResId;
+        this.imageUrl = imageUrl;
     }
-
-    // Bạn có thể thêm một constructor nếu muốn khởi tạo imageUrl ngay
-    // public SubCategory(String name, String imageUrl) { ... }
 }

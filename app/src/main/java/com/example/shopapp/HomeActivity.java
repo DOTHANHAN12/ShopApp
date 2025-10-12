@@ -28,8 +28,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private TextView tabWomen, tabMen, tabKids, tabBaby;
     private TextView currentSelectedTab;
-
-    // Khai báo cho nút Search ở Footer Home (ID đã được thêm vào XML)
     private View searchButton;
 
     @Override
@@ -59,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
         // 3. Thiết lập Listener cho các Tab
         setupCategoryTabs();
 
-        // 4. Thiết lập Listener cho nút Search ở Footer
+        // 4. Thiết lập Listener cho nút Search ở Footer (Đã sửa lỗi)
         setupSearchButton();
 
         // 5. Khởi tạo trạng thái UI cho tab mặc định và tải dữ liệu ban đầu
@@ -77,10 +75,8 @@ public class HomeActivity extends AppCompatActivity {
         tabKids = findViewById(R.id.tab_kids);
         tabBaby = findViewById(R.id.tab_baby);
 
-        // Ánh xạ FrameLayout chứa icon Search ở Footer (Đảm bảo ID này tồn tại trong activity_home.xml)
         searchButton = findViewById(R.id.btn_search_footer);
 
-        // Đặt tab mặc định
         currentSelectedTab = tabMen;
     }
 
@@ -92,7 +88,7 @@ public class HomeActivity extends AppCompatActivity {
             // 1. Cập nhật UI (Gạch chân/In đậm)
             updateCategoryUI(category);
 
-            // 2. Tải danh sách Featured Products mới cho Category đó (Vẫn ở Home)
+            // 2. Tải danh sách Featured Products mới cho Category đó
             loadFeaturedProductsList(category);
         };
 
@@ -102,14 +98,16 @@ public class HomeActivity extends AppCompatActivity {
         tabBaby.setOnClickListener(tabClickListener);
     }
 
-    // ------------------- LOGIC XỬ LÝ NÚT SEARCH -------------------
+    // ------------------- LOGIC XỬ LÝ NÚT SEARCH (ĐÃ SỬA LỖI) -------------------
     private void setupSearchButton() {
         if (searchButton != null) {
             searchButton.setOnClickListener(v -> {
-                // Lấy Category đang được chọn để truyền sang màn hình Search
+                // Lấy Category đang được chọn
                 String categoryToSearch = (currentSelectedTab != null) ? currentSelectedTab.getText().toString() : "MEN";
 
+                // CHUYỂN ĐẾN CATEGORYSEARCHACTIVITY (Màn hình Sub-Category)
                 Intent intent = new Intent(HomeActivity.this, CategorySearchActivity.class);
+
                 intent.putExtra("CATEGORY_KEY", categoryToSearch);
                 startActivity(intent);
             });
@@ -147,7 +145,7 @@ public class HomeActivity extends AppCompatActivity {
     private void loadFeaturedProductsList(String category) {
         db.collection("products")
                 .whereEqualTo("isFeatured", true)
-                .whereEqualTo("category", category) // Lọc theo Category được chọn
+                .whereEqualTo("category", category)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

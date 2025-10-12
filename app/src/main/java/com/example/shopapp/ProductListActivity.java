@@ -33,7 +33,7 @@ public class ProductListActivity extends AppCompatActivity {
     private List<Product> productList;
 
     private String currentCategory;
-    private String currentSubCategory; // <-- BIẾN MỚI: Thêm Sub-category
+    private String currentSubCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +47,11 @@ public class ProductListActivity extends AppCompatActivity {
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
         // ĐỌC THAM SỐ LỌC SUB-CATEGORY (TYPE_KEY)
         currentSubCategory = getIntent().getStringExtra("TYPE_KEY");
+
+        // Thêm kiểm tra cho giá trị đặc biệt SHOW ALL
+        if (currentSubCategory != null && currentSubCategory.equals(SubCategory.SHOW_ALL_TYPE)) {
+            currentSubCategory = null; // Đặt về null để không lọc theo Type
+        }
 
         if (currentCategory == null) {
             currentCategory = "MEN";
@@ -77,17 +82,18 @@ public class ProductListActivity extends AppCompatActivity {
     /** * Tải danh sách sản phẩm từ Firestore dựa trên Category VÀ Sub-Category
      */
     private void loadProductsFromFirestore(String category, String subCategory) {
-        // BẮT ĐẦU VỚI TRUY VẤN CƠ BẢN
-        Query query = db.collection(PRODUCTS_COLLECTION)
-                .whereEqualTo("category", category); // Lọc theo Category
 
-        // BỔ SUNG THÊM LỌC THEO SUB-CATEGORY (FIELD NAME: "type")
+        // BƯỚC 1: BẮT ĐẦU VỚI TRUY VẤN CƠ BẢN (luôn lọc theo Category)
+        Query query = db.collection(PRODUCTS_COLLECTION)
+                .whereEqualTo("category", category);
+
+        // BƯỚC 2: BỔ SUNG THÊM LỌC THEO SUB-CATEGORY (type) NẾU subCategory KHÔNG NULL/EMPTY
         if (subCategory != null && !subCategory.isEmpty()) {
-            // LƯU Ý: Tên trường trong Firestore phải là "type" để khớp với subCategory.name
+            // LỌC THÊM THEO TRƯỜNG "type"
             query = query.whereEqualTo("type", subCategory);
         }
 
-        // TIẾP TỤC SẮP XẾP VÀ GIỚI HẠN
+        // BƯỚC 3: TIẾP TỤC SẮP XẾP VÀ GIỚI HẠN
         query.orderBy("currentPrice", Query.Direction.ASCENDING)
                 .limit(20)
                 .get()

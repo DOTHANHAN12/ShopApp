@@ -9,12 +9,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.SubCategoryViewHolder> {
 
     private final List<SubCategory> subCategoryList;
     private final String currentCategory;
+
+    // Lấy giá trị SHOW_ALL_TYPE từ Model
+    private static final String SHOW_ALL_TYPE = SubCategory.SHOW_ALL_TYPE;
 
     public SubCategoryAdapter(List<SubCategory> subCategoryList, String currentCategory) {
         this.subCategoryList = subCategoryList;
@@ -24,7 +28,7 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
     @NonNull
     @Override
     public SubCategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Sử dụng layout item_sub_category.xml (tôi giả định bạn có file này)
+        // Layout cần được tạo: item_sub_category.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sub_category, parent, false);
         return new SubCategoryViewHolder(view);
     }
@@ -35,27 +39,26 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
 
         holder.nameTextView.setText(subCategory.name);
 
-        // TẢI ẢNH TỪ URL MỚI (subCategoryImage)
+        // Tải ảnh từ URL
         if (subCategory.imageUrl != null && !subCategory.imageUrl.isEmpty()) {
             Picasso.get()
                     .load(subCategory.imageUrl)
-                    .error(R.drawable.ic_launcher_foreground) // Dùng ảnh placeholder nếu lỗi
+                    .error(R.drawable.ic_launcher_foreground)
                     .into(holder.iconImageView);
         } else {
-            // Trường hợp không có URL, fallback về iconResource ID (nếu có)
-            if (subCategory.iconResId > 0) {
-                holder.iconImageView.setImageResource(subCategory.iconResId);
-            } else {
-                holder.iconImageView.setImageResource(R.drawable.ic_launcher_foreground);
-            }
+            holder.iconImageView.setImageResource(R.drawable.ic_launcher_foreground);
         }
 
-
-        // Xử lý click (Đã đúng)
+        // Xử lý click item
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ProductListActivity.class);
             intent.putExtra("CATEGORY_KEY", currentCategory);
-            intent.putExtra("TYPE_KEY", subCategory.name);
+
+            // Logic Show All: KHÔNG truyền TYPE_KEY nếu là SHOW ALL
+            if (!subCategory.name.equals(SHOW_ALL_TYPE)) {
+                intent.putExtra("TYPE_KEY", subCategory.name);
+            }
+
             v.getContext().startActivity(intent);
         });
     }
@@ -71,7 +74,7 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
 
         public SubCategoryViewHolder(@NonNull View itemView) {
             super(itemView);
-            iconImageView = itemView.findViewById(R.id.img_sub_category); // ID của ImageView trong item_sub_category.xml
+            iconImageView = itemView.findViewById(R.id.img_sub_category);
             nameTextView = itemView.findViewById(R.id.text_sub_category_name);
         }
     }

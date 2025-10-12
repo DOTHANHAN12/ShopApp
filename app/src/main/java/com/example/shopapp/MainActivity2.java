@@ -67,7 +67,7 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
     // ---------------------------------------------------------------------
-    // HÀM GHI DỮ LIỆU SẢN PHẨM MỚI
+    // HÀM GHI DỮ LIỆU SẢN PHẨM MỚI (ĐÃ SỬA LỖI DOCUMENT ID)
     // ---------------------------------------------------------------------
 
     /** TẠO VÀ GHI 50 SẢN PHẨM KHÁC NHAU VÀO COLLECTION 'products' */
@@ -78,10 +78,15 @@ public class MainActivity2 extends AppCompatActivity {
         tvOutput.setText("Đang ghi 50 sản phẩm vào Firestore...");
 
         for (Product product : products) {
-            String docId = product.category.toLowerCase() + "_"
-                    + product.type.toLowerCase().replace(" ", "_") + "_"
-                    + product.productId.substring(0, 8);
+            // TẠO DOCUMENT ID DÙNG ĐỂ TRUY VẤN
+            String docId = product.getCategory().toLowerCase() + "_"
+                    + product.getType().toLowerCase().replace(" ", "_") + "_"
+                    + UUID.randomUUID().toString().substring(0, 8);
 
+            // QUAN TRỌNG: GÁN Document ID VÀO TRƯỜNG productId để ProductAdapter truyền đi đúng
+            product.setProductId(docId);
+
+            // Tham chiếu và thêm vào batch
             batch.set(db.collection(PRODUCTS_COLLECTION).document(docId), product);
         }
 
@@ -115,13 +120,10 @@ public class MainActivity2 extends AppCompatActivity {
             String desc = "Chất liệu cao cấp, mang lại cảm giác thoải mái và bền bỉ.";
             String status = "Active";
 
-            // --- TẠO BIẾN THỂ (VARIANTS) ---
-            List<ProductVariant> variants = new ArrayList<>();
             // Giả định chỉ dùng 3 màu đầu tiên trong danh sách cho mỗi sản phẩm
             List<String> productColors = Arrays.asList(colors).subList(0, 3);
 
             // --- CẤU TRÚC ẢNH MỚI (mainImage & colorImages) ---
-            String typeSlug = type.toLowerCase().replace(" ", "-");
             String mainImage = "https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/main_" + i + ".jpg?alt=media";
 
             Map<String, List<String>> colorImages = new HashMap<>();
@@ -131,15 +133,16 @@ public class MainActivity2 extends AppCompatActivity {
                 List<String> detailUrls = new ArrayList<>();
                 String colorSlug = color.toLowerCase();
                 for(int k=1; k<=5; k++) {
-                    // Ví dụ: https://.../detail_black_01.jpg
+                    // Ví dụ: https://.../detail_black_01_i.jpg
                     detailUrls.add("https://storage.firebase.com/v0/b/shopapp-demo.appspot.com/o/detail_" + colorSlug + "_" + k + "_" + i + ".jpg?alt=media");
                 }
                 colorImages.put(color, detailUrls);
             }
 
-            // --- TẠO BIẾN THỂ CŨ (Cần thiết cho constructor) ---
+            // --- TẠO BIẾN THỂ (VARIANTS) ---
+            List<ProductVariant> variants = new ArrayList<>();
             for(String color : productColors) {
-                String varSize = category.equals("BABY") ? "S" : "M"; // Đơn giản hóa size
+                String varSize = category.equals("BABY") ? "S" : "M";
                 long varQuantity = (long) (random.nextInt(50) + 10);
                 String varId = "SKU-" + varSize + "-" + color.substring(0, 2).toUpperCase() + "-" + i;
                 variants.add(new ProductVariant(varId, varSize, color, varQuantity, currentPrice));
@@ -153,12 +156,12 @@ public class MainActivity2 extends AppCompatActivity {
 
             // GỌI CONSTRUCTOR MỚI CỦA PRODUCT
             Product p = new Product(
-                    UUID.randomUUID().toString(),
+                    null, // Tạm thời đặt null, sẽ gán Doc ID vào sau
                     name,
                     desc,
                     currentPrice,
                     originalPrice,
-                    mainImage, // <-- ẢNH CHÍNH MỚI
+                    mainImage, // <-- ẢNH CHÍNH
                     category,
                     type,
                     status,
@@ -169,7 +172,7 @@ public class MainActivity2 extends AppCompatActivity {
                     rating,
                     totalReviews,
                     isFeatured,
-                    colorImages // <-- MAP ẢNH CHI TIẾT MỚI
+                    colorImages // <-- MAP ẢNH CHI TIẾT
             );
             list.add(p);
         }
@@ -200,17 +203,17 @@ public class MainActivity2 extends AppCompatActivity {
                                 Product p = document.toObject(Product.class);
 
                                 dataBuilder.append("--- Sản phẩm #").append(count).append(" ---\n")
-                                        .append(" 🔑 Doc ID: ").append(document.getId()).append("\n")
-                                        .append(" 📝 Tên: ").append(p.name).append("\n")
-                                        .append(" 🏷️ Giá: ").append(String.format("%,.0f đ", p.currentPrice)).append("\n")
-                                        .append(" ⭐️ Đánh giá: ").append(p.averageRating).append(" (").append(p.totalReviews).append(" lượt)\n")
-                                        .append(" 💥 Nổi bật: ").append(p.isFeatured ? "CÓ" : "KHÔNG").append("\n")
-                                        .append(" 📸 Ảnh Chính: ").append(p.mainImage != null ? p.mainImage : "N/A").append("\n")
-                                        .append(" 🎨 Số lượng Màu có ảnh: ").append(p.colorImages != null ? p.colorImages.size() : 0).append("\n")
-                                        .append(" 🛍 Biến thể (").append(p.variants.size()).append("):\n");
+                                        .append(" 🔑 Doc ID (Product ID): ").append(document.getId()).append("\n")
+                                        .append(" 📝 Tên: ").append(p.getName()).append("\n")
+                                        .append(" 🏷️ Giá: ").append(String.format("%,.0f đ", p.getCurrentPrice())).append("\n")
+                                        .append(" ⭐️ Đánh giá: ").append(p.getAverageRating()).append(" (").append(p.getTotalReviews()).append(" lượt)\n")
+                                        .append(" 💥 Nổi bật: ").append(p.getFeatured() ? "CÓ" : "KHÔNG").append("\n")
+                                        .append(" 📸 Ảnh Chính: ").append(p.getMainImage() != null ? p.getMainImage() : "N/A").append("\n")
+                                        .append(" 🎨 Số lượng Màu có ảnh: ").append(p.getColorImages() != null ? p.getColorImages().size() : 0).append("\n")
+                                        .append(" 🛍 Biến thể (").append(p.getVariants().size()).append("):\n");
 
                                 // Hiển thị chi tiết từng biến thể
-                                for (ProductVariant pv : p.variants) {
+                                for (ProductVariant pv : p.getVariants()) {
                                     dataBuilder.append("     - [")
                                             .append(pv.size).append("/").append(pv.color)
                                             .append("] tồn: ").append(pv.quantity)

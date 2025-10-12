@@ -1,6 +1,7 @@
 package com.example.shopapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,13 +39,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.nameTextView.setText(product.name);
         holder.typeTextView.setText(product.type);
 
+        // Định dạng giá tiền
         String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice);
         String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.originalPrice);
 
         holder.currentPriceTextView.setText(currentPriceFormatted);
 
+        // Gán giá gốc và gạch ngang
         if (product.currentPrice < product.originalPrice) {
             holder.originalPriceTextView.setText(originalPriceFormatted);
+            // Thêm hiệu ứng gạch ngang
             holder.originalPriceTextView.setPaintFlags(
                     holder.originalPriceTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
             );
@@ -62,9 +66,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     .into(holder.thumbnailImageView);
         }
 
-        // 3. Xử lý click (Ví dụ: Mở màn hình chi tiết sản phẩm)
+        // 3. XỬ LÝ CLICK: Mở màn hình chi tiết sản phẩm và truyền ID
         holder.itemView.setOnClickListener(v -> {
-            // Logic chuyển sang ProductDetailActivity, truyền product.productId
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            // Truyền Product ID của sản phẩm được click
+            intent.putExtra("PRODUCT_ID", product.productId);
+            context.startActivity(intent);
         });
     }
 
@@ -81,6 +88,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         TextView originalPriceTextView;
 
         public ProductViewHolder(@NonNull View itemView) {
+            // Đã sửa lỗi cú pháp super()
             super(itemView);
             thumbnailImageView = itemView.findViewById(R.id.img_product_thumb);
             nameTextView = itemView.findViewById(R.id.text_product_name_list);

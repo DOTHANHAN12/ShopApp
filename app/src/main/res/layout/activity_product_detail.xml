@@ -23,11 +23,9 @@
             app:contentInsetStartWithNavigation="0dp"
             android:elevation="0dp">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
                 android:paddingEnd="16dp"
                 tools:ignore="RtlSymmetry">
 
@@ -38,12 +36,14 @@
                     android:src="@drawable/ic_arrow_back"
                     android:padding="8dp"
                     app:tint="@android:color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:contentDescription="@string/back_desc"/>
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="AirSense Jacket | Wool Like"
                     android:textSize="16sp"
                     android:textColor="@android:color/black"
@@ -51,30 +51,48 @@
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/img_back"
+                    app:layout_constraintEnd_toStartOf="@id/img_notification"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     tools:visibility="visible"/>
 
                 <ImageView
+                    android:id="@+id/img_cart"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_notification"
+                    android:src="@drawable/ic_shopping_bag"
                     app:tint="#444"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/notification_desc"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:contentDescription="@string/cart_desc"/>
+
                 <ImageView
+                    android:id="@+id/img_favorite"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_favorite_outline"
                     app:tint="#444"
                     android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toStartOf="@id/img_cart"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:contentDescription="@string/favorite_desc"/>
+
                 <ImageView
+                    android:id="@+id/img_notification"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_shopping_bag"
+                    android:src="@drawable/ic_notification"
                     app:tint="#444"
-                    android:contentDescription="@string/cart_desc"/>
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toStartOf="@id/img_favorite"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:contentDescription="@string/notification_desc"/>
 
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -150,6 +168,7 @@
                     android:layout_marginBottom="16dp"/>
 
                 <TextView
+                    android:id="@+id/text_size_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Size: MEN M"
@@ -230,7 +249,7 @@
                         android:textColor="#333"/>
 
                     <TextView
-                        android:id="@+id/text_quantity"
+                        android:id="@+id/text_selected_quantity"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -256,6 +275,15 @@
                     android:text="Low stock"
                     android:textColor="#DD0000"
                     android:textSize="12sp"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/text_inventory_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="#666"
+                    android:textSize="12sp"
                     android:layout_marginBottom="16dp"/>
 
                 <Button
@@ -263,7 +291,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:text="ADD TO CART"
-                    android:background="@android:color/black"
+                    android:background="@drawable/rounded_button_black"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
                     android:textSize="16sp"
@@ -290,8 +318,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:text="USE MY LOCATION"
-                    android:background="@drawable/rounded_border_gray_button"
-                    android:textColor="@android:color/black"
+                    android:background="@drawable/rounded_button_black"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"
                     android:textSize="14sp"/>
 

@@ -1,6 +1,7 @@
 package com.example.shopapp;
 
 import android.content.Intent;
+import android.graphics.Paint; // Cần import Paint
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,7 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
             // Chuyển sang ProductDetailActivity
             Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
             // Truyền Product ID (Document ID)
-            intent.putExtra("PRODUCT_ID", product.productId);
+            intent.putExtra("PRODUCT_ID", product.getProductId());
             v.getContext().startActivity(intent);
         });
     }
@@ -77,32 +78,72 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
 
         public void bind(Product product) {
             // Gán Tên
-            textTitle.setText(product.name);
+            textTitle.setText(product.getName());
 
             // Sử dụng trường 'desc' cho mô tả
-            textDescription.setText(product.desc);
+            textDescription.setText(product.getDesc());
 
-            // Gán Giá
-            String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice);
-            String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.originalPrice);
+            // -----------------------------------------------------------
+            // LOGIC TÍNH TOÁN VÀ GÁN GIÁ MỚI
+            // -----------------------------------------------------------
+
+            double basePrice = product.getBasePrice();
+            double displayPrice = basePrice;
+            boolean hasValidOffer = false;
+
+            if (product.getIsOfferStatus() && product.getOffer() != null) {
+                long now = System.currentTimeMillis();
+                OfferDetails offer = product.getOffer();
+
+                // Kiểm tra thời gian khuyến mãi còn hiệu lực
+                if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                    hasValidOffer = true;
+                    double discount = offer.getDiscountPercent() / 100.0;
+                    displayPrice = basePrice * (1.0 - discount);
+
+                    // Hiển thị chi tiết khuyến mãi
+                    textOfferDetails.setText(String.format(Locale.getDefault(), "%d%% OFF, Hết hạn %d ngày",
+                            offer.getDiscountPercent(),
+                            (offer.getEndDate() - now) / (1000 * 60 * 60 * 24) // Tính số ngày còn lại
+                    ));
+                    textDisclaimer.setText("Sản phẩm số lượng có hạn.");
+                }
+            } else {
+                textOfferDetails.setText("Mua ngay giá tốt!");
+                textDisclaimer.setText("");
+            }
+
+            // GÁN GIÁ HIỆN TẠI
+            String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", displayPrice);
             textCurrentPrice.setText(currentPriceFormatted);
-            textOriginalPrice.setText(originalPriceFormatted);
 
-            // Gán Thông tin Khuyến mãi
-            textOfferDetails.setText(product.offerDetails);
-            textDisclaimer.setText(product.extraInfo);
+            // GÁN GIÁ GỐC VÀ GẠCH NGANG
+            if (hasValidOffer) {
+                String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", basePrice);
+                textOriginalPrice.setText(originalPriceFormatted);
+                // Thêm hiệu ứng gạch ngang
+                textOriginalPrice.setPaintFlags(
+                        textOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
+                );
+            } else {
+                // Xóa giá gốc nếu không có khuyến mãi hợp lệ
+                textOriginalPrice.setText("");
+                textOriginalPrice.setPaintFlags(0);
+            }
+            // -----------------------------------------------------------
+
 
             // Cập nhật Badge "LIMITED OFFER"
-            if (product.isOffer) {
+            if (hasValidOffer) {
                 textLimitedOfferBadge.setVisibility(View.VISIBLE);
             } else {
                 textLimitedOfferBadge.setVisibility(View.GONE);
             }
 
             // Tải Ảnh bằng Picasso (Sử dụng trường mainImage mới)
-            if (product.mainImage != null && !product.mainImage.isEmpty()) {
+            if (product.getMainImage() != null && !product.getMainImage().isEmpty()) {
                 Picasso.get()
-                        .load(product.mainImage)
+                        .load(product.getMainImage())
                         .error(R.drawable.ic_launcher_foreground)
                         .into(imgProduct);
             }

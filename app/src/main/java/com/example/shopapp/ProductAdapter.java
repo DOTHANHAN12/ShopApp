@@ -36,31 +36,55 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Product product = productList.get(position);
 
         // 1. Gán dữ liệu văn bản
-        holder.nameTextView.setText(product.name);
-        holder.typeTextView.setText(product.type);
+        holder.nameTextView.setText(product.getName());
+        holder.typeTextView.setText(product.getType());
 
-        // Định dạng giá tiền
-        String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice);
-        String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", product.originalPrice);
+        // -----------------------------------------------------------
+        // LOGIC TÍNH TOÁN VÀ GÁN GIÁ MỚI
+        // -----------------------------------------------------------
 
+        double basePrice = product.getBasePrice();
+        double displayPrice = basePrice;
+        boolean isDiscounted = false;
+
+        // Kiểm tra xem khuyến mãi có hợp lệ không
+        if (product.getIsOfferStatus() && product.getOffer() != null) {
+            long now = System.currentTimeMillis();
+            OfferDetails offer = product.getOffer();
+
+            // Chỉ tính giảm giá nếu khuyến mãi đang diễn ra (kiểm tra thời gian)
+            if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                double discount = offer.getDiscountPercent() / 100.0;
+                displayPrice = basePrice * (1.0 - discount);
+                isDiscounted = true;
+            }
+        }
+
+        // Định dạng và gán Giá Hiển thị (Giá sau giảm hoặc Giá gốc)
+        String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", displayPrice);
         holder.currentPriceTextView.setText(currentPriceFormatted);
 
         // Gán giá gốc và gạch ngang
-        if (product.currentPrice < product.originalPrice) {
+        if (isDiscounted) {
+            String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", basePrice);
+
             holder.originalPriceTextView.setText(originalPriceFormatted);
             // Thêm hiệu ứng gạch ngang
             holder.originalPriceTextView.setPaintFlags(
                     holder.originalPriceTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
             );
         } else {
+            // Xóa giá gốc nếu không có khuyến mãi hợp lệ
             holder.originalPriceTextView.setText("");
             holder.originalPriceTextView.setPaintFlags(0);
         }
 
-        // 2. Tải ảnh bằng Picasso - SỬ DỤNG TRƯỜNG mainImage MỚI
-        if (product.mainImage != null && !product.mainImage.isEmpty()) {
+        // -----------------------------------------------------------
+
+        // 2. Tải ảnh bằng Picasso - SỬ DỤNG TRƯỜNG mainImage
+        if (product.getMainImage() != null && !product.getMainImage().isEmpty()) {
             Picasso.get()
-                    .load(product.mainImage)
+                    .load(product.getMainImage())
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_foreground)
                     .into(holder.thumbnailImageView);
@@ -70,7 +94,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
             // Truyền Product ID của sản phẩm được click
-            intent.putExtra("PRODUCT_ID", product.productId);
+            intent.putExtra("PRODUCT_ID", product.getProductId());
             context.startActivity(intent);
         });
     }
@@ -88,7 +112,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         TextView originalPriceTextView;
 
         public ProductViewHolder(@NonNull View itemView) {
-            // Đã sửa lỗi cú pháp super()
             super(itemView);
             thumbnailImageView = itemView.findViewById(R.id.img_product_thumb);
             nameTextView = itemView.findViewById(R.id.text_product_name_list);

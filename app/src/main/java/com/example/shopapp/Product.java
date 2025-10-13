@@ -4,60 +4,63 @@ import java.util.List;
 import java.util.Map;
 
 public class Product {
-    // Thuộc tính cốt lõi
+    // Thuộc tính cốt lõi và quản lý
     public String productId;
     public String name;
     public String desc;
-    public double currentPrice;
-    public double originalPrice;
 
+    public double basePrice;
     public String mainImage;
 
     public String category;
     public String type;
     public String status;
 
-    // Thuộc tính Khuyến mãi
-    public boolean isOffer;
-    public String offerDetails;
-    public String extraInfo;
+    // --- CẤU TRÚC KHUYẾN MÃI MỚI ---
+    public boolean isOffer; // Cờ bật/tắt chính
+    public OfferDetails offer; // Object chi tiết khuyến mãi
 
-    // --- Thuộc tính Lồng ghép/Phức tạp ---
+    // --- THUỘC TÍNH QUẢN LÝ THỜI GIAN MỚI ---
+    public Long createdAt;
+    public Long updatedAt;
+
+    // --- Thuộc tính Phức tạp ---
     public List<ProductVariant> variants;
     public Double averageRating;
     public Long totalReviews;
     public Boolean isFeatured;
     public Map<String, List<String>> colorImages;
 
-    // Constructor rỗng bắt buộc cho Firestore (QUAN TRỌNG)
+    // Constructor rỗng bắt buộc cho Firestore
     public Product() {}
 
-    // Constructor đầy đủ (Đã cập nhật)
-    public Product(String productId, String name, String desc, double currentPrice, double originalPrice,
+    // Constructor đầy đủ
+    public Product(String productId, String name, String desc, double basePrice,
                    String mainImage, String category, String type, String status, boolean isOffer,
-                   String offerDetails, String extraInfo, List<ProductVariant> variants,
-                   Double averageRating, Long totalReviews, Boolean isFeatured, Map<String, List<String>> colorImages) {
+                   OfferDetails offer, List<ProductVariant> variants,
+                   Double averageRating, Long totalReviews, Boolean isFeatured, Map<String, List<String>> colorImages,
+                   Long createdAt, Long updatedAt) {
         this.productId = productId;
         this.name = name;
         this.desc = desc;
-        this.currentPrice = currentPrice;
-        this.originalPrice = originalPrice;
+        this.basePrice = basePrice;
         this.mainImage = mainImage;
         this.category = category;
         this.type = type;
         this.status = status;
         this.isOffer = isOffer;
-        this.offerDetails = offerDetails;
-        this.extraInfo = extraInfo;
+        this.offer = offer;
         this.variants = variants;
         this.averageRating = averageRating;
         this.totalReviews = totalReviews;
         this.isFeatured = isFeatured;
         this.colorImages = colorImages;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // =================================================================
-    // GETTERS VÀ SETTERS (BẮT BUỘC ĐỂ ĐẢM BẢO FIREBASE DESERIALIZATION)
+    // GETTERS VÀ SETTERS (ĐÃ SỬA LỖI XUNG ĐỘT CHO isOffer)
     // =================================================================
 
     public String getProductId() { return productId; }
@@ -69,11 +72,8 @@ public class Product {
     public String getDesc() { return desc; }
     public void setDesc(String desc) { this.desc = desc; }
 
-    public double getCurrentPrice() { return currentPrice; }
-    public void setCurrentPrice(double currentPrice) { this.currentPrice = currentPrice; }
-
-    public double getOriginalPrice() { return originalPrice; }
-    public void setOriginalPrice(double originalPrice) { this.originalPrice = originalPrice; }
+    public double getBasePrice() { return basePrice; }
+    public void setBasePrice(double basePrice) { this.basePrice = basePrice; }
 
     public String getMainImage() { return mainImage; }
     public void setMainImage(String mainImage) { this.mainImage = mainImage; }
@@ -87,15 +87,19 @@ public class Product {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public boolean isOffer() { return isOffer; }
-    public void setOffer(boolean offer) { isOffer = offer; }
+    // Logic Khuyến mãi (ĐÃ ĐỔI TÊN GETTER/SETTER ĐỂ KHÔNG XUNG ĐỘT)
+    public boolean getIsOfferStatus() { return isOffer; } // <-- ĐÃ SỬA
+    public void setIsOfferStatus(boolean offer) { this.isOffer = offer; } // <-- ĐÃ SỬA
+    public OfferDetails getOffer() { return offer; }
+    public void setOffer(OfferDetails offer) { this.offer = offer; } // <-- Giữ nguyên vì tên trường là 'offer'
 
-    public String getOfferDetails() { return offerDetails; }
-    public void setOfferDetails(String offerDetails) { this.offerDetails = offerDetails; }
+    // Quản lý thời gian
+    public Long getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Long createdAt) { this.createdAt = createdAt; }
+    public Long getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Long updatedAt) { this.updatedAt = updatedAt; }
 
-    public String getExtraInfo() { return extraInfo; }
-    public void setExtraInfo(String extraInfo) { this.extraInfo = extraInfo; }
-
+    // Thuộc tính phức tạp (Variants, Rating, Images)
     public List<ProductVariant> getVariants() { return variants; }
     public void setVariants(List<ProductVariant> variants) { this.variants = variants; }
 

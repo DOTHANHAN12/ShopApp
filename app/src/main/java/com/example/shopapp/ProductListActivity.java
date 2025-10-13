@@ -5,15 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.inputmethod.InputMethodManager;
+import android.view.KeyEvent;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -28,7 +32,7 @@ import java.util.Locale;
 
 public class ProductListActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProductListActivity";
+    private static final String TAG = "ProductListAct"; // <-- TAG DEBUG
     private static final String PRODUCTS_COLLECTION = "products";
     private FirebaseFirestore db;
 
@@ -44,7 +48,9 @@ public class ProductListActivity extends AppCompatActivity {
     private ImageView imgBackList;
     private TextView currentSelectedTab;
 
-    // KHAI BÁO BIẾN CHO FOOTER
+    private EditText edtSearchKeyword;
+    private ImageView imgSearchFilter;
+
     private ImageView navHomeFloat;
     private View searchButtonFloat;
     private ImageView navProfileFloat;
@@ -57,7 +63,6 @@ public class ProductListActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
@@ -72,6 +77,7 @@ public class ProductListActivity extends AppCompatActivity {
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
         currentSubCategory = getIntent().getStringExtra("TYPE_KEY");
 
+        // --- XỬ LÝ SHOW ALL ---
         if (currentSubCategory != null && currentSubCategory.equals(SubCategory.SHOW_ALL_TYPE)) {
             currentSubCategory = null;
         }
@@ -83,14 +89,15 @@ public class ProductListActivity extends AppCompatActivity {
         // 3. Khởi tạo UI và Ánh xạ Views
         mapViews();
         setupCategoryTabs();
-        setupFooterNavigation(); // <--- THIẾT LẬP LOGIC FOOTER
+        setupSearchListener();
+        setupFooterNavigation();
 
         // 4. Thiết lập nút Back
         if (imgBackList != null) {
             imgBackList.setOnClickListener(v -> finish());
         }
 
-        // Cập nhật tiêu đề hiển thị cả Sub-category (dùng trường categoryHeader)
+        // Cập nhật tiêu đề hiển thị cả Sub-category
         updateHeaderAndData(currentCategory, currentSubCategory);
 
         // Cập nhật UI Tab để làm nổi bật tab đã chọn
@@ -103,29 +110,69 @@ public class ProductListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        // 6. Tải dữ liệu (đã được gọi trong updateHeaderAndData)
+        // 6. Tải dữ liệu đã được gọi trong updateHeaderAndData
     }
 
     private void mapViews() {
         categoryHeader = findViewById(R.id.text_category_header);
         recyclerView = findViewById(R.id.recycler_product_list);
 
-        // Ánh xạ Tabs và nút Back mới
+        // Ánh xạ Tabs và nút Back
         tabWomen = findViewById(R.id.tab_women_list);
         tabMen = findViewById(R.id.tab_men_list);
         tabKids = findViewById(R.id.tab_kids_list);
         tabBaby = findViewById(R.id.tab_baby_list);
         imgBackList = findViewById(R.id.img_back_list);
 
-        // ÁNH XẠ CÁC NÚT TỪ FOOTER (layout_floating_bottom_nav)
+        // ÁNH XẠ SEARCH BAR
+        edtSearchKeyword = findViewById(R.id.edt_search_keyword);
+        imgSearchFilter = findViewById(R.id.img_search_filter);
+
+        // ÁNH XẠ CÁC NÚT TỪ FOOTER
         navHomeFloat = findViewById(R.id.nav_home_cs);
         searchButtonFloat = findViewById(R.id.btn_search_footer);
 //        navProfileFloat = findViewById(R.id.nav_profile_detail);
     }
 
-    /**
-     * Thiết lập Listener cho các nút Footer (Home, Search, Profile)
-     */
+    // --------------------------------------------------------------------------------
+    // LOGIC TÌM KIẾM
+    // --------------------------------------------------------------------------------
+    private void setupSearchListener() {
+
+        if (edtSearchKeyword != null) {
+            edtSearchKeyword.setFocusable(true);
+            edtSearchKeyword.setFocusableInTouchMode(true);
+
+            edtSearchKeyword.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                    performSearch();
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (imgSearchFilter != null) {
+            imgSearchFilter.setOnClickListener(v -> {
+                performSearch();
+            });
+        }
+    }
+
+    private void performSearch() {
+        String keyword = edtSearchKeyword.getText().toString().trim();
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edtSearchKeyword.getWindowToken(), 0);
+
+        // Tải dữ liệu với từ khóa (tìm kiếm chung trong category đó)
+        loadProductsFromFirestore(currentCategory, null, keyword);
+    }
+
+    // --------------------------------------------------------------------------------
+    // LOGIC NAVIGATION
+    // --------------------------------------------------------------------------------
+
     private void setupFooterNavigation() {
         // NÚT HOME: Chuyển về HomeActivity (clear stack)
         if (navHomeFloat != null) {
@@ -154,11 +201,11 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+
     private void setupCategoryTabs() {
         View.OnClickListener tabClickListener = view -> {
             String newCategory = ((TextView) view).getText().toString();
 
-            // Cập nhật UI
             updateCategoryUI(newCategory);
 
             // Gửi Intent để chuyển về CategorySearchActivity với Category mới (và kết thúc Activity hiện tại)
@@ -174,6 +221,10 @@ public class ProductListActivity extends AppCompatActivity {
         tabBaby.setOnClickListener(tabClickListener);
     }
 
+    // --------------------------------------------------------------------------------
+    // DATA LOADING & UI UPDATES
+    // --------------------------------------------------------------------------------
+
     private void updateHeaderAndData(String category, String subCategory) {
         String headerText;
 
@@ -185,8 +236,8 @@ public class ProductListActivity extends AppCompatActivity {
 
         categoryHeader.setText(headerText);
 
-        // Tải dữ liệu
-        loadProductsFromFirestore(category, subCategory);
+        // Load data ban đầu (không có keyword)
+        loadProductsFromFirestore(category, subCategory, null);
     }
 
 
@@ -211,26 +262,48 @@ public class ProductListActivity extends AppCompatActivity {
         currentSelectedTab.setTextSize(18);
     }
 
-    /** * Tải danh sách sản phẩm từ Firestore dựa trên Category VÀ Sub-Category
+    /** * Tải danh sách sản phẩm từ Firestore dựa trên Category, Sub-Category và Keyword
      */
-    private void loadProductsFromFirestore(String category, String subCategory) {
+    private void loadProductsFromFirestore(String category, String subCategory, String keyword) {
 
-        // BƯỚC 1: BẮT ĐẦU VỚI TRUY VẤN CƠ BẢN (luôn lọc theo Category)
+        String finalCategory = category.toUpperCase(Locale.ROOT);
+        String finalSubCategory = (subCategory != null && !subCategory.isEmpty()) ? subCategory.toUpperCase(Locale.ROOT) : null;
+
+        // DEBUG LOG
+        Log.d(TAG, "--- BẮT ĐẦU TRUY VẤN SẢN PHẨM ---");
+
+        // BƯỚC 1: BẮT ĐẦU VỚI LỌC CATEGORY (KHÔNG CÓ ORDER BY NÀO KHÁC)
         Query query = db.collection(PRODUCTS_COLLECTION)
-                .whereEqualTo("category", category);
+                .whereEqualTo("category", finalCategory);
 
-        // BƯỚC 2: BỔ SUNG THÊM LỌC THEO SUB-CATEGORY (type) NẾU subCategory KHÔNG NULL/EMPTY
-        if (subCategory != null && !subCategory.isEmpty()) {
-            query = query.whereEqualTo("type", subCategory);
+        // BƯỚC 2: BỔ SUNG LỌC THEO TYPE
+        if (finalSubCategory != null && !finalSubCategory.isEmpty()) {
+            query = query.whereEqualTo("type", finalSubCategory);
         }
 
-        // BƯỚC 3: TIẾP TỤC SẮP XẾP VÀ GIỚI HẠN
-        query.orderBy("currentPrice", Query.Direction.ASCENDING)
-                .limit(20)
+        // BƯỚC 3: XỬ LÝ SẮP XẾP DỰA TRÊN CÓ/KHÔNG CÓ KEYWORD
+        if (keyword != null && !keyword.isEmpty()) {
+            String endKeyword = keyword + "\uf8ff";
+
+            // Khi có KEYWORD, ta phải sắp xếp theo 'name' để tìm kiếm tiền tố
+            query = query.orderBy("name")
+                    .whereGreaterThanOrEqualTo("name", keyword)
+                    .whereLessThan("name", endKeyword);
+
+            // CẦN BỔ SUNG: Sắp xếp theo giá thứ cấp sau khi lọc tên
+            query = query.orderBy("basePrice", Query.Direction.ASCENDING);
+
+        } else {
+            // TRƯỜNG HỢP MẶC ĐỊNH (SHOW ALL / LỌC TYPE): Sắp xếp theo basePrice
+            query = query.orderBy("basePrice", Query.Direction.ASCENDING);
+        }
+
+        query.limit(50)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Log.d(TAG, "--- KẾT THÚC TRUY VẤN SẢN PHẨM ---");
                         if (task.isSuccessful()) {
                             productList.clear();
                             int count = 0;
@@ -240,6 +313,10 @@ public class ProductListActivity extends AppCompatActivity {
                                     Product product = document.toObject(Product.class);
                                     productList.add(product);
                                     count++;
+
+                                    // DEBUG LOG: Kiểm tra Type của sản phẩm tìm thấy
+                                    Log.d(TAG, "DOC FOUND: " + document.getId() + ", CATE: " + product.getCategory() + ", TYPE: " + product.getType());
+
                                 } catch (Exception e) {
                                     Log.e(TAG, "Lỗi khi chuyển đổi Document ID: " + document.getId(), e);
                                     Toast.makeText(ProductListActivity.this, "Lỗi định dạng dữ liệu (Debug log)", Toast.LENGTH_SHORT).show();
@@ -249,6 +326,7 @@ public class ProductListActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
 
                             if (count == 0) {
+                                Log.w(TAG, "RỖNG: Không tìm thấy sản phẩm nào khớp với điều kiện lọc.");
                                 Toast.makeText(ProductListActivity.this,
                                         "Không tìm thấy sản phẩm nào.",
                                         Toast.LENGTH_LONG).show();

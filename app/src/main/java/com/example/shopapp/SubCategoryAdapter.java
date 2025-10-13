@@ -1,5 +1,6 @@
 package com.example.shopapp;
 
+import android.content.Context; // <--- THÊM IMPORT NÀY
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,24 +12,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.Locale;
 
 public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.SubCategoryViewHolder> {
 
     private final List<SubCategory> subCategoryList;
     private final String currentCategory;
+    private final Context context; // KHAI BÁO CONTEXT
 
     // Lấy giá trị SHOW_ALL_TYPE từ Model
     private static final String SHOW_ALL_TYPE = SubCategory.SHOW_ALL_TYPE;
 
-    public SubCategoryAdapter(List<SubCategory> subCategoryList, String currentCategory) {
+    // SỬA LỖI: Constructor phải nhận Context
+    public SubCategoryAdapter(List<SubCategory> subCategoryList, String currentCategory, Context context) {
         this.subCategoryList = subCategoryList;
         this.currentCategory = currentCategory;
+        this.context = context; // Gán Context
     }
 
     @NonNull
     @Override
     public SubCategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Layout cần được tạo: item_sub_category.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sub_category, parent, false);
         return new SubCategoryViewHolder(view);
     }
@@ -49,17 +53,18 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
             holder.iconImageView.setImageResource(R.drawable.ic_launcher_foreground);
         }
 
-        // Xử lý click item
+        // 3. Xử lý click item
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), ProductListActivity.class);
+            Intent intent = new Intent(context, ProductListActivity.class);
+            // Category đã là chữ hoa từ Activity trước đó (ví dụ: WOMEN)
             intent.putExtra("CATEGORY_KEY", currentCategory);
 
-            // Logic Show All: KHÔNG truyền TYPE_KEY nếu là SHOW ALL
             if (!subCategory.name.equals(SHOW_ALL_TYPE)) {
-                intent.putExtra("TYPE_KEY", subCategory.name);
+                // TRUYỀN TYPE SANG CHỮ HOA ĐỂ KHỚP VỚI LOGIC LỌC
+                intent.putExtra("TYPE_KEY", subCategory.name.toUpperCase(Locale.ROOT));
             }
 
-            v.getContext().startActivity(intent);
+            context.startActivity(intent);
         });
     }
 

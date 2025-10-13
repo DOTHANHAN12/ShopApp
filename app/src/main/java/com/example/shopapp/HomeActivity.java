@@ -41,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
+        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
         getWindow().setStatusBarColor(Color.TRANSPARENT);
 
         setContentView(R.layout.activity_home);
@@ -151,6 +152,8 @@ public class HomeActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         featuredProductsList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            // SỬ DỤNG document.toObject(Product.class) sẽ tự động ánh xạ
+                            // các Getters/Setters đã được thêm vào Product.java
                             Product product = document.toObject(Product.class);
                             featuredProductsList.add(product);
                         }

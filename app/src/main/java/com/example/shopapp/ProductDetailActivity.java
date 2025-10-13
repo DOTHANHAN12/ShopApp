@@ -1,7 +1,7 @@
 package com.example.shopapp;
 
 import android.content.Intent;
-import android.graphics.Color; // Import Color
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.RatingBar;
+import android.graphics.Paint;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,17 +34,19 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private FirebaseFirestore db;
 
     // UI Elements
-    private ViewPager2 viewPager;
     private TextView textImageIndicator, textProductName, textPrice, textReviewCount, textColorName, textSizeLabel, textStockStatus, textSelectedQuantity, textInventoryCount;
+    private TextView textOriginalPrice; // Khai báo nếu có trong layout
+    private ViewPager2 viewPager;
     private RatingBar ratingBarDetail;
     private Button btnAddToCart;
     private RecyclerView recyclerColors, recyclerSizes, recyclerRecommendations;
     private ImageView imgBack;
     private ImageView navHomeDetail;
+    private TextView textToolbarTitle;
 
     // Nút Cộng/Trừ
-    private TextView btnIncrementQty; // Nút +
-    private TextView btnDecrementQty; // Nút -
+    private TextView btnIncrementQty;
+    private TextView btnDecrementQty;
 
     // Data
     private Product currentProduct;
@@ -51,7 +54,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private List<String> currentImages;
     private ProductVariant currentSelectedVariant;
 
-    private int currentQuantityToBuy = 1; // SỐ LƯỢNG MUA HIỆN TẠI
+    private int currentQuantityToBuy = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +64,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
@@ -93,12 +95,14 @@ public class ProductDetailActivity extends AppCompatActivity implements
         textImageIndicator = findViewById(R.id.text_image_indicator);
         textProductName = findViewById(R.id.text_product_name_detail);
         textPrice = findViewById(R.id.text_price);
+        // textOriginalPrice = findViewById(R.id.text_original_price); // Ánh xạ nếu có trong layout
         textReviewCount = findViewById(R.id.text_review_count);
         textColorName = findViewById(R.id.text_color_name);
         textSizeLabel = findViewById(R.id.text_size_label);
         textStockStatus = findViewById(R.id.text_stock_status);
         textSelectedQuantity = findViewById(R.id.text_selected_quantity);
         textInventoryCount = findViewById(R.id.text_inventory_count);
+//        textToolbarTitle = findViewById(R.id.text_toolbar_title);
 
         ratingBarDetail = findViewById(R.id.rating_bar_detail);
 
@@ -112,8 +116,8 @@ public class ProductDetailActivity extends AppCompatActivity implements
         btnIncrementQty = findViewById(R.id.btn_increment_qty);
         btnDecrementQty = findViewById(R.id.btn_decrement_qty);
 
-        // Ánh xạ nút Home
-        navHomeDetail = findViewById(R.id.nav_home_cs); // <--- Đã sửa ID Home
+        // Ánh xạ nút Home (Footer)
+        navHomeDetail = findViewById(R.id.nav_home_cs);
         if (navHomeDetail != null) {
             navHomeDetail.setOnClickListener(v -> {
                 Intent intent = new Intent(ProductDetailActivity.this, HomeActivity.class);
@@ -193,7 +197,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
                             try {
                                 currentProduct = document.toObject(Product.class);
 
-                                if (currentProduct != null && currentProduct.colorImages != null && !currentProduct.colorImages.isEmpty()) {
+                                if (currentProduct != null && currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
                                     displayProductData(currentProduct);
                                 } else {
                                     Log.e(TAG, "LỖI DỮ LIỆU: currentProduct là NULL hoặc thiếu trường colorImages.");
@@ -218,9 +222,13 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
     private void displayProductData(Product product) {
         // 1. Gán dữ liệu cơ bản
-        textProductName.setText(product.name);
+        textProductName.setText(product.getName());
+        if (textToolbarTitle != null) {
+            textToolbarTitle.setText(product.getName());
+        }
 
-        textPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice));
+        // 2. TÍNH TOÁN VÀ GÁN GIÁ (Áp dụng KM cho lần đầu)
+        updatePriceUIInitial(product.getBasePrice(), product.getIsOfferStatus(), product.getOffer());
 
         // Gán Review và Rating
         if (product.getTotalReviews() != null && product.getAverageRating() != null) {
@@ -228,25 +236,57 @@ public class ProductDetailActivity extends AppCompatActivity implements
             ratingBarDetail.setRating(product.getAverageRating().floatValue());
         }
 
-        // 2. Setup Color Selector
-        List<String> colorNames = new ArrayList<>(product.colorImages.keySet());
+        // 3. Setup Color Selector
+        List<String> colorNames = new ArrayList<>(product.getColorImages().keySet());
         if (!colorNames.isEmpty()) {
             currentSelectedColor = colorNames.get(0);
 
             recyclerColors.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             recyclerColors.setAdapter(new ColorSelectorAdapter(colorNames, this));
 
-            // 3. Load ảnh và size cho màu mặc định
+            // 4. Load ảnh và size cho màu mặc định
             loadImagesAndSizesForColor(currentSelectedColor);
         }
 
-        // 4. Setup Recommendations (GỌI HÀM VỚI TYPE THỰC TẾ)
-        if (product.type != null) {
-            setupRecommendation(product.type);
+        // 5. Setup Recommendations
+        if (product.getType() != null) {
+            setupRecommendation(product.getType());
         } else {
             Log.w(TAG, "Sản phẩm thiếu trường 'type' để đề xuất.");
         }
     }
+
+    /**
+     * TÍNH TOÁN VÀ CẬP NHẬT GIÁ DỰA TRÊN LOGIC KHUYẾN MÃI (CHỈ GỌI KHI LOAD BAN ĐẦU)
+     */
+    private void updatePriceUIInitial(double basePrice, boolean isOffer, OfferDetails offer) {
+        double displayPrice = basePrice;
+        boolean hasValidOffer = false;
+
+        if (isOffer && offer != null) {
+            long now = System.currentTimeMillis();
+            if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                hasValidOffer = true;
+                double discount = offer.getDiscountPercent() / 100.0;
+                displayPrice = basePrice * (1.0 - discount);
+            }
+        }
+
+        // GÁN GIÁ HIỆN TẠI (ĐÃ GIẢM HOẶC BASE PRICE)
+        textPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", displayPrice));
+
+        // HIỂN THỊ GIÁ GỐC VÀ GẠCH NGANG (Chỉ cho lần load đầu tiên)
+        if (textOriginalPrice != null) {
+            if (hasValidOffer) {
+                textOriginalPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", basePrice));
+                textOriginalPrice.setPaintFlags(textOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                textOriginalPrice.setText("");
+                textOriginalPrice.setPaintFlags(0);
+            }
+        }
+    }
+
 
     // Xử lý khi màu được chọn
     @Override
@@ -272,10 +312,45 @@ public class ProductDetailActivity extends AppCompatActivity implements
             }
         }
 
-        // 3. Cập nhật Giá
-        textPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", selectedVariant.price));
+        // -----------------------------------------------------------
+        // FIX LOGIC: TÍNH GIÁ ĐÃ GIẢM DỰA TRÊN GIÁ VARIANT BASE PRICE
+        // -----------------------------------------------------------
 
-        // 4. Cập nhật Tồn kho (Hiển thị số lượng và trạng thái)
+        double variantBasePrice = selectedVariant.price; // GIÁ GỐC CỦA VARIANT (theo đề xuất mới nhất)
+        double finalDisplayPrice = variantBasePrice;
+        boolean hasValidOffer = false;
+
+        if (currentProduct.getIsOfferStatus() && currentProduct.getOffer() != null) {
+            long now = System.currentTimeMillis();
+            OfferDetails offer = currentProduct.getOffer();
+
+            // Kiểm tra thời gian khuyến mãi còn hiệu lực
+            if (offer != null && now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                hasValidOffer = true;
+                double discount = offer.getDiscountPercent() / 100.0;
+
+                // TÍNH GIÁ HIỂN THỊ CUỐI CÙNG = GIÁ VARIANT - PHẦN TRĂM GIẢM
+                finalDisplayPrice = variantBasePrice * (1.0 - discount);
+            }
+        }
+
+        // 3. Cập nhật GIÁ HIỆN TẠI (Giá sau khi giảm)
+        textPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", finalDisplayPrice));
+
+        // 4. CẬP NHẬT GIÁ GỐC GẠCH NGANG
+        if (textOriginalPrice != null) {
+            if (hasValidOffer && finalDisplayPrice < variantBasePrice) {
+                // Hiển thị giá gốc của variant và gạch ngang
+                textOriginalPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", variantBasePrice));
+                textOriginalPrice.setPaintFlags(textOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                // Khuyến mãi hết hạn hoặc không hợp lệ, xóa giá gốc
+                textOriginalPrice.setText("");
+                textOriginalPrice.setPaintFlags(0);
+            }
+        }
+
+        // 5. Cập nhật Tồn kho (Hiển thị số lượng và trạng thái)
         long quantity = selectedVariant.quantity;
 
         if (quantity > 0 && quantity <= 20) {
@@ -292,14 +367,14 @@ public class ProductDetailActivity extends AppCompatActivity implements
             textInventoryCount.setText("Sản phẩm tạm thời hết hàng.");
         }
 
-        // 5. Cập nhật TextView số lượng mua và nút
+        // 6. Cập nhật TextView số lượng mua và nút
         if (textSelectedQuantity != null) {
             textSelectedQuantity.setText(String.valueOf(currentQuantityToBuy));
         }
 
         btnAddToCart.setEnabled(quantity > 0);
 
-        // 6. Cập nhật trạng thái nút Cộng/Trừ
+        // 7. Cập nhật trạng thái nút Cộng/Trừ
         updateButtonStates();
     }
 
@@ -364,9 +439,21 @@ public class ProductDetailActivity extends AppCompatActivity implements
                                     !recommendedProduct.getProductId().equals(currentProduct.productId) &&
                                     recommendedProduct.getMainImage() != null)
                             {
+                                // TÍNH GIÁ HIỂN THỊ CHO SẢN PHẨM ĐỀ XUẤT
+                                double recDisplayPrice = recommendedProduct.getBasePrice();
+                                if (recommendedProduct.getIsOfferStatus() && recommendedProduct.getOffer() != null) {
+                                    long now = System.currentTimeMillis();
+                                    OfferDetails offer = recommendedProduct.getOffer();
+
+                                    if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                                        recDisplayPrice = recommendedProduct.getBasePrice() * (1.0 - offer.getDiscountPercent() / 100.0);
+                                    }
+                                }
+                                // KẾT THÚC LOGIC TÍNH GIÁ ĐỀ XUẤT
+
                                 recommendations.add(new Recommendation(
                                         recommendedProduct.getName(),
-                                        recommendedProduct.getCurrentPrice(),
+                                        recDisplayPrice, // Dùng giá đã tính toán
                                         recommendedProduct.getMainImage(),
                                         recommendedProduct.getCategory() + ", Size: S-XL",
                                         "Various Colors"

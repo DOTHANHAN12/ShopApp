@@ -1,5 +1,6 @@
 package com.example.shopapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -35,7 +37,10 @@ public class CategorySearchActivity extends AppCompatActivity {
     private TextView tabWomen, tabMen, tabKids, tabBaby;
     private TextView currentSelectedTab;
     private EditText edtSearchKeyword;
-    private ImageView navHome; // <--- Đã có khai báo
+
+    // Khai báo Footer Buttons
+    private ImageView navHome;
+    private ImageView navProfile;
 
     private RecyclerView recyclerView;
     private SubCategoryAdapter subCategoryAdapter;
@@ -55,7 +60,6 @@ public class CategorySearchActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
@@ -72,29 +76,26 @@ public class CategorySearchActivity extends AppCompatActivity {
             currentCategory = "WOMEN";
         }
 
-        // 1. Ánh xạ Views và Footer (Đã gộp)
         mapViews();
+        setupSearchListener();
+        setupFooterNavigation();
 
-        // 2. Khởi tạo RecyclerView và Adapter
+        // Khởi tạo RecyclerView và Adapter (SỬA LỖI: Truyền Context)
         recyclerView = findViewById(R.id.recycler_category_grid);
-        subCategoryAdapter = new SubCategoryAdapter(subCategoryList, currentCategory);
+        subCategoryAdapter = new SubCategoryAdapter(subCategoryList, currentCategory, this);
 
         // Thiết lập GridLayout 2 cột
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(subCategoryAdapter);
 
-        // 3. Khởi tạo UI và Listener
+        // Khởi tạo UI và Listener
         updateCategoryUI(currentCategory);
         setupCategoryTabs();
-        setupSearchBarListener();
 
-        // 4. Tải dữ liệu Sub Category từ Firestore
+        // Tải dữ liệu Sub Category từ Firestore
         loadSubCategoryData(currentCategory);
     }
 
-    /**
-     * Khởi tạo Map chứa URL ảnh Fix Cứng cho từng TYPE theo từng CATEGORY
-     */
     private void initializeFixedImages() {
         Map<String, String> commonTypes = new HashMap<>();
         commonTypes.put("OUTERWEAR", "URL_OUTERWEAR_DEFAULT");
@@ -102,7 +103,7 @@ public class CategorySearchActivity extends AppCompatActivity {
         commonTypes.put("BOTTOMS", "URL_BOTTOMS_DEFAULT");
         commonTypes.put("T-SHIRTS, SWEAT & FLEECE", "URL_TSHIRTS_DEFAULT");
         commonTypes.put("INNERWEAR & UNDERWEAR", "URL_INNERWEAR_DEFAULT");
-        commonTypes.put("ACCESSORIES", "https://i.pinimg.com/736x/e6/85/5b/e6855b431c74ca89257d0605de878943.jpg");
+        commonTypes.put("ACCESSORIES", "URL_ACCESSORIES_DEFAULT");
 
         Map<String, String> womenTypes = new HashMap<>(commonTypes);
         womenTypes.put("BOTTOMS", "URL_BOTTOMS_WOMEN_RIENG_BIET");
@@ -123,7 +124,6 @@ public class CategorySearchActivity extends AppCompatActivity {
         categoryTypeImages.put("BABY", babyTypes);
     }
 
-    // GỘP LOGIC ÁNH XẠ CHÍNH VÀ FOOTER
     private void mapViews() {
         tabWomen = findViewById(R.id.tab_women_cs);
         tabMen = findViewById(R.id.tab_men_cs);
@@ -131,23 +131,60 @@ public class CategorySearchActivity extends AppCompatActivity {
         tabBaby = findViewById(R.id.tab_baby_cs);
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
 
-        // Ánh xạ nút Home từ Footer
+        // ÁNH XẠ FOOTER
         navHome = findViewById(R.id.nav_home_cs);
+//        navProfile = findViewById(R.id.nav_profile_detail);
+    }
 
-        // THIẾT LẬP LISTENER CHO NÚT HOME (ĐÃ FIX)
+    // --------------------------------------------------------------------------------
+    // LOGIC FOOTER NAVIGATION
+    // --------------------------------------------------------------------------------
+    private void setupFooterNavigation() {
+        // NÚT HOME
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
                 Intent intent = new Intent(CategorySearchActivity.this, HomeActivity.class);
-                // Cờ để đảm bảo quay về màn hình Home gốc
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
             });
         }
+        // NÚT PROFILE
+        if (navProfile != null) {
+            navProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(CategorySearchActivity.this, MainActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
-    // HÀM mapViewsFooter() ĐÃ BỊ XÓA BỎ VÀ GỘP VÀO mapViews()
+    private void setupSearchListener() {
 
+        if (edtSearchKeyword != null) {
+            edtSearchKeyword.setFocusable(true);
+            edtSearchKeyword.setFocusableInTouchMode(true);
+
+            edtSearchKeyword.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                    performSearch(edtSearchKeyword.getText().toString().trim());
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    private void performSearch(String keyword) {
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edtSearchKeyword.getWindowToken(), 0);
+
+        // CHUYỂN SANG PRODUCTLISTACTIVITY VÀ TRUYỀN KEYWORD
+        Intent intent = new Intent(this, ProductListActivity.class);
+        intent.putExtra("CATEGORY_KEY", currentCategory);
+        intent.putExtra("SEARCH_KEYWORD", keyword);
+        startActivity(intent);
+    }
 
     private void setupCategoryTabs() {
         View.OnClickListener tabClickListener = view -> {
@@ -186,21 +223,8 @@ public class CategorySearchActivity extends AppCompatActivity {
         this.currentCategory = newCategory;
     }
 
-    private void setupSearchBarListener() {
-        edtSearchKeyword.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ProductListActivity.class);
-            intent.putExtra("CATEGORY_KEY", currentCategory);
-            startActivity(intent);
-        });
-
-        findViewById(R.id.img_search_filter).setOnClickListener(v -> {
-            // Logic mở màn hình Filter
-        });
-    }
-
     /**
      * Tải danh sách các TYPE (Danh mục con) duy nhất từ Collection 'products'
-     * và gán URL ảnh fix cứng cho mỗi Type, bao gồm mục SHOW ALL.
      */
     private void loadSubCategoryData(String category) {
         db.collection("products")
@@ -213,6 +237,7 @@ public class CategorySearchActivity extends AppCompatActivity {
                         Set<String> uniqueTypesFromDB = new HashSet<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            // LƯU Ý: Dữ liệu type được lưu trong DB phải khớp
                             String type = document.getString("type");
                             if (type != null) {
                                 uniqueTypesFromDB.add(type.toUpperCase(Locale.ROOT));
@@ -229,14 +254,14 @@ public class CategorySearchActivity extends AppCompatActivity {
                             String typeName = entry.getKey();
                             String imageUrl = entry.getValue();
 
-                            // CHỈ thêm Type nếu nó có trong DB
+                            // CHỈ thêm Type nếu nó có trong DB (Kiểm tra bằng chữ HOA)
                             if (uniqueTypesFromDB.contains(typeName.toUpperCase(Locale.ROOT))) {
                                 subCategoryList.add(new SubCategory(typeName, imageUrl));
                             }
                         }
 
-                        // 4. Cập nhật Adapter
-                        subCategoryAdapter = new SubCategoryAdapter(subCategoryList, category);
+                        // 4. Cập nhật Adapter (SỬA LỖI: Truyền Context)
+                        subCategoryAdapter = new SubCategoryAdapter(subCategoryList, category, this);
                         recyclerView.setAdapter(subCategoryAdapter);
                         subCategoryAdapter.notifyDataSetChanged();
 

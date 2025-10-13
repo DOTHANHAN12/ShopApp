@@ -1,6 +1,7 @@
 package com.example.shopapp;
 
 import android.content.Intent;
+import android.graphics.Color; // Import Color
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -55,11 +56,18 @@ public class ProductDetailActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_detail);
 
+        // SETUP UI CƠ BẢN VÀ FIX STATUS BAR
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
+        setContentView(R.layout.activity_product_detail);
 
         db = FirebaseFirestore.getInstance();
 
@@ -105,7 +113,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
         btnDecrementQty = findViewById(R.id.btn_decrement_qty);
 
         // Ánh xạ nút Home
-        navHomeDetail = findViewById(R.id.nav_home_cs);
+        navHomeDetail = findViewById(R.id.nav_home_cs); // <--- Đã sửa ID Home
         if (navHomeDetail != null) {
             navHomeDetail.setOnClickListener(v -> {
                 Intent intent = new Intent(ProductDetailActivity.this, HomeActivity.class);
@@ -211,6 +219,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private void displayProductData(Product product) {
         // 1. Gán dữ liệu cơ bản
         textProductName.setText(product.name);
+
         textPrice.setText(String.format(Locale.getDefault(), "%,.0f VND", product.currentPrice));
 
         // Gán Review và Rating

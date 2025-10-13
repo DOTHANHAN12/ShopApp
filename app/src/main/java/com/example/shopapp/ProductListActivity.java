@@ -5,8 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,9 +40,29 @@ public class ProductListActivity extends AppCompatActivity {
     private String currentCategory;
     private String currentSubCategory;
 
+    private TextView tabWomen, tabMen, tabKids, tabBaby;
+    private ImageView imgBackList;
+    private TextView currentSelectedTab;
+
+    // KHAI BÁO BIẾN CHO FOOTER
+    private ImageView navHomeFloat;
+    private View searchButtonFloat;
+    private ImageView navProfileFloat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // SETUP UI CƠ BẢN VÀ FIX STATUS BAR
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
         setContentView(R.layout.activity_product_list);
 
         // 1. Khởi tạo Firebase
@@ -45,38 +70,145 @@ public class ProductListActivity extends AppCompatActivity {
 
         // 2. Lấy Category VÀ Sub-category từ Intent
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
-        // ĐỌC THAM SỐ LỌC SUB-CATEGORY (TYPE_KEY)
         currentSubCategory = getIntent().getStringExtra("TYPE_KEY");
 
-        // Thêm kiểm tra cho giá trị đặc biệt SHOW ALL
         if (currentSubCategory != null && currentSubCategory.equals(SubCategory.SHOW_ALL_TYPE)) {
-            currentSubCategory = null; // Đặt về null để không lọc theo Type
+            currentSubCategory = null;
         }
 
         if (currentCategory == null) {
             currentCategory = "MEN";
         }
 
-        // 3. Khởi tạo UI
-        categoryHeader = findViewById(R.id.text_category_header);
-        recyclerView = findViewById(R.id.recycler_product_list);
+        // 3. Khởi tạo UI và Ánh xạ Views
+        mapViews();
+        setupCategoryTabs();
+        setupFooterNavigation(); // <--- THIẾT LẬP LOGIC FOOTER
 
-        // Cập nhật tiêu đề hiển thị cả Sub-category nếu có
-        String headerText = currentCategory.toUpperCase(Locale.ROOT) + " Collection";
-        if (currentSubCategory != null && !currentSubCategory.isEmpty()) {
-            headerText = currentCategory.toUpperCase(Locale.ROOT) + " / " + currentSubCategory.toUpperCase(Locale.ROOT);
+        // 4. Thiết lập nút Back
+        if (imgBackList != null) {
+            imgBackList.setOnClickListener(v -> finish());
         }
-        categoryHeader.setText(headerText);
 
-        // 4. Thiết lập RecyclerView
+        // Cập nhật tiêu đề hiển thị cả Sub-category (dùng trường categoryHeader)
+        updateHeaderAndData(currentCategory, currentSubCategory);
+
+        // Cập nhật UI Tab để làm nổi bật tab đã chọn
+        updateCategoryUI(currentCategory);
+
+        // 5. Thiết lập RecyclerView
         productList = new ArrayList<>();
         adapter = new ProductAdapter(this, productList);
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        // 5. Tải dữ liệu, truyền cả Sub-category
-        loadProductsFromFirestore(currentCategory, currentSubCategory);
+        // 6. Tải dữ liệu (đã được gọi trong updateHeaderAndData)
+    }
+
+    private void mapViews() {
+        categoryHeader = findViewById(R.id.text_category_header);
+        recyclerView = findViewById(R.id.recycler_product_list);
+
+        // Ánh xạ Tabs và nút Back mới
+        tabWomen = findViewById(R.id.tab_women_list);
+        tabMen = findViewById(R.id.tab_men_list);
+        tabKids = findViewById(R.id.tab_kids_list);
+        tabBaby = findViewById(R.id.tab_baby_list);
+        imgBackList = findViewById(R.id.img_back_list);
+
+        // ÁNH XẠ CÁC NÚT TỪ FOOTER (layout_floating_bottom_nav)
+        navHomeFloat = findViewById(R.id.nav_home_cs);
+        searchButtonFloat = findViewById(R.id.btn_search_footer);
+//        navProfileFloat = findViewById(R.id.nav_profile_detail);
+    }
+
+    /**
+     * Thiết lập Listener cho các nút Footer (Home, Search, Profile)
+     */
+    private void setupFooterNavigation() {
+        // NÚT HOME: Chuyển về HomeActivity (clear stack)
+        if (navHomeFloat != null) {
+            navHomeFloat.setOnClickListener(v -> {
+                Intent intent = new Intent(this, HomeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            });
+        }
+
+        // NÚT SEARCH: Chuyển về CategorySearchActivity
+        if (searchButtonFloat != null) {
+            searchButtonFloat.setOnClickListener(v -> {
+                Intent intent = new Intent(this, CategorySearchActivity.class);
+                intent.putExtra("CATEGORY_KEY", currentCategory);
+                startActivity(intent);
+            });
+        }
+
+        // NÚT PROFILE: Chuyển về MainActivity (Login/Register)
+        if (navProfileFloat != null) {
+            navProfileFloat.setOnClickListener(v -> {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+            });
+        }
+    }
+
+    private void setupCategoryTabs() {
+        View.OnClickListener tabClickListener = view -> {
+            String newCategory = ((TextView) view).getText().toString();
+
+            // Cập nhật UI
+            updateCategoryUI(newCategory);
+
+            // Gửi Intent để chuyển về CategorySearchActivity với Category mới (và kết thúc Activity hiện tại)
+            Intent intent = new Intent(this, CategorySearchActivity.class);
+            intent.putExtra("CATEGORY_KEY", newCategory);
+            startActivity(intent);
+            finish();
+        };
+
+        tabWomen.setOnClickListener(tabClickListener);
+        tabMen.setOnClickListener(tabClickListener);
+        tabKids.setOnClickListener(tabClickListener);
+        tabBaby.setOnClickListener(tabClickListener);
+    }
+
+    private void updateHeaderAndData(String category, String subCategory) {
+        String headerText;
+
+        if (subCategory != null && !subCategory.isEmpty()) {
+            headerText = subCategory.toUpperCase(Locale.ROOT);
+        } else {
+            headerText = category.toUpperCase(Locale.ROOT) + " Collection";
+        }
+
+        categoryHeader.setText(headerText);
+
+        // Tải dữ liệu
+        loadProductsFromFirestore(category, subCategory);
+    }
+
+
+    private void updateCategoryUI(String newCategory) {
+        if (currentSelectedTab != null) {
+            currentSelectedTab.setAlpha(0.7f);
+            currentSelectedTab.setPaintFlags(currentSelectedTab.getPaintFlags() & (~Paint.UNDERLINE_TEXT_FLAG));
+            currentSelectedTab.setTextSize(16);
+        }
+
+        switch (newCategory) {
+            case "WOMEN": currentSelectedTab = tabWomen; break;
+            case "MEN": currentSelectedTab = tabMen; break;
+            case "KIDS": currentSelectedTab = tabKids; break;
+            case "BABY": currentSelectedTab = tabBaby; break;
+            default: return;
+        }
+
+        // Thiết lập trạng thái mới: Gạch chân và In đậm
+        currentSelectedTab.setAlpha(1.0f);
+        currentSelectedTab.setPaintFlags(currentSelectedTab.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        currentSelectedTab.setTextSize(18);
     }
 
     /** * Tải danh sách sản phẩm từ Firestore dựa trên Category VÀ Sub-Category
@@ -89,7 +221,6 @@ public class ProductListActivity extends AppCompatActivity {
 
         // BƯỚC 2: BỔ SUNG THÊM LỌC THEO SUB-CATEGORY (type) NẾU subCategory KHÔNG NULL/EMPTY
         if (subCategory != null && !subCategory.isEmpty()) {
-            // LỌC THÊM THEO TRƯỜNG "type"
             query = query.whereEqualTo("type", subCategory);
         }
 

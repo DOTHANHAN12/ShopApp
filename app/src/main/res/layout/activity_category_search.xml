@@ -13,30 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="?attr/actionBarSize"
         android:background="@android:color/white"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:gravity="end|center_vertical">
+        <include layout="@layout/layout_top_icons_simple"/>
 
-            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
-
-            <ImageView
-                android:layout_width="24dp" android:layout_height="24dp" android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_notification" app:tint="#333333"/>
-            <ImageView
-                android:layout_width="24dp" android:layout_height="24dp" android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_favorite" app:tint="#333333"/>
-            <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shopping_bag" app:tint="#333333"/>
-                <TextView style="@style/CartBadge"/>
-            </FrameLayout>
-        </LinearLayout>
         <LinearLayout
             android:id="@+id/layout_tabs_header"
             android:layout_width="match_parent"
@@ -55,6 +36,34 @@
 
         <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0"/>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <EditText
+                android:id="@+id/edt_search_keyword"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:paddingStart="48dp"
+                android:paddingEnd="48dp"
+                android:hint="Search by Keyword"
+                android:textSize="14sp"
+                android:textColor="#333"
+                android:background="@drawable/rounded_search_background"
+                android:singleLine="true"
+                android:focusable="false"/>
+
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_search"
+                android:layout_alignParentStart="true" android:layout_centerVertical="true"
+                android:layout_marginStart="12dp" app:tint="#666"/>
+
+            <ImageView android:id="@+id/img_search_filter" android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@drawable/ic_filter" android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" android:layout_marginEnd="12dp" app:tint="#666"/>
+        </RelativeLayout>
+
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -72,36 +81,6 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="16dp">
 
-            <RelativeLayout
-                android:id="@+id/search_bar_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <EditText
-                    android:id="@+id/edt_search_keyword"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:paddingStart="48dp"
-                    android:paddingEnd="48dp"
-                    android:hint="Search by Keyword"
-                    android:inputType="text"
-                    android:focusable="false"
-                    android:textSize="14sp"
-                    android:textColor="#333"
-                    android:background="@drawable/rounded_search_background"
-                    android:singleLine="true"/>
-
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_search"
-                    android:layout_alignParentStart="true" android:layout_centerVertical="true"
-                    android:layout_marginStart="12dp" app:tint="#666"/>
-
-                <ImageView android:id="@+id/img_search_filter" android:layout_width="24dp" android:layout_height="24dp"
-                    android:src="@drawable/ic_filter" android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true" android:layout_marginEnd="12dp" app:tint="#666"/>
-            </RelativeLayout>
-
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_category_grid"
                 android:layout_width="match_parent"
@@ -117,17 +96,22 @@
     <LinearLayout
         android:id="@+id/layout_bottom_nav_cs"
         android:layout_width="match_parent"
-        android:layout_height="66dp"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:elevation="0dp"
+        android:gravity="center"
         android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <FrameLayout
-            android:layout_height="match_parent"
+            android:layout_height="66dp"
             android:layout_width="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="center">
             <ImageView
                 android:id="@+id/nav_home_cs"
                 android:layout_width="45dp"
@@ -141,23 +125,25 @@
 
         <FrameLayout
             android:id="@+id/btn_search_footer"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content">
+            android:layout_height="66dp"
+            android:layout_width="wrap_content"
+            android:gravity="center">
             <ImageView
                 android:background="@drawable/circle_background_black"
                 android:contentDescription="@string/search_desc"
                 android:layout_gravity="center"
-                android:layout_height="65dp"
-                android:layout_width="65dp"
+                android:layout_height="58dp"
+                android:layout_width="58dp"
                 android:padding="12dp"
                 android:src="@drawable/ic_search"
                 app:tint="@android:color/black"/>
         </FrameLayout>
 
         <FrameLayout
-            android:layout_height="match_parent"
+            android:layout_height="66dp"
             android:layout_width="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="center">
             <ImageView
                 android:layout_width="45dp"
                 android:layout_height="45dp"

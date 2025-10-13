@@ -1,6 +1,7 @@
 package com.example.shopapp;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,9 +9,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Locale;
 
 public class CategorySearchActivity extends AppCompatActivity {
 
@@ -30,16 +35,14 @@ public class CategorySearchActivity extends AppCompatActivity {
     private TextView tabWomen, tabMen, tabKids, tabBaby;
     private TextView currentSelectedTab;
     private EditText edtSearchKeyword;
-    private ImageView navHome;
+    private ImageView navHome; // <--- Đã có khai báo
 
     private RecyclerView recyclerView;
     private SubCategoryAdapter subCategoryAdapter;
     private final List<SubCategory> subCategoryList = new ArrayList<>();
 
-    // Khai báo Map ảnh: Category -> (Type -> URL)
     private final Map<String, Map<String, String>> categoryTypeImages = new HashMap<>();
 
-    // Lấy hằng số từ Model
     private static final String SHOW_ALL_TYPE = SubCategory.SHOW_ALL_TYPE;
     private static final String SHOW_ALL_IMAGE_URL = SubCategory.SHOW_ALL_IMAGE_URL;
 
@@ -47,15 +50,21 @@ public class CategorySearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_category_search);
 
+        // SETUP UI CƠ BẢN VÀ FIX STATUS BAR
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
+        setContentView(R.layout.activity_category_search);
 
         db = FirebaseFirestore.getInstance();
 
-        // Khởi tạo Map URL ảnh Fix Cứng
         initializeFixedImages();
 
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
@@ -63,10 +72,10 @@ public class CategorySearchActivity extends AppCompatActivity {
             currentCategory = "WOMEN";
         }
 
+        // 1. Ánh xạ Views và Footer (Đã gộp)
         mapViews();
-        mapViewsFooter();
 
-        // Khởi tạo RecyclerView và Adapter
+        // 2. Khởi tạo RecyclerView và Adapter
         recyclerView = findViewById(R.id.recycler_category_grid);
         subCategoryAdapter = new SubCategoryAdapter(subCategoryList, currentCategory);
 
@@ -74,91 +83,71 @@ public class CategorySearchActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(subCategoryAdapter);
 
-        // Khởi tạo UI và Listener
+        // 3. Khởi tạo UI và Listener
         updateCategoryUI(currentCategory);
         setupCategoryTabs();
         setupSearchBarListener();
 
-        // Tải dữ liệu Sub Category từ Firestore
+        // 4. Tải dữ liệu Sub Category từ Firestore
         loadSubCategoryData(currentCategory);
     }
 
     /**
      * Khởi tạo Map chứa URL ảnh Fix Cứng cho từng TYPE theo từng CATEGORY
      */
-    // Trong CategorySearchActivity.java
-
-    // Trong CategorySearchActivity.java
-
-    /**
-     * Khởi tạo Map chứa URL ảnh Fix Cứng cho từng TYPE theo từng CATEGORY
-     */
     private void initializeFixedImages() {
-        // ------------------- DỮ LIỆU CHUNG (DEFAULT) -------------------
         Map<String, String> commonTypes = new HashMap<>();
         commonTypes.put("OUTERWEAR", "URL_OUTERWEAR_DEFAULT");
         commonTypes.put("SWEATERS & KNITWEAR", "URL_SWEATERS_DEFAULT");
-        commonTypes.put("BOTTOMS", "URL_BOTTOMS_DEFAULT"); // Ảnh mặc định cho các Category khác
+        commonTypes.put("BOTTOMS", "URL_BOTTOMS_DEFAULT");
         commonTypes.put("T-SHIRTS, SWEAT & FLEECE", "URL_TSHIRTS_DEFAULT");
         commonTypes.put("INNERWEAR & UNDERWEAR", "URL_INNERWEAR_DEFAULT");
-        commonTypes.put("ACCESSORIES", "URL_ACCESSORIES_DEFAULT");
+        commonTypes.put("ACCESSORIES", "https://i.pinimg.com/736x/e6/85/5b/e6855b431c74ca89257d0605de878943.jpg");
 
-        // ------------------- WOMEN -------------------
-        Map<String, String> womenTypes = new HashMap<>(commonTypes); // BẮT ĐẦU VỚI CÁC TYPE CHUNG
-
-        // Ghi đè ảnh BOTTOMS của WOMEN
-        womenTypes.put("BOTTOMS", "https://i.pinimg.com/736x/b2/65/10/b2651094216e49852c57c125eddcab83.jpg");
-
-        // Thêm các Type riêng của WOMEN
+        Map<String, String> womenTypes = new HashMap<>(commonTypes);
+        womenTypes.put("BOTTOMS", "URL_BOTTOMS_WOMEN_RIENG_BIET");
         womenTypes.put("DRESSES", "URL_DRESSES_WOMEN");
         womenTypes.put("MATERNITY CLOTHES", "URL_MATERNITY_WOMEN");
-
+        womenTypes.put("OUTERWEAR", "URL_OUTERWEAR_WOMEN_SPECIAL");
         categoryTypeImages.put("WOMEN", womenTypes);
 
-        // ------------------- MAN -------------------
-        Map<String, String> menTypes = new HashMap<>(commonTypes); // BẮT ĐẦU VỚI CÁC TYPE CHUNG
-
-        // Ghi đè ảnh BOTTOMS của MAN
-        menTypes.put("BOTTOMS", "https://i.pinimg.com/736x/22/d1/05/22d10514c9e010d94e4fc6bc20bdf0aa.jpg");
-        menTypes.put("ACCESSORIES", "https://i.pinimg.com/736x/22/d1/05/22d10514c9e010d94e4fc6bc20bdf0aa.jpg");
-        // Thêm các Type riêng của MAN
+        Map<String, String> menTypes = new HashMap<>(commonTypes);
+        menTypes.put("BOTTOMS", "URL_BOTTOMS_MAN_RIENG_BIET");
         menTypes.put("SPORT UTILITY WEAR", "URL_SPORT_MAN");
-
         categoryTypeImages.put("MEN", menTypes);
 
-        // ------------------- KIDS -------------------
-        // SỬA LỖI: Cần sao chép các Type chung
         Map<String, String> kidsTypes = new HashMap<>(commonTypes);
         categoryTypeImages.put("KIDS", kidsTypes);
 
-        // ------------------- BABY -------------------
-        // SỬA LỖI: Cần sao chép các Type chung
         Map<String, String> babyTypes = new HashMap<>(commonTypes);
         categoryTypeImages.put("BABY", babyTypes);
-
-        // -------------------------------------------------------------------
-        // Vui lòng thay thế tất cả các placeholder URL (URL_...) bằng URL ảnh THẬT của bạn.
-        // -------------------------------------------------------------------
     }
 
+    // GỘP LOGIC ÁNH XẠ CHÍNH VÀ FOOTER
     private void mapViews() {
         tabWomen = findViewById(R.id.tab_women_cs);
         tabMen = findViewById(R.id.tab_men_cs);
         tabKids = findViewById(R.id.tab_kids_cs);
         tabBaby = findViewById(R.id.tab_baby_cs);
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
-    }
 
-    private void mapViewsFooter() {
+        // Ánh xạ nút Home từ Footer
         navHome = findViewById(R.id.nav_home_cs);
 
-        navHome.setOnClickListener(v -> {
-            Intent intent = new Intent(CategorySearchActivity.this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        });
+        // THIẾT LẬP LISTENER CHO NÚT HOME (ĐÃ FIX)
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                Intent intent = new Intent(CategorySearchActivity.this, HomeActivity.class);
+                // Cờ để đảm bảo quay về màn hình Home gốc
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            });
+        }
     }
+
+    // HÀM mapViewsFooter() ĐÃ BỊ XÓA BỎ VÀ GỘP VÀO mapViews()
+
 
     private void setupCategoryTabs() {
         View.OnClickListener tabClickListener = view -> {
@@ -223,15 +212,13 @@ public class CategorySearchActivity extends AppCompatActivity {
                         subCategoryList.clear();
                         Set<String> uniqueTypesFromDB = new HashSet<>();
 
-                        // 1. Lấy danh sách Type THẬT sự có sản phẩm trong DB
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String type = document.getString("type");
                             if (type != null) {
-                                uniqueTypesFromDB.add(type.toUpperCase());
+                                uniqueTypesFromDB.add(type.toUpperCase(Locale.ROOT));
                             }
                         }
 
-                        // Lấy Map ảnh fix cứng cho Category hiện tại
                         Map<String, String> fixedImageMap = categoryTypeImages.getOrDefault(category, new HashMap<>());
 
                         // 2. Thêm mục "SHOW ALL" vào đầu danh sách
@@ -243,18 +230,19 @@ public class CategorySearchActivity extends AppCompatActivity {
                             String imageUrl = entry.getValue();
 
                             // CHỈ thêm Type nếu nó có trong DB
-                            if (uniqueTypesFromDB.contains(typeName.toUpperCase())) {
+                            if (uniqueTypesFromDB.contains(typeName.toUpperCase(Locale.ROOT))) {
                                 subCategoryList.add(new SubCategory(typeName, imageUrl));
                             }
                         }
 
-                        // 4. Cập nhật Adapter (Quan trọng: Cập nhật Adapter sau khi list thay đổi)
+                        // 4. Cập nhật Adapter
                         subCategoryAdapter = new SubCategoryAdapter(subCategoryList, category);
                         recyclerView.setAdapter(subCategoryAdapter);
                         subCategoryAdapter.notifyDataSetChanged();
 
                     } else {
                         Log.e(TAG, "Lỗi khi tải danh sách Sub-Category:", task.getException());
+                        Toast.makeText(CategorySearchActivity.this, "Lỗi tải danh mục con.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

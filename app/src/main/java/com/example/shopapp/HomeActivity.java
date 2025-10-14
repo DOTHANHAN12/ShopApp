@@ -108,7 +108,7 @@ public class HomeActivity extends AppCompatActivity {
         // NÚT YÊU THÍCH (Favorite)
         if (iconFavorite != null) {
             iconFavorite.setOnClickListener(v -> {
-                if (currentUser != null) {
+                if (mAuth.getCurrentUser() != null) {
                     startActivity(new Intent(this, FavoriteActivity.class));
                 } else {
                     Toast.makeText(this, "Vui lòng đăng nhập để xem mục Yêu thích.", Toast.LENGTH_SHORT).show();
@@ -120,7 +120,7 @@ public class HomeActivity extends AppCompatActivity {
         // NÚT GIỎ HÀNG (Cart)
         if (iconCart != null) {
             iconCart.setOnClickListener(v -> {
-                if (currentUser != null) {
+                if (mAuth.getCurrentUser() != null) {
                     startActivity(new Intent(this, CartActivity.class));
                 } else {
                     Toast.makeText(this, "Vui lòng đăng nhập để xem Giỏ hàng.", Toast.LENGTH_SHORT).show();
@@ -139,7 +139,7 @@ public class HomeActivity extends AppCompatActivity {
         // NÚT PROFILE
         if (iconProfile != null) {
             iconProfile.setOnClickListener(v -> {
-                if (currentUser != null) {
+                if (mAuth.getCurrentUser() != null) {
                     startActivity(new Intent(this, UserProfileActivity.class));
                 } else {
                     Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin cá nhân.", Toast.LENGTH_SHORT).show();

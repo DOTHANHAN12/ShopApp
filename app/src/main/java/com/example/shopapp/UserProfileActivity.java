@@ -39,7 +39,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
         btnLogout.setOnClickListener(v -> {
             mAuth.signOut();
-            Intent intent = new Intent(UserProfileActivity.this, LoginActivity.class);
+            Toast.makeText(this, "Đăng xuất thành công!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(UserProfileActivity.this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
@@ -47,12 +48,12 @@ public class UserProfileActivity extends AppCompatActivity {
 
         btnEditProfile.setOnClickListener(v -> {
             // Navigate to an EditProfileActivity (to be created)
-            Toast.makeText(this, "Edit Profile clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chức năng đang được phát triển.", Toast.LENGTH_SHORT).show();
         });
 
         btnChangePassword.setOnClickListener(v -> {
             // Handle password change
-            Toast.makeText(this, "Change Password clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chức năng đang được phát triển.", Toast.LENGTH_SHORT).show();
         });
     }
 

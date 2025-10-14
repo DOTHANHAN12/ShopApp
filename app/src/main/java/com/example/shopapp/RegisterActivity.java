@@ -20,7 +20,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
     private EditText edtFullName, edtEmail, edtPassword, edtConfirmPassword;
     private Button btnRegister;
     private TextView tvBackToLogin;
@@ -47,8 +49,9 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Initialize Firebase Auth
+        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Map views
         edtFullName = findViewById(R.id.edtFullName);
@@ -92,54 +95,28 @@ public class RegisterActivity extends AppCompatActivity {
 
         boolean hasError = false;
 
-        // Validate full name
-        if (TextUtils.isEmpty(fullName)) {
-            tvFullNameError.setText("Vui lòng nhập họ và tên");
-            tvFullNameError.setVisibility(android.view.View.VISIBLE);
-            hasError = true;
-        } else if (!NAME_PATTERN.matcher(fullName).matches()) {
-            tvFullNameError.setText("Họ tên chỉ chứa chữ cái và khoảng trắng (2-50 ký tự)");
-            tvFullNameError.setVisibility(android.view.View.VISIBLE);
+        if (TextUtils.isEmpty(fullName) || !NAME_PATTERN.matcher(fullName).matches()) {
+            tvFullNameError.setText("Họ tên không hợp lệ");
             hasError = true;
         }
 
-        // Validate email
-        if (TextUtils.isEmpty(email)) {
-            tvEmailError.setText("Vui lòng nhập email");
-            tvEmailError.setVisibility(android.view.View.VISIBLE);
-            hasError = true;
-        } else if (!EMAIL_PATTERN.matcher(email).matches()) {
-            tvEmailError.setText("Email không đúng định dạng");
-            tvEmailError.setVisibility(android.view.View.VISIBLE);
+        if (TextUtils.isEmpty(email) || !EMAIL_PATTERN.matcher(email).matches()) {
+            tvEmailError.setText("Email không hợp lệ");
             hasError = true;
         }
 
-        // Validate password
-        if (TextUtils.isEmpty(password)) {
-            tvPasswordError.setText("Vui lòng nhập mật khẩu");
-            tvPasswordError.setVisibility(android.view.View.VISIBLE);
-            hasError = true;
-        } else if (!PASSWORD_PATTERN.matcher(password).matches()) {
-            tvPasswordError.setText("Mật khẩu phải có 8-32 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
-            tvPasswordError.setVisibility(android.view.View.VISIBLE);
+        if (TextUtils.isEmpty(password) || !PASSWORD_PATTERN.matcher(password).matches()) {
+            tvPasswordError.setText("Mật khẩu quá yếu");
             hasError = true;
         }
 
-        // Validate confirm password
-        if (TextUtils.isEmpty(confirmPassword)) {
-            tvConfirmPasswordError.setText("Vui lòng xác nhận mật khẩu");
-            tvConfirmPasswordError.setVisibility(android.view.View.VISIBLE);
-            hasError = true;
-        } else if (!password.equals(confirmPassword)) {
+        if (!password.equals(confirmPassword)) {
             tvConfirmPasswordError.setText("Mật khẩu xác nhận không khớp");
-            tvConfirmPasswordError.setVisibility(android.view.View.VISIBLE);
             hasError = true;
         }
 
-        // Validate terms
         if (!cbTerms.isChecked()) {
-            tvTermsError.setText("Bạn phải đồng ý với điều khoản để tiếp tục");
-            tvTermsError.setVisibility(android.view.View.VISIBLE);
+            tvTermsError.setText("Bạn phải đồng ý với điều khoản");
             hasError = true;
         }
 
@@ -149,41 +126,48 @@ public class RegisterActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Create Firebase Authentication account
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            // 1. Update Firebase Auth display name
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(fullName)
+                                    .build();
+                            user.updateProfile(profileUpdates);
 
-                            if (user != null) {
-                                // Save additional user info to Realtime Database
-                                Map<String, Object> userData = new HashMap<>();
-                                userData.put("fullName", fullName);
-                                userData.put("email", email);
-                                userData.put("createdAt", System.currentTimeMillis());
+                            // 2. Create user data map for Firestore
+                            Map<String, Object> userData = new HashMap<>();
+                            userData.put("fullName", fullName);
+                            userData.put("email", email);
+                            userData.put("createdAt", System.currentTimeMillis());
+                            userData.put("gender", ""); // Placeholder
+                            userData.put("phoneNumber", ""); // Placeholder
 
-                                FirebaseDatabase.getInstance().getReference("users")
-                                        .child(user.getUid())
-                                        .setValue(userData)
-                                        .addOnCompleteListener(saveTask -> {
-                                            setLoading(false);
-                                            if (saveTask.isSuccessful()) {
-                                                showToast("Đăng ký thành công! Chào mừng bạn.");
-                                                // Go to MainActivity
-                                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                                                finish();
-                                            } else {
-                                                showToast("Lỗi lưu thông tin: " + saveTask.getException().getMessage());
-                                            }
-                                        });
-                            }
-                        } else {
-                            setLoading(false);
-                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Đăng ký thất bại";
-                            showToast(errorMessage);
+                            Map<String, String> addressData = new HashMap<>();
+                            addressData.put("city", "");
+                            addressData.put("street", "");
+                            addressData.put("zipCode", "");
+                            userData.put("defaultAddress", addressData);
+
+                            // 3. Save to Firestore
+                            db.collection("users").document(user.getUid())
+                                    .set(userData)
+                                    .addOnCompleteListener(saveTask -> {
+                                        setLoading(false);
+                                        if (saveTask.isSuccessful()) {
+                                            showToast("Đăng ký thành công!");
+                                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                            finish();
+                                        } else {
+                                            showToast("Lỗi lưu thông tin: " + saveTask.getException().getMessage());
+                                        }
+                                    });
                         }
+                    } else {
+                        setLoading(false);
+                        showToast("Đăng ký thất bại: " + task.getException().getMessage());
                     }
                 });
     }
@@ -203,7 +187,6 @@ public class RegisterActivity extends AppCompatActivity {
     private void setLoading(boolean loading) {
         btnRegister.setEnabled(!loading);
         progressBar.setVisibility(loading ? android.view.View.VISIBLE : android.view.View.GONE);
-        btnRegister.setText(loading ? "ĐANG XỬ LÝ..." : "TẠO TÀI KHOẢN");
     }
 
     private void togglePasswordVisibility(EditText editText, TextView toggleView) {

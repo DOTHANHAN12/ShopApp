@@ -62,32 +62,48 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        adapter = new FavoriteAdapter(this, favoriteItemList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        // Lấy userId để truyền vào Adapter
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = (user != null) ? user.getUid() : null;
+
+        if (userId != null) {
+            // *** SỬA ĐỔI: TRUYỀN USERID VÀO CONSTRUCTOR CỦA ADAPTER ***
+            adapter = new FavoriteAdapter(this, favoriteItemList, userId);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(adapter);
+        } else {
+            // Xử lý trường hợp người dùng chưa đăng nhập
+            Toast.makeText(this, "Vui lòng đăng nhập để xem mục Yêu thích.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void loadFavoriteItems() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
-            Toast.makeText(this, "Vui lòng đăng nhập để xem mục Yêu thích.", Toast.LENGTH_LONG).show();
             return;
         }
 
+        final String userId = user.getUid();
+
         // Truy vấn subcollection favorites
-        db.collection("users").document(user.getUid()).collection("favorites")
+        db.collection("users").document(userId).collection("favorites")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         favoriteItemList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            // LƯU Ý: Document ID ở đây là productId
+                            // Document ID là productId
                             FavoriteItem item = document.toObject(FavoriteItem.class);
-                            // Cần lưu cả Product ID để Adapter có thể truy vấn chi tiết sản phẩm
-                            // item.setProductId(document.getId());
+
+                            // *** DÒNG SỬA ĐỔI: Lưu Product ID ***
+                            item.setProductId(document.getId());
+
                             favoriteItemList.add(item);
                         }
-                        adapter.notifyDataSetChanged();
+
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        }
                         textItemCount.setText(String.format(Locale.ROOT, "%d ITEM(S)", favoriteItemList.size()));
                     } else {
                         Log.e(TAG, "Lỗi tải Yêu thích: ", task.getException());

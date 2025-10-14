@@ -11,6 +11,25 @@
         <item name="android:alpha">0.7</item>
     </style>
 
+    <style name="OrderTotalText" parent="android:style/Widget.TextView">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CartBadge" parent="android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">top|end</item>
+        <item name="android:layout_marginTop">-4dp</item>
+        <item name="android:layout_marginEnd">-4dp</item>
+        <item name="android:background">@drawable/circle_badge</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:text">1</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
     <style name="CategoryTab.Selected" parent="CategoryTab">
         <item name="android:alpha">1.0</item>
     </style>
@@ -31,17 +50,5 @@
         <item name="android:layout_height">28dp</item>
         <item name="android:padding">4dp</item>
     </style>
-        <style name="CartBadge">
-            <item name="android:layout_width">wrap_content</item>
-            <item name="android:layout_height">wrap_content</item>
-            <item name="android:layout_gravity">top|end</item>
-            <item name="android:layout_marginTop">-4dp</item>
-            <item name="android:layout_marginEnd">-4dp</item>
-            <item name="android:background">@drawable/circle_badge</item>
-            <item name="android:gravity">center</item>
-            <item name="android:padding">2dp</item>
-            <item name="android:text">1</item> <item name="android:textColor">@android:color/white</item>
-            <item name="android:textSize">10sp</item>
-        </style>
 
 </resources>

@@ -14,14 +14,29 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"  android:paddingBottom="8dp">
 
-        <ImageView
-            android:id="@+id/img_product_thumb"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:scaleType="centerCrop"
-            android:background="#f0f0f0"
-            tools:src="@tools:sample/avatars"
-            android:contentDescription="Product Thumbnail" />
+            android:layout_height="180dp">
+
+            <ImageView
+                android:id="@+id/img_product_thumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="#f0f0f0"
+                tools:src="@tools:sample/avatars"
+                android:contentDescription="Product Thumbnail" />
+
+            <ImageView
+                android:id="@+id/img_favorite_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_favorite_outline"
+                android:layout_gravity="top|end"
+                android:padding="8dp"
+                app:tint="#666"/>
+
+        </FrameLayout>
 
         <TextView
             android:id="@+id/text_product_name_list"

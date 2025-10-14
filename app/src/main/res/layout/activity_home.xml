@@ -31,6 +31,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:gravity="end">
             <ImageView
+                android:id="@+id/ic_notification"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
@@ -40,6 +41,7 @@
                 tools:ignore="ContentDescription"/>
 
             <ImageView
+                android:id="@+id/ic_favorite"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
@@ -150,6 +152,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1">
                 <ImageView
+                    android:id="@+id/nav_profile"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_gravity="center"

@@ -6,11 +6,15 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -21,6 +25,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "HomeActivity";
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     private ViewPager2 viewPagerFeaturedProducts;
     private FeaturedProductAdapter adapter;
@@ -29,6 +34,13 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tabWomen, tabMen, tabKids, tabBaby;
     private TextView currentSelectedTab;
     private View searchButton;
+    private ImageView iconProfile;
+
+    // Khai báo Icons Header
+    private ImageView iconNotification;
+    private ImageView iconFavorite;
+    private ImageView iconCart;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +53,17 @@ public class HomeActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
-        // THIẾT LẬP Status Bar icons sang màu đen (LIGHT_STATUS_BAR)
+        // Status Bar
         getWindow().setStatusBarColor(Color.TRANSPARENT);
 
         setContentView(R.layout.activity_home);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
-        // 1. Ánh xạ Views
+        // 1. Ánh xạ Views và Icons Header
         mapViews();
+        setupHeaderIcons(); // <--- THIẾT LẬP LISTENER ICONS
 
         // 2. Khởi tạo Adapter và ViewPager2
         adapter = new FeaturedProductAdapter(featuredProductsList);
@@ -58,7 +72,7 @@ public class HomeActivity extends AppCompatActivity {
         // 3. Thiết lập Listener cho các Tab
         setupCategoryTabs();
 
-        // 4. Thiết lập Listener cho nút Search ở Footer (Đã sửa lỗi)
+        // 4. Thiết lập Listener cho nút Search ở Footer
         setupSearchButton();
 
         // 5. Khởi tạo trạng thái UI cho tab mặc định và tải dữ liệu ban đầu
@@ -76,10 +90,65 @@ public class HomeActivity extends AppCompatActivity {
         tabKids = findViewById(R.id.tab_kids);
         tabBaby = findViewById(R.id.tab_baby);
 
-        searchButton = findViewById(R.id.btn_search_footer);
+        searchButton = findViewById(R.id.btn_search_footer); // Nút Search lớn ở Footer
+
+        // ÁNH XẠ ICONS HEADER
+        iconNotification = findViewById(R.id.ic_notification);
+        iconFavorite = findViewById(R.id.ic_favorite);
+        iconCart = findViewById(R.id.ic_cart);
+        iconProfile = findViewById(R.id.nav_profile); // Make sure this ID exists in your layout
 
         currentSelectedTab = tabMen;
     }
+
+    // ------------------- LOGIC KÍCH HOẠT ICONS HEADER -------------------
+    private void setupHeaderIcons() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        // NÚT YÊU THÍCH (Favorite)
+        if (iconFavorite != null) {
+            iconFavorite.setOnClickListener(v -> {
+                if (currentUser != null) {
+                    startActivity(new Intent(this, FavoriteActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem mục Yêu thích.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+
+        // NÚT GIỎ HÀNG (Cart)
+        if (iconCart != null) {
+            iconCart.setOnClickListener(v -> {
+                if (currentUser != null) {
+                    startActivity(new Intent(this, CartActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem Giỏ hàng.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+
+        // NÚT THÔNG BÁO (Notification)
+        if (iconNotification != null) {
+            iconNotification.setOnClickListener(v -> {
+                Toast.makeText(this, "Chức năng Thông báo đang phát triển.", Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        // NÚT PROFILE
+        if (iconProfile != null) {
+            iconProfile.setOnClickListener(v -> {
+                if (currentUser != null) {
+                    startActivity(new Intent(this, UserProfileActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin cá nhân.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+    }
+
 
     // ------------------- LOGIC XỬ LÝ TAB -------------------
     private void setupCategoryTabs() {
@@ -99,16 +168,12 @@ public class HomeActivity extends AppCompatActivity {
         tabBaby.setOnClickListener(tabClickListener);
     }
 
-    // ------------------- LOGIC XỬ LÝ NÚT SEARCH (ĐÃ SỬA LỖI) -------------------
+    // ------------------- LOGIC XỬ LÝ NÚT SEARCH -------------------
     private void setupSearchButton() {
         if (searchButton != null) {
             searchButton.setOnClickListener(v -> {
-                // Lấy Category đang được chọn
                 String categoryToSearch = (currentSelectedTab != null) ? currentSelectedTab.getText().toString() : "MEN";
-
-                // CHUYỂN ĐẾN CATEGORYSEARCHACTIVITY (Màn hình Sub-Category)
                 Intent intent = new Intent(HomeActivity.this, CategorySearchActivity.class);
-
                 intent.putExtra("CATEGORY_KEY", categoryToSearch);
                 startActivity(intent);
             });
@@ -152,8 +217,6 @@ public class HomeActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         featuredProductsList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            // SỬ DỤNG document.toObject(Product.class) sẽ tự động ánh xạ
-                            // các Getters/Setters đã được thêm vào Product.java
                             Product product = document.toObject(Product.class);
                             featuredProductsList.add(product);
                         }

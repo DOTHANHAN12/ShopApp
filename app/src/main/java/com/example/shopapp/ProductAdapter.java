@@ -8,9 +8,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -18,10 +27,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private final Context context;
     private final List<Product> productList;
+    private final FirebaseFirestore db;
+    private final FirebaseAuth mAuth;
 
     public ProductAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
+        this.db = FirebaseFirestore.getInstance();
+        this.mAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
@@ -97,6 +110,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             intent.putExtra("PRODUCT_ID", product.getProductId());
             context.startActivity(intent);
         });
+
+        // 4. XỬ LÝ NÚT YÊU THÍCH
+        checkFavoriteStatus(product.getProductId(), holder.favoriteImageView);
+
+        holder.favoriteImageView.setOnClickListener(v -> {
+            toggleFavorite(product.getProductId(), holder.favoriteImageView);
+        });
     }
 
     @Override
@@ -104,8 +124,68 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
+    private void toggleFavorite(String productId, ImageView favoriteImageView) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(context, "Vui lòng đăng nhập để thêm vào Yêu thích.", Toast.LENGTH_SHORT).show();
+            context.startActivity(new Intent(context, LoginActivity.class));
+            return;
+        }
+
+        db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            // Bỏ yêu thích
+                            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        updateFavoriteIcon(false, favoriteImageView);
+                                    });
+                        } else {
+                            // Thêm vào yêu thích
+                            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                                    .set(new FavoriteItem(System.currentTimeMillis()))
+                                    .addOnSuccessListener(aVoid -> {
+                                        updateFavoriteIcon(true, favoriteImageView);
+                                    });
+                        }
+                    }
+                });
+    }
+
+    private void checkFavoriteStatus(String productId, ImageView favoriteImageView) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            updateFavoriteIcon(false, favoriteImageView);
+            return;
+        }
+
+        db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        updateFavoriteIcon(document != null && document.exists(), favoriteImageView);
+                    }
+                });
+    }
+
+    private void updateFavoriteIcon(boolean isFavorited, ImageView favoriteImageView) {
+        if (isFavorited) {
+            favoriteImageView.setImageResource(R.drawable.ic_favorite_filled);
+            favoriteImageView.setColorFilter(ContextCompat.getColor(context, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
+        } else {
+            favoriteImageView.setImageResource(R.drawable.ic_favorite_outline);
+            favoriteImageView.clearColorFilter();
+        }
+    }
+
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView thumbnailImageView;
+        ImageView favoriteImageView;
         TextView nameTextView;
         TextView typeTextView;
         TextView currentPriceTextView;
@@ -114,6 +194,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             thumbnailImageView = itemView.findViewById(R.id.img_product_thumb);
+            favoriteImageView = itemView.findViewById(R.id.img_favorite_list);
             nameTextView = itemView.findViewById(R.id.text_product_name_list);
             typeTextView = itemView.findViewById(R.id.text_product_type_list);
             currentPriceTextView = itemView.findViewById(R.id.text_current_price_list);

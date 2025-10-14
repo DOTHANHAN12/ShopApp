@@ -76,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Back to login
         tvBackToLogin.setOnClickListener(v -> {
-            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
@@ -172,7 +172,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             if (saveTask.isSuccessful()) {
                                                 showToast("Đăng ký thành công! Chào mừng bạn.");
                                                 // Go to MainActivity
-                                                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                                                 finish();
                                             } else {
                                                 showToast("Lỗi lưu thông tin: " + saveTask.getException().getMessage());

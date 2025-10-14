@@ -148,14 +148,28 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"/>
 
-                <TextView
-                    android:id="@+id/text_color_name"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Color: 08 DARK GRAY"
-                    android:textSize="14sp"
-                    android:textColor="#333"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/text_color_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Color: 08 DARK GRAY"
+                        android:textSize="14sp"
+                        android:textColor="#333"/>
+
+                    <ImageView
+                        android:id="@+id/img_favorite_detail"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_favorite_outline"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#444"/>
+                </RelativeLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_color_selector"

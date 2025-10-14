@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
-import android.view.KeyEvent;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -195,7 +194,7 @@ public class ProductListActivity extends AppCompatActivity {
         // NÚT PROFILE: Chuyển về MainActivity (Login/Register)
         if (navProfileFloat != null) {
             navProfileFloat.setOnClickListener(v -> {
-                Intent intent = new Intent(this, MainActivity.class);
+                Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             });
         }

@@ -13,12 +13,15 @@ import android.widget.RatingBar;
 import android.graphics.Paint;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +35,11 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
     private static final String TAG = "ProductDetailAct";
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth; // Khai báo FirebaseAuth
 
     // UI Elements
     private TextView textImageIndicator, textProductName, textPrice, textReviewCount, textColorName, textSizeLabel, textStockStatus, textSelectedQuantity, textInventoryCount;
-    private TextView textOriginalPrice; // Khai báo nếu có trong layout
+    private TextView textOriginalPrice;
     private ViewPager2 viewPager;
     private RatingBar ratingBarDetail;
     private Button btnAddToCart;
@@ -43,6 +47,8 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private ImageView imgBack;
     private ImageView navHomeDetail;
     private TextView textToolbarTitle;
+    private ImageView iconFavoriteToolbar; // Icon Favorite trên Toolbar
+    private ImageView iconFavoriteDetail; // Icon Favorite mới trong chi tiết sản phẩm
 
     // Nút Cộng/Trừ
     private TextView btnIncrementQty;
@@ -53,6 +59,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private String currentSelectedColor;
     private List<String> currentImages;
     private ProductVariant currentSelectedVariant;
+    private boolean isFavorited = false;
 
     private int currentQuantityToBuy = 1;
 
@@ -72,6 +79,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_product_detail);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance(); // Khởi tạo FirebaseAuth
 
         // 1. Ánh xạ Views
         mapViews();
@@ -95,7 +103,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
         textImageIndicator = findViewById(R.id.text_image_indicator);
         textProductName = findViewById(R.id.text_product_name_detail);
         textPrice = findViewById(R.id.text_price);
-        // textOriginalPrice = findViewById(R.id.text_original_price); // Ánh xạ nếu có trong layout
         textReviewCount = findViewById(R.id.text_review_count);
         textColorName = findViewById(R.id.text_color_name);
         textSizeLabel = findViewById(R.id.text_size_label);
@@ -116,6 +123,22 @@ public class ProductDetailActivity extends AppCompatActivity implements
         btnIncrementQty = findViewById(R.id.btn_increment_qty);
         btnDecrementQty = findViewById(R.id.btn_decrement_qty);
 
+        // KÍCH HOẠT VÀ ÁNH XẠ ICONS HEADER
+        iconFavoriteToolbar = findViewById(R.id.img_favorite);
+        iconFavoriteDetail = findViewById(R.id.img_favorite_detail);
+        ImageView iconCartToolbar = findViewById(R.id.img_cart);
+
+        if (iconCartToolbar != null) {
+            iconCartToolbar.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
+        if (iconFavoriteToolbar != null) {
+            iconFavoriteToolbar.setOnClickListener(v -> toggleFavorite());
+        }
+        if (iconFavoriteDetail != null) {
+            iconFavoriteDetail.setOnClickListener(v -> toggleFavorite());
+        }
+
+
         // Ánh xạ nút Home (Footer)
         navHomeDetail = findViewById(R.id.nav_home_cs);
         if (navHomeDetail != null) {
@@ -129,6 +152,81 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         // Thiết lập Listener cho Cộng/Trừ
         setupQuantityButtons();
+    }
+
+    // --------------------------------------------------------------------------------
+    // LOGIC FAVORITE
+    // --------------------------------------------------------------------------------
+
+    private void toggleFavorite() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để thêm vào Yêu thích.", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+        if (currentProduct == null) return;
+
+        String productId = currentProduct.getProductId();
+
+        if (isFavorited) {
+            // Bỏ yêu thích
+            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Đã bỏ yêu thích.", Toast.LENGTH_SHORT).show();
+                        isFavorited = false;
+                        updateFavoriteIcon();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Lỗi khi bỏ yêu thích.", Toast.LENGTH_SHORT).show());
+        } else {
+            // Thêm vào yêu thích
+            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                    .set(new FavoriteItem(System.currentTimeMillis()))
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Đã thêm vào mục Yêu thích.", Toast.LENGTH_SHORT).show();
+                        isFavorited = true;
+                        updateFavoriteIcon();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Lỗi thêm vào Yêu thích.", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void checkFavoriteStatus() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null || currentProduct == null) {
+            isFavorited = false;
+            updateFavoriteIcon();
+            return;
+        }
+
+        String productId = currentProduct.getProductId();
+        db.collection("users").document(user.getUid()).collection("favorites").document(productId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        isFavorited = document != null && document.exists();
+                        updateFavoriteIcon();
+                    } else {
+                        isFavorited = false;
+                        updateFavoriteIcon();
+                    }
+                });
+    }
+
+    private void updateFavoriteIcon() {
+        if (isFavorited) {
+            iconFavoriteToolbar.setImageResource(R.drawable.ic_favorite_filled);
+            iconFavoriteDetail.setImageResource(R.drawable.ic_favorite_filled);
+            iconFavoriteToolbar.setColorFilter(ContextCompat.getColor(this, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
+            iconFavoriteDetail.setColorFilter(ContextCompat.getColor(this, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
+        } else {
+            iconFavoriteToolbar.setImageResource(R.drawable.ic_favorite_outline);
+            iconFavoriteDetail.setImageResource(R.drawable.ic_favorite_outline);
+            iconFavoriteToolbar.clearColorFilter();
+            iconFavoriteDetail.clearColorFilter();
+        }
     }
 
     private void setupQuantityButtons() {
@@ -199,6 +297,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
                                 if (currentProduct != null && currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
                                     displayProductData(currentProduct);
+                                    checkFavoriteStatus();
                                 } else {
                                     Log.e(TAG, "LỖI DỮ LIỆU: currentProduct là NULL hoặc thiếu trường colorImages.");
                                     Toast.makeText(this, "Thiếu dữ liệu ảnh chi tiết. Vui lòng ghi lại dữ liệu mẫu.", Toast.LENGTH_LONG).show();
@@ -316,7 +415,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
         // FIX LOGIC: TÍNH GIÁ ĐÃ GIẢM DỰA TRÊN GIÁ VARIANT BASE PRICE
         // -----------------------------------------------------------
 
-        double variantBasePrice = selectedVariant.price; // GIÁ GỐC CỦA VARIANT (theo đề xuất mới nhất)
+        double variantBasePrice = selectedVariant.price;
         double finalDisplayPrice = variantBasePrice;
         boolean hasValidOffer = false;
 

@@ -152,7 +152,7 @@ public class CategorySearchActivity extends AppCompatActivity {
         // NÚT PROFILE
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
-                Intent intent = new Intent(CategorySearchActivity.this, MainActivity.class);
+                Intent intent = new Intent(CategorySearchActivity.this, LoginActivity.class);
                 startActivity(intent);
             });
         }

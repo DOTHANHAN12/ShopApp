@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     // Material Design (Rất quan trọng cho AppBarLayout/CoordinatorLayout)
     implementation(libs.material) // Dùng cái libs này nếu nó là phiên bản mới

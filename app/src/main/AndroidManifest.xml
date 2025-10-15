@@ -13,6 +13,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopApp">
+
+        <activity android:name=".AddressSelectionActivity"
+            android:exported="false"
+            android:label="Chọn địa chỉ"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".EditAddressActivity"
+            android:exported="false"
+            android:label="Sửa địa chỉ"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name=".AddressAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".ShippingAddress"
+            android:exported="false" />
         <activity
             android:name=".FavoriteActivity"
             android:exported="false" />

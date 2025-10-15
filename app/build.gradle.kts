@@ -44,6 +44,7 @@ dependencies {
     // 1. FIREBASE & GOOGLE SERVICES
     // -----------------------------------------------------------------
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Firebase Core Services
     implementation("com.google.firebase:firebase-analytics")

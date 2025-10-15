@@ -15,6 +15,7 @@
         app:layout_constraintBottom_toTopOf="@id/layout_checkout_bar">
 
         <LinearLayout
+            android:paddingTop="26dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -23,27 +24,27 @@
                 android:id="@+id/cart_title_bar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:paddingTop="16dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp">
 
                 <ImageView
                     android:id="@+id/img_back_cart"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@string/back_desc"
                     android:src="@drawable/ic_arrow_back"
-                    app:tint="@android:color/black"
-                    android:contentDescription="@string/back_desc"/>
+                    app:tint="@android:color/black" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cart"
-                    android:textSize="22sp"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:layout_centerVertical="true"
+                    android:layout_marginStart="8dp"
                     android:layout_toEndOf="@id/img_back_cart"
-                    android:layout_marginStart="8dp"/>
+                    android:text="Cart"
+                    android:textColor="@android:color/black"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
             </RelativeLayout>
 
             <TextView
@@ -68,6 +69,81 @@
                 android:paddingTop="24dp"
                 android:paddingBottom="12dp"/>
 
+            <LinearLayout
+                android:id="@+id/layout_shipping_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ĐỊA CHỈ NHẬN HÀNG"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
+
+                <RelativeLayout
+                    android:id="@+id/layout_selected_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:background="@drawable/rounded_border_gray"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/icon_location"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginTop="4dp"
+                        android:src="@drawable/ic_location_on"
+                        app:tint="#DD0000"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/icon_location"
+                        android:layout_toStartOf="@id/btn_change_address">
+
+                        <TextView
+                            android:id="@+id/text_shipping_name_phone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            tools:text="ĐỖ Thành An | (+84) 967 851 513"/>
+
+                        <TextView
+                            android:id="@+id/text_shipping_address_line"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="#555"
+                            tools:text="Cổng sau nhà trẻ Xóm Trong, Xã Uy Nỗ, Huyện Đông Anh, Hà Nội"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/btn_change_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="THAY ĐỔI"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:padding="4dp"/>
+
+                </RelativeLayout>
+            </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_cart_items"
                 android:layout_width="match_parent"
@@ -162,15 +238,19 @@
         android:orientation="horizontal"
         android:background="@android:color/white"
         android:elevation="8dp"
+
         app:layout_constraintBottom_toBottomOf="parent">
+
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
+
+            android:paddingHorizontal="26dp"
             android:gravity="center_vertical">
+
 
             <TextView
                 android:layout_width="wrap_content"

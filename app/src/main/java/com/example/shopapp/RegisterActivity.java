@@ -143,13 +143,8 @@ public class RegisterActivity extends AppCompatActivity {
                             userData.put("email", email);
                             userData.put("createdAt", System.currentTimeMillis());
                             userData.put("gender", ""); // Placeholder
-                            userData.put("phoneNumber", ""); // Placeholder
 
-                            Map<String, String> addressData = new HashMap<>();
-                            addressData.put("city", "");
-                            addressData.put("street", "");
-                            addressData.put("zipCode", "");
-                            userData.put("defaultAddress", addressData);
+
 
                             // 3. Save to Firestore
                             db.collection("users").document(user.getUid())

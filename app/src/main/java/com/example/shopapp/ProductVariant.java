@@ -19,4 +19,18 @@ public class ProductVariant {
         this.quantity = quantity;
         this.price = price;
     }
+
+    // *** KHẮC PHỤC LỖI: Cannot resolve method 'getVariantId' ***
+    public String getVariantId() { return variantId; }
+    public void setVariantId(String variantId) { this.variantId = variantId; }
+
+    // Thêm các getter/setter còn thiếu nếu cần thiết (dựa trên các file trước):
+    public String getSize() { return size; }
+    public void setSize(String size) { this.size = size; }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+    public Long getQuantity() { return quantity; }
+    public void setQuantity(Long quantity) { this.quantity = quantity; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 }

@@ -52,24 +52,55 @@
             android:gravity="center_vertical"
             android:layout_marginTop="8dp">
 
-            <TextView
-                android:id="@+id/text_cart_quantity"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/rounded_border_gray"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="4dp">
+
+                <TextView
+                    android:id="@+id/btn_quantity_minus"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:text="—"
+                    android:textSize="18sp"
+                    android:textColor="#555"
+                    android:gravity="center"
+                    android:contentDescription="Decrease quantity"/>
+
+                <TextView
+                    android:id="@+id/text_cart_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:paddingHorizontal="8dp"/>
+
+                <TextView
+                    android:id="@+id/btn_quantity_plus"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:text="+"
+                    android:textSize="18sp"
+                    android:textColor="#555"
+                    android:gravity="center"
+                    android:contentDescription="Increase quantity"/>
+
+            </LinearLayout>
+            <TextView
+                android:id="@+id/text_cart_price"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="588.000 VND"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
-                android:paddingHorizontal="8dp"
-                android:background="@drawable/rounded_border_gray"/> <TextView
-            android:id="@+id/text_cart_price"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="588.000 VND"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"/>
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"/>
 
         </LinearLayout>
 

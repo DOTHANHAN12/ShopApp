@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ProductDetailActivity extends AppCompatActivity implements
@@ -35,7 +36,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
     private static final String TAG = "ProductDetailAct";
     private FirebaseFirestore db;
-    private FirebaseAuth mAuth; // Khai báo FirebaseAuth
+    private FirebaseAuth mAuth;
 
     // UI Elements
     private TextView textImageIndicator, textProductName, textPrice, textReviewCount, textColorName, textSizeLabel, textStockStatus, textSelectedQuantity, textInventoryCount;
@@ -47,8 +48,8 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private ImageView imgBack;
     private ImageView navHomeDetail;
     private TextView textToolbarTitle;
-    private ImageView iconFavoriteToolbar; // Icon Favorite trên Toolbar
-    private ImageView iconFavoriteDetail; // Icon Favorite mới trong chi tiết sản phẩm
+    private ImageView iconFavoriteToolbar;
+    private ImageView iconFavoriteDetail;
 
     // Nút Cộng/Trừ
     private TextView btnIncrementQty;
@@ -79,10 +80,14 @@ public class ProductDetailActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_product_detail);
 
         db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance(); // Khởi tạo FirebaseAuth
+        mAuth = FirebaseAuth.getInstance();
 
         // 1. Ánh xạ Views
         mapViews();
+
+        // *** Gán Listener cho nút Thêm vào Giỏ hàng ***
+        btnAddToCart.setOnClickListener(v -> addToCart());
+        // ******************************************************
 
         // 2. Lấy Product ID từ Intent
         String productId = getIntent().getStringExtra("PRODUCT_ID");
@@ -152,6 +157,104 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         // Thiết lập Listener cho Cộng/Trừ
         setupQuantityButtons();
+    }
+
+    // --------------------------------------------------------------------------------
+    // LOGIC ADD TO CART
+    // --------------------------------------------------------------------------------
+
+    private void addToCart() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+
+        if (currentProduct == null || currentSelectedVariant == null) {
+            Toast.makeText(this, "Vui lòng chọn Màu sắc và Kích cỡ trước.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentSelectedVariant.quantity <= 0) {
+            Toast.makeText(this, "Sản phẩm đã hết hàng.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentQuantityToBuy <= 0) {
+            Toast.makeText(this, "Vui lòng chọn số lượng.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. TÍNH TOÁN GIÁ HIỂN THỊ CUỐI CÙNG
+        double priceAtTimeOfAdd = currentSelectedVariant.price;
+        if (currentProduct.getIsOfferStatus() && currentProduct.getOffer() != null) {
+            long now = System.currentTimeMillis();
+            OfferDetails offer = currentProduct.getOffer();
+            if (offer != null && now >= offer.getStartDate() && now <= offer.getEndDate()) {
+                double discount = offer.getDiscountPercent() / 100.0;
+                priceAtTimeOfAdd = currentSelectedVariant.price * (1.0 - discount);
+            }
+        }
+
+        final String userId = user.getUid();
+        final String productId = currentProduct.getProductId();
+        final String variantId = currentSelectedVariant.variantId;
+        final String documentId = productId + "_" + variantId; // Key duy nhất trong giỏ hàng
+        final int quantityToAdd = currentQuantityToBuy;
+        final double finalPriceAtTimeOfAdd = priceAtTimeOfAdd; // Khai báo final
+
+        // 2. Tải giỏ hàng hiện tại để kiểm tra số lượng cộng dồn
+        db.collection("users").document(userId).collection("cart").document(documentId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    int existingQuantity = 0;
+
+                    if (documentSnapshot.exists()) {
+                        // SẢN PHẨM ĐÃ CÓ TRONG GIỎ: Lấy số lượng hiện tại
+                        CartItem existingItem = documentSnapshot.toObject(CartItem.class);
+                        if (existingItem != null) {
+                            existingQuantity = existingItem.getQuantity();
+                        }
+                    }
+
+                    int finalQuantity = existingQuantity + quantityToAdd; // Tính toán tổng số lượng
+
+                    // Kiểm tra lại tồn kho sau khi cộng dồn
+                    if (finalQuantity > currentSelectedVariant.quantity) {
+                        Toast.makeText(this, "Số lượng trong giỏ (" + existingQuantity + ") + số lượng thêm (" + quantityToAdd + ") vượt quá tồn kho!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    // 3. Tạo/Cập nhật đối tượng CartItem
+                    CartItem newCartItem = new CartItem(
+                            productId,
+                            variantId,
+                            finalQuantity, // Số lượng mới đã cộng dồn
+                            finalPriceAtTimeOfAdd, // Giá được tính toán tại thời điểm thêm vào
+                            System.currentTimeMillis() // Thời gian cập nhật
+                    );
+
+                    // 4. Lưu vào Firestore
+                    db.collection("users").document(userId).collection("cart").document(documentId)
+                            .set(newCartItem)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Đã thêm " + quantityToAdd + " sản phẩm vào Giỏ hàng. Tổng số lượng: " + finalQuantity, Toast.LENGTH_SHORT).show();
+                                // Reset số lượng mua về 1 và cập nhật UI
+                                currentQuantityToBuy = 1;
+                                textSelectedQuantity.setText("1");
+                                updateButtonStates();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Lỗi thêm vào Giỏ hàng: ", e);
+                                Toast.makeText(this, "Lỗi thêm vào Giỏ hàng. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                            });
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi truy vấn Giỏ hàng: ", e);
+                    Toast.makeText(this, "Lỗi kiểm tra giỏ hàng.", Toast.LENGTH_SHORT).show();
+                });
     }
 
     // --------------------------------------------------------------------------------

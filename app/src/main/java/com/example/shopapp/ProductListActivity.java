@@ -31,7 +31,7 @@ import java.util.Locale;
 
 public class ProductListActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProductListAct"; // <-- TAG DEBUG
+    private static final String TAG = "ProductListAct";
     private static final String PRODUCTS_COLLECTION = "products";
     private FirebaseFirestore db;
 
@@ -49,6 +49,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     private EditText edtSearchKeyword;
     private ImageView imgSearchFilter;
+    private ImageView imgSearchIcon; // *** ĐÃ THÊM: Icon kính lúp (search icon) ***
 
     private ImageView navHomeFloat;
     private View searchButtonFloat;
@@ -126,6 +127,7 @@ public class ProductListActivity extends AppCompatActivity {
         // ÁNH XẠ SEARCH BAR
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
         imgSearchFilter = findViewById(R.id.img_search_filter);
+        imgSearchIcon = findViewById(R.id.img_search_icon); // *** ĐÃ THÊM ***
 
         // ÁNH XẠ CÁC NÚT TỪ FOOTER
         navHomeFloat = findViewById(R.id.nav_home_cs);
@@ -139,9 +141,7 @@ public class ProductListActivity extends AppCompatActivity {
     private void setupSearchListener() {
 
         if (edtSearchKeyword != null) {
-            edtSearchKeyword.setFocusable(true);
-            edtSearchKeyword.setFocusableInTouchMode(true);
-
+            // Lắng nghe sự kiện ENTER/SEARCH trên bàn phím
             edtSearchKeyword.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
                     performSearch();
@@ -151,8 +151,16 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
+        // *** ĐÃ SỬA: Lắng nghe sự kiện click vào ICON KÍNH LÚP (BÊN TRÁI) ***
+        if (imgSearchIcon != null) {
+            imgSearchIcon.setOnClickListener(v -> {
+                performSearch();
+            });
+        }
+
         if (imgSearchFilter != null) {
             imgSearchFilter.setOnClickListener(v -> {
+                // Ta coi việc bấm Filter là trigger Search với từ khóa hiện tại
                 performSearch();
             });
         }
@@ -268,10 +276,9 @@ public class ProductListActivity extends AppCompatActivity {
         String finalCategory = category.toUpperCase(Locale.ROOT);
         String finalSubCategory = (subCategory != null && !subCategory.isEmpty()) ? subCategory.toUpperCase(Locale.ROOT) : null;
 
-        // DEBUG LOG
         Log.d(TAG, "--- BẮT ĐẦU TRUY VẤN SẢN PHẨM ---");
 
-        // BƯỚC 1: BẮT ĐẦU VỚI LỌC CATEGORY (KHÔNG CÓ ORDER BY NÀO KHÁC)
+        // BƯỚC 1: BẮT ĐẦU VỚI LỌC CATEGORY
         Query query = db.collection(PRODUCTS_COLLECTION)
                 .whereEqualTo("category", finalCategory);
 
@@ -280,20 +287,18 @@ public class ProductListActivity extends AppCompatActivity {
             query = query.whereEqualTo("type", finalSubCategory);
         }
 
-        // BƯỚC 3: XỬ LÝ SẮP XẾP DỰA TRÊN CÓ/KHÔNG CÓ KEYWORD
+        // BƯỚC 3: XỬ LÝ LỌC VÀ SẮP XẾP DỰA TRÊN KEYWORD
         if (keyword != null && !keyword.isEmpty()) {
-            String endKeyword = keyword + "\uf8ff";
+            String endKeyword = keyword + "";
 
-            // Khi có KEYWORD, ta phải sắp xếp theo 'name' để tìm kiếm tiền tố
+            // Khi có KEYWORD, ta buộc phải sắp xếp theo 'name' để tìm kiếm tiền tố
+            // CẦN INDEX TỔNG HỢP: (category, type, name) hoặc (category, name)
             query = query.orderBy("name")
                     .whereGreaterThanOrEqualTo("name", keyword)
                     .whereLessThan("name", endKeyword);
 
-            // CẦN BỔ SUNG: Sắp xếp theo giá thứ cấp sau khi lọc tên
-            query = query.orderBy("basePrice", Query.Direction.ASCENDING);
-
         } else {
-            // TRƯỜNG HỢP MẶC ĐỊNH (SHOW ALL / LỌC TYPE): Sắp xếp theo basePrice
+            // TRƯỜNG HỢP MẶC ĐỊNH (SHOW ALL / LỌC TYPE):
             query = query.orderBy("basePrice", Query.Direction.ASCENDING);
         }
 
@@ -313,7 +318,6 @@ public class ProductListActivity extends AppCompatActivity {
                                     productList.add(product);
                                     count++;
 
-                                    // DEBUG LOG: Kiểm tra Type của sản phẩm tìm thấy
                                     Log.d(TAG, "DOC FOUND: " + document.getId() + ", CATE: " + product.getCategory() + ", TYPE: " + product.getType());
 
                                 } catch (Exception e) {

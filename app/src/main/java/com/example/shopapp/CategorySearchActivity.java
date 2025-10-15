@@ -38,6 +38,10 @@ public class CategorySearchActivity extends AppCompatActivity {
     private TextView currentSelectedTab;
     private EditText edtSearchKeyword;
 
+    // *** SỬA ĐỔI: Ánh xạ cho icon kính lúp (search icon) và icon filter ***
+    private ImageView imgSearchIcon;
+    private ImageView imgSearchFilter;
+
     // Khai báo Footer Buttons
     private ImageView navHome;
     private ImageView navProfile;
@@ -131,6 +135,10 @@ public class CategorySearchActivity extends AppCompatActivity {
         tabBaby = findViewById(R.id.tab_baby_cs);
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
 
+        // *** ĐÃ SỬA: Ánh xạ icon search và filter ***
+        imgSearchIcon = findViewById(R.id.img_search_icon);
+        imgSearchFilter = findViewById(R.id.img_search_filter);
+
         // ÁNH XẠ FOOTER
         navHome = findViewById(R.id.nav_home_cs);
 //        navProfile = findViewById(R.id.nav_profile_detail);
@@ -160,9 +168,8 @@ public class CategorySearchActivity extends AppCompatActivity {
 
     private void setupSearchListener() {
 
+        // 1. Lắng nghe sự kiện ENTER/SEARCH trên bàn phím
         if (edtSearchKeyword != null) {
-            edtSearchKeyword.setFocusable(true);
-            edtSearchKeyword.setFocusableInTouchMode(true);
 
             edtSearchKeyword.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
@@ -170,6 +177,21 @@ public class CategorySearchActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            });
+        }
+
+        // 2. *** ĐÃ SỬA: Lắng nghe sự kiện click vào ICON KÍNH LÚP (BÊN TRÁI) ***
+        if (imgSearchIcon != null) {
+            imgSearchIcon.setOnClickListener(v -> {
+                performSearch(edtSearchKeyword.getText().toString().trim());
+            });
+        }
+
+        // 3. *** ĐÃ SỬA: Lắng nghe sự kiện click vào ICON FILTER (BÊN PHẢI) ***
+        if (imgSearchFilter != null) {
+            imgSearchFilter.setOnClickListener(v -> {
+                // Có thể mở một Activity Filter hoặc coi đây là trigger Search
+                performSearch(edtSearchKeyword.getText().toString().trim());
             });
         }
     }

@@ -5,4 +5,19 @@
     <color name="red">#FF0000</color>
     <color name="switch_thumb_color">#DD0000</color> <color name="switch_track_color">#CCCCCC</color>
 
+
+    <color name="colorPrimary">#FF0000</color>
+    <color name="colorPrimaryDark">#CD381C</color>
+    <color name="colorAccent">#EE4D2D</color>
+
+    <color name="grey_light">#F5F5F5</color>
+    <color name="grey_medium">#E0E0E0</color>
+    <color name="grey_dark">#9E9E9E</color>
+    <color name="grey_text">#616161</color>
+
+    <color name="shopee_green">#00BFA5</color>
+
+    <color name="text_discount">#EE4D2D</color>
+
+    <color name="red_warning">#FF0000</color>
     </resources>

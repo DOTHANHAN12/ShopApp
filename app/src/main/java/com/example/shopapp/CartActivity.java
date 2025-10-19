@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +33,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     private static final String TAG = "CartActivity";
     private static final int REQUEST_CODE_SELECT_ADDRESS = 1001;
+    private static final int REQUEST_CODE_SELECT_VOUCHER = 1002;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -38,7 +41,17 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private CartAdapter adapter;
     private final List<CartItem> cartItemList = new ArrayList<>();
 
+    // UI và Data cho Tổng tiền & Voucher
     private TextView textCheckoutTotal;
+    private TextView textSubtotal;
+    private TextView textVoucherDiscount;
+    private TextView textVoucherAppliedInfo; // Dòng hiển thị "Miễn Phí Vận Chuyển"
+    private LinearLayout layoutVoucherSelector; // Layout cho vùng click chọn voucher
+
+    // Trạng thái Voucher hiện tại
+    private String appliedVoucherCode = null;
+    private double voucherDiscountValue = 0.0;
+
     private String userId;
 
     // UI và Data cho Địa chỉ
@@ -75,7 +88,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     @Override
     protected void onResume() {
         super.onResume();
-        // Chỉ tải địa chỉ mặc định nếu chưa có địa chỉ nào được chọn cho đơn hàng này
         if (selectedShippingAddress == null) {
             loadDefaultAddress();
         }
@@ -86,17 +98,24 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         textCheckoutTotal = findViewById(R.id.text_checkout_total);
         ImageView imgBack = findViewById(R.id.img_back_cart);
 
+        // ÁNH XẠ VOUCHER VÀ SUBTOTAL
+        textSubtotal = findViewById(R.id.text_subtotal);
+        textVoucherDiscount = findViewById(R.id.text_voucher_discount);
+
+        // Ánh xạ các View MỚI theo mẫu Shopee
+        textVoucherAppliedInfo = findViewById(R.id.text_voucher_info_line);
+        layoutVoucherSelector = findViewById(R.id.layout_voucher_selector);
+
         // Ánh xạ các thành phần Địa chỉ
         textShippingNamePhone = findViewById(R.id.text_shipping_name_phone);
         textShippingAddressLine = findViewById(R.id.text_shipping_address_line);
         btnChangeAddress = findViewById(R.id.btn_change_address);
 
-        // Listener gọi startActivityForResult
+        // Listener cho Địa chỉ
         btnChangeAddress.setOnClickListener(v -> {
             Intent intent = new Intent(this, AddressSelectionActivity.class);
             intent.putExtra(AddressSelectionActivity.MODE_SELECT, true);
 
-            // TRUYỀN ID CỦA ĐỊA CHỈ ĐANG ĐƯỢC CHỌN HIỆN TẠI VÀO INTENT
             if (selectedShippingAddress != null && selectedShippingAddress.getDocumentId() != null) {
                 intent.putExtra("CURRENT_ADDRESS_ID", selectedShippingAddress.getDocumentId());
             }
@@ -104,32 +123,47 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
             startActivityForResult(intent, REQUEST_CODE_SELECT_ADDRESS);
         });
 
+        // Listener cho vùng chọn Voucher (click vào layout_voucher_selector)
+        layoutVoucherSelector.setOnClickListener(v -> openVoucherSelection());
+
         imgBack.setOnClickListener(v -> finish());
     }
 
-    // *** PHƯƠNG THỨC: Xử lý kết quả trả về từ AddressSelectionActivity ***
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // 1. Xử lý kết quả từ Chọn Địa chỉ
         if (requestCode == REQUEST_CODE_SELECT_ADDRESS && resultCode == RESULT_OK && data != null) {
             String addressJson = data.getStringExtra(AddressSelectionActivity.SELECTED_ADDRESS_JSON);
             if (addressJson != null) {
                 Gson gson = new Gson();
                 ShippingAddress newSelectedAddress = gson.fromJson(addressJson, ShippingAddress.class);
 
-                // Gán địa chỉ mới được chọn cho đơn hàng hiện tại
                 this.selectedShippingAddress = newSelectedAddress;
-
-                // Cập nhật giao diện giỏ hàng
                 updateAddressUI(newSelectedAddress);
 
                 Toast.makeText(this, "Địa chỉ giao hàng đã được cập nhật.", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-    // **********************************************************************************
 
+        // 2. XỬ LÝ KẾT QUẢ TỪ CHỌN VOUCHER
+        if (requestCode == REQUEST_CODE_SELECT_VOUCHER && resultCode == RESULT_OK && data != null) {
+            String selectedCode = data.getStringExtra("SELECTED_VOUCHER_CODE");
+
+            if (selectedCode != null && !selectedCode.isEmpty()) {
+                appliedVoucherCode = selectedCode;
+            } else {
+                appliedVoucherCode = null;
+                voucherDiscountValue = 0.0;
+            }
+
+            calculateCartTotal();
+            // Toast sẽ được xử lý trong fetchAndApplyVoucher
+        }
+    }
+
+    // *** KHẮC PHỤC LỖI CANNOT RESOLVE METHOD 'setupRecyclerView' ***
     private void setupRecyclerView() {
         adapter = new CartAdapter(this, cartItemList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -138,7 +172,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     private void loadDefaultAddress() {
         if (userId == null) return;
-
+        // Logic tải địa chỉ giữ nguyên
         db.collection("users").document(userId).collection("addresses")
                 .whereEqualTo("isDefault", true)
                 .limit(1)
@@ -190,15 +224,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
                         for (QueryDocumentSnapshot cartDocument : task.getResult()) {
                             CartItem item = cartDocument.toObject(CartItem.class);
-
                             item.setProductId(cartDocument.getString("productId"));
                             item.setVariantId(cartDocument.getString("variantId"));
 
                             if (item.getProductId() != null && item.getVariantId() != null) {
                                 cartItemList.add(item);
-
-                                Task<Void> detailTask = loadProductDetailForCartItem(item);
-                                detailTasks.add(detailTask);
+                                detailTasks.add(loadProductDetailForCartItem(item));
                             }
                         }
 
@@ -216,6 +247,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 });
     }
 
+    // *** GIẢ ĐỊNH CÓ PRODUCT VÀ VARIANTS CLASS ***
     private Task<Void> loadProductDetailForCartItem(CartItem item) {
         // 1. Tải chi tiết Product
         Task<DocumentSnapshot> productTask = db.collection("products").document(item.getProductId()).get();
@@ -226,7 +258,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 item.setProductDetails(product);
 
                 if (product != null && product.getVariants() != null && item.getVariantId() != null) {
-                    // 2. Tìm chi tiết Variant từ danh sách Variants của Product
                     for (ProductVariant variant : product.getVariants()) {
                         if (variant.getVariantId() != null && variant.getVariantId().equals(item.getVariantId())) {
                             item.setVariantDetails(variant);
@@ -240,17 +271,113 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
             return Tasks.forResult(null);
         });
     }
+    // ********************************************
 
     private void calculateCartTotal() {
-        double total = 0;
+        // 1. TÍNH TỔNG PHỤ (SUBTOTAL)
+        double subtotal = 0;
         for (CartItem item : cartItemList) {
-            total += item.getPriceAtTimeOfAdd() * item.getQuantity();
+            subtotal += item.getPriceAtTimeOfAdd() * item.getQuantity();
         }
-        updateCartTotal(total);
+
+        // 2. GỌI HÀM BẤT ĐỒNG BỘ ĐỂ TẢI VOUCHER VÀ TÍNH TỔNG CUỐI CÙNG
+        fetchAndApplyVoucher(subtotal);
     }
 
-    private void updateCartTotal(double total) {
+    private void fetchAndApplyVoucher(double subtotal) {
+        if (appliedVoucherCode == null || subtotal <= 0) {
+            voucherDiscountValue = 0.0;
+            updateCartTotalUI(subtotal, voucherDiscountValue, subtotal);
+            return;
+        }
+
+        db.collection("vouchers")
+                .whereEqualTo("code", appliedVoucherCode)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    voucherDiscountValue = 0.0;
+
+                    if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                        Voucher voucher = querySnapshot.getDocuments().get(0).toObject(Voucher.class);
+
+                        // LOGIC KIỂM TRA ĐIỀU KIỆN
+                        Date now = new Date();
+                        boolean isValid = true;
+
+                        if (voucher.getStartDate() == null || voucher.getEndDate() == null || voucher.getStartDate().after(now) || voucher.getEndDate().before(now)) {
+                            isValid = false;
+                        } else if (voucher.getTimesUsed() >= voucher.getMaxUsageLimit()) {
+                            isValid = false;
+                        } else if (subtotal < voucher.getMinOrderValue()) {
+                            isValid = false;
+                        }
+
+                        if (isValid) {
+                            // TÍNH TOÁN GIẢM GIÁ
+                            double discount = 0;
+                            if ("PERCENT".equals(voucher.getDiscountType())) {
+                                discount = subtotal * (voucher.getDiscountValue() / 100.0);
+                            } else if ("FIXED_AMOUNT".equals(voucher.getDiscountType())) {
+                                discount = voucher.getDiscountValue();
+                            }
+
+                            voucherDiscountValue = Math.min(discount, subtotal);
+                            Toast.makeText(CartActivity.this, "Đã áp dụng mã " + appliedVoucherCode, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.d(TAG, "Voucher không hợp lệ sau khi kiểm tra lại.");
+                            Toast.makeText(this, "Mã " + appliedVoucherCode + " không hợp lệ/đủ điều kiện.", Toast.LENGTH_LONG).show();
+                            appliedVoucherCode = null; // Hủy áp dụng
+                        }
+                    } else {
+                        Log.d(TAG, "Không tìm thấy mã voucher trong DB.");
+                        Toast.makeText(this, "Mã voucher không tồn tại.", Toast.LENGTH_LONG).show();
+                        appliedVoucherCode = null;
+                    }
+
+                    // CẬP NHẬT GIAO DIỆN SAU KHI TÍNH TOÁN
+                    double finalTotal = subtotal - voucherDiscountValue;
+                    if (finalTotal < 0) finalTotal = 0;
+                    updateCartTotalUI(subtotal, voucherDiscountValue, finalTotal);
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi tải voucher: " + e.getMessage());
+                    voucherDiscountValue = 0.0;
+                    double finalTotal = subtotal - voucherDiscountValue;
+                    updateCartTotalUI(subtotal, voucherDiscountValue, finalTotal);
+                    Toast.makeText(this, "Lỗi kết nối khi kiểm tra voucher.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // *** CẬP NHẬT UI ĐỂ PHẢN ÁNH TÔNG MÀU ĐỎ VÀ THÔNG TIN VOUCHER ***
+    private void updateCartTotalUI(double subtotal, double discount, double total) {
+        textSubtotal.setText(String.format(Locale.getDefault(), "%,.0f VND", subtotal));
+
+        // 1. Dòng Giảm giá Voucher (Màu Đỏ)
+        if (discount > 0) {
+            textVoucherDiscount.setText(String.format(Locale.getDefault(), "- %,.0f VND", discount));
+            textVoucherDiscount.setTextColor(getResources().getColor(R.color.colorPrimary));
+        } else {
+            textVoucherDiscount.setText("0 VND");
+            textVoucherDiscount.setTextColor(getResources().getColor(R.color.grey_dark));
+        }
+
+        // 2. Tổng Thanh toán (Màu Đỏ)
         textCheckoutTotal.setText(String.format(Locale.getDefault(), "%,.0f VND", total));
+        textCheckoutTotal.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+        // 3. Dòng thông tin Voucher (Theo mẫu ảnh - Màu Xanh Shopee)
+        if (appliedVoucherCode != null && discount > 0) {
+            String infoText = (appliedVoucherCode.contains("SHIP") || appliedVoucherCode.contains("FREE")) ? "Miễn Phí Vận Chuyển" : "Đã áp dụng mã";
+            textVoucherAppliedInfo.setText(infoText);
+            textVoucherAppliedInfo.setTextColor(getResources().getColor(R.color.shopee_green));
+            textVoucherAppliedInfo.setBackgroundResource(R.drawable.bg_rounded_shopee_green_border);
+        } else {
+            textVoucherAppliedInfo.setText("Chọn Voucher >");
+            textVoucherAppliedInfo.setTextColor(getResources().getColor(R.color.grey_dark));
+            textVoucherAppliedInfo.setBackground(null); // Xóa background nếu không áp dụng
+        }
     }
 
     @Override
@@ -295,5 +422,19 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     Toast.makeText(this, "Lỗi cập nhật số lượng.", Toast.LENGTH_SHORT).show();
                     adapter.notifyDataSetChanged();
                 });
+    }
+
+    // PHƯƠNG THỨC XỬ LÝ VOUCHER
+    private void openVoucherSelection() {
+        Intent intent = new Intent(this, VoucherSelectionActivity.class);
+
+        // Truyền subtotal để Activity VoucherSelection có thể kiểm tra điều kiện ngay lập tức
+        double subtotal = 0;
+        for (CartItem item : cartItemList) {
+            subtotal += item.getPriceAtTimeOfAdd() * item.getQuantity();
+        }
+        intent.putExtra("CURRENT_SUBTOTAL", subtotal);
+
+        startActivityForResult(intent, REQUEST_CODE_SELECT_VOUCHER);
     }
 }

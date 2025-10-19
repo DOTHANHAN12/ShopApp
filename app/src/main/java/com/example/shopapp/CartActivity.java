@@ -1,10 +1,10 @@
 package com.example.shopapp;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,6 +41,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private CartAdapter adapter;
     private final List<CartItem> cartItemList = new ArrayList<>();
 
+<<<<<<< HEAD
     // UI và Data cho Tổng tiền & Voucher
     private TextView textCheckoutTotal;
     private TextView textSubtotal;
@@ -54,11 +55,28 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     private String userId;
 
+=======
+>>>>>>> 88d1b26516cee09aa8ba26bb8bf7bf4988505bfa
     // UI và Data cho Địa chỉ
     private TextView textShippingNamePhone;
     private TextView textShippingAddressLine;
     private TextView btnChangeAddress;
     private ShippingAddress selectedShippingAddress;
+
+    // UI và Data cho Thanh toán & Tổng tiền
+    private TextView textCheckoutTotal;
+    private TextView textTotalItemsPrice; // Tổng tiền hàng (Chưa giảm)
+    private TextView textTotalVoucherDiscount; // Tổng cộng giảm giá
+    private TextView textTotalPayment; // Tổng thanh toán
+
+    private TextView textPaymentCOD;
+    private TextView textPaymentMomo;
+
+    private String userId;
+    private String selectedPaymentMethod = "COD";
+
+    // Giả định giá trị giảm cứng (Mô phỏng giảm giá Voucher/Coupon)
+    private static final double VOUCHER_DISCOUNT_VALUE = 27500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +100,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
         mapViews();
         setupRecyclerView();
+        setupPaymentListeners();
         loadCartItems();
     }
 
@@ -111,7 +130,20 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         textShippingAddressLine = findViewById(R.id.text_shipping_address_line);
         btnChangeAddress = findViewById(R.id.btn_change_address);
 
+<<<<<<< HEAD
         // Listener cho Địa chỉ
+=======
+        // Ánh xạ Order Summary (SỬA LỖI: Ánh xạ chính xác)
+        textTotalItemsPrice = findViewById(R.id.text_total_items_price);
+        textTotalVoucherDiscount = findViewById(R.id.text_total_voucher_discount);
+        textTotalPayment = findViewById(R.id.text_total_payment);
+
+        // Ánh xạ Payment Methods
+        textPaymentCOD = findViewById(R.id.text_payment_cod);
+        textPaymentMomo = findViewById(R.id.text_payment_momo);
+
+        // Listener gọi startActivityForResult
+>>>>>>> 88d1b26516cee09aa8ba26bb8bf7bf4988505bfa
         btnChangeAddress.setOnClickListener(v -> {
             Intent intent = new Intent(this, AddressSelectionActivity.class);
             intent.putExtra(AddressSelectionActivity.MODE_SELECT, true);
@@ -129,6 +161,57 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         imgBack.setOnClickListener(v -> finish());
     }
 
+<<<<<<< HEAD
+=======
+    private void setupPaymentListeners() {
+        // Khởi tạo trạng thái ban đầu
+        selectPaymentMethod(selectedPaymentMethod);
+
+        textPaymentCOD.setOnClickListener(v -> selectPaymentMethod("COD"));
+        textPaymentMomo.setOnClickListener(v -> selectPaymentMethod("MOMO"));
+
+        findViewById(R.id.btn_checkout).setOnClickListener(v -> {
+            // TODO: Triển khai logic ĐẶT HÀNG
+            Toast.makeText(this, "Thanh toán bằng: " + selectedPaymentMethod, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void selectPaymentMethod(String method) {
+        selectedPaymentMethod = method;
+
+        TextView selectedView;
+        TextView unselectedView;
+
+        if (method.equals("COD")) {
+            selectedView = textPaymentCOD;
+            unselectedView = textPaymentMomo;
+        } else { // MOMO
+            selectedView = textPaymentMomo;
+            unselectedView = textPaymentCOD;
+        }
+
+        // *** LOGIC 1: ĐẶT STYLE VÀ CHECK CHO PHƯƠNG THỨC ĐƯỢC CHỌN ***
+        // Đặt style đỏ (checked) và icon check
+        selectedView.setBackgroundResource(R.drawable.rounded_red_border_label);
+
+        // Đặt icon check màu đỏ (index 2 là drawableEnd)
+        if (selectedView.getCompoundDrawables()[2] != null) {
+            selectedView.getCompoundDrawables()[2].setTint(getResources().getColor(android.R.color.holo_red_dark));
+        }
+
+        // *** LOGIC 2: ĐẶT STYLE VÀ UNCHECK CHO PHƯƠNG THỨC KHÔNG ĐƯỢC CHỌN ***
+        unselectedView.setBackgroundResource(R.drawable.rounded_gray_border);
+
+        // Đặt icon check trong suốt (mất check)
+        if (unselectedView.getCompoundDrawables()[2] != null) {
+            unselectedView.getCompoundDrawables()[2].setTint(getResources().getColor(android.R.color.transparent));
+        }
+
+        // Cần gọi lại tính tổng tiền nếu phương thức thanh toán ảnh hưởng đến giá
+        calculateCartTotal();
+    }
+
+>>>>>>> 88d1b26516cee09aa8ba26bb8bf7bf4988505bfa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -146,6 +229,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 Toast.makeText(this, "Địa chỉ giao hàng đã được cập nhật.", Toast.LENGTH_SHORT).show();
             }
         }
+<<<<<<< HEAD
+=======
+    }
+>>>>>>> 88d1b26516cee09aa8ba26bb8bf7bf4988505bfa
 
         // 2. XỬ LÝ KẾT QUẢ TỪ CHỌN VOUCHER
         if (requestCode == REQUEST_CODE_SELECT_VOUCHER && resultCode == RESULT_OK && data != null) {
@@ -273,7 +360,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     }
     // ********************************************
 
+    // *** LOGIC SỬA ĐỔI CHÍNH: TÍNH TOÁN CHI TIẾT GIÁ ***
     private void calculateCartTotal() {
+<<<<<<< HEAD
         // 1. TÍNH TỔNG PHỤ (SUBTOTAL)
         double subtotal = 0;
         for (CartItem item : cartItemList) {
@@ -378,6 +467,60 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
             textVoucherAppliedInfo.setTextColor(getResources().getColor(R.color.grey_dark));
             textVoucherAppliedInfo.setBackground(null); // Xóa background nếu không áp dụng
         }
+=======
+        double totalItemsOriginalPrice = 0; // TỔNG TIỀN HÀNG (Giá gốc/chưa giảm)
+        double totalItemsNetPrice = 0;      // Tổng giá sau giảm (dùng để tính tổng giảm)
+
+        // Tính tổng tiền hàng (Items Price)
+        for (CartItem item : cartItemList) {
+            ProductVariant variant = item.getVariantDetails();
+
+            if (variant != null) {
+                // Sử dụng giá gốc của Variant để tính Tổng tiền hàng
+                totalItemsOriginalPrice += variant.getPrice() * item.getQuantity();
+            } else {
+                // Fallback nếu chi tiết variant chưa tải/có lỗi
+                totalItemsOriginalPrice += item.getPriceAtTimeOfAdd() * item.getQuantity();
+            }
+
+            // Giá sau giảm (giá được lưu vào CartItem khi add)
+            totalItemsNetPrice += item.getPriceAtTimeOfAdd() * item.getQuantity();
+        }
+
+        // 1. TỔNG CỘNG GIẢM GIÁ (Tính bằng cách lấy Tổng Gốc trừ đi Tổng Sau Giảm)
+        double totalDiscount = totalItemsOriginalPrice - totalItemsNetPrice;
+
+        // 2. TỔNG THANH TOÁN CUỐI CÙNG
+        double finalPaymentTotal = totalItemsNetPrice - VOUCHER_DISCOUNT_VALUE;
+
+        // Đảm bảo không âm
+        if (finalPaymentTotal < 0) finalPaymentTotal = 0;
+
+        // Cập nhật giao diện chi tiết Order Summary
+        updateOrderSummary(totalItemsOriginalPrice, totalDiscount + VOUCHER_DISCOUNT_VALUE, finalPaymentTotal);
+
+        // Cập nhật thanh Checkout bar dưới cùng
+        updateCartTotal(finalPaymentTotal);
+    }
+
+    private void updateOrderSummary(double itemsOriginalPrice, double totalDiscountValue, double netTotal) {
+        // Cập nhật Tổng tiền hàng
+        if (textTotalItemsPrice != null) {
+            textTotalItemsPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", itemsOriginalPrice));
+        }
+        // Cập nhật Tổng cộng giảm giá
+        if (textTotalVoucherDiscount != null) {
+            textTotalVoucherDiscount.setText(String.format(Locale.getDefault(), "-%,.0f đ", totalDiscountValue));
+        }
+        // Cập nhật Tổng thanh toán
+        if (textTotalPayment != null) {
+            textTotalPayment.setText(String.format(Locale.getDefault(), "%,.0f đ", netTotal));
+        }
+    }
+
+    private void updateCartTotal(double total) {
+        textCheckoutTotal.setText(String.format(Locale.getDefault(), "%,.0f đ", total));
+>>>>>>> 88d1b26516cee09aa8ba26bb8bf7bf4988505bfa
     }
 
     @Override

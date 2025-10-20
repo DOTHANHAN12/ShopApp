@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +39,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private static final String TAG = "CartActivity";
     private static final int REQUEST_CODE_SELECT_ADDRESS = 1001;
     private static final int REQUEST_CODE_SELECT_VOUCHER = 1002;
+    private static final int REQUEST_CODE_MOMO_PAYMENT = 3001;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -50,7 +53,17 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private TextView textVoucherDiscount;
     private TextView textVoucherAppliedInfo;
     private LinearLayout layoutVoucherSelector;
-    private Button btnCheckout; // <-- Nút Checkout
+    private Button btnCheckout;
+
+    // BIẾN CHO THANH TOÁN MOMO/COD
+    private RelativeLayout layoutPaymentCod;
+    private RelativeLayout layoutPaymentMomo;
+    private RadioButton radioCod;
+    private RadioButton radioMomo;
+
+    private String selectedPaymentMethod = "COD";
+    private static final String PAYMENT_COD = "COD";
+    private static final String PAYMENT_MOMO = "MOMO";
 
     // Trạng thái Voucher hiện tại
     private String appliedVoucherCode = null;
@@ -102,22 +115,28 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         textCheckoutTotal = findViewById(R.id.text_checkout_total);
         ImageView imgBack = findViewById(R.id.img_back_cart);
 
-        // ÁNH XẠ VOUCHER VÀ SUBTOTAL
         textSubtotal = findViewById(R.id.text_subtotal);
         textVoucherDiscount = findViewById(R.id.text_voucher_discount);
-
-        // Ánh xạ các View MỚI
         textVoucherAppliedInfo = findViewById(R.id.text_voucher_info_line);
         layoutVoucherSelector = findViewById(R.id.layout_voucher_selector);
         btnCheckout = findViewById(R.id.btn_checkout);
 
-        // Listener cho Checkout
         btnCheckout.setOnClickListener(v -> handleCheckout());
 
-        // Ánh xạ các thành phần Địa chỉ
         textShippingNamePhone = findViewById(R.id.text_shipping_name_phone);
         textShippingAddressLine = findViewById(R.id.text_shipping_address_line);
         btnChangeAddress = findViewById(R.id.btn_change_address);
+
+        // ÁNH XẠ VÀ THIẾT LẬP LISTENER CHO MOMO/COD
+        layoutPaymentCod = findViewById(R.id.layout_payment_cod);
+        layoutPaymentMomo = findViewById(R.id.layout_payment_momo);
+        radioCod = findViewById(R.id.radio_cod);
+        radioMomo = findViewById(R.id.radio_momo);
+
+        layoutPaymentCod.setOnClickListener(v -> updatePaymentSelection(PAYMENT_COD));
+        layoutPaymentMomo.setOnClickListener(v -> updatePaymentSelection(PAYMENT_MOMO));
+
+        updatePaymentSelection(PAYMENT_COD);
 
         // Listener cho Địa chỉ
         btnChangeAddress.setOnClickListener(v -> {
@@ -135,6 +154,18 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         layoutVoucherSelector.setOnClickListener(v -> openVoucherSelection());
 
         imgBack.setOnClickListener(v -> finish());
+    }
+
+    private void updatePaymentSelection(String method) {
+        selectedPaymentMethod = method;
+        radioCod.setChecked(method.equals(PAYMENT_COD));
+        radioMomo.setChecked(method.equals(PAYMENT_MOMO));
+
+        if (method.equals(PAYMENT_MOMO)) {
+            if (radioMomo.isChecked()) Toast.makeText(this, "Đã chọn thanh toán qua Ví Momo.", Toast.LENGTH_SHORT).show();
+        } else {
+            if (radioCod.isChecked()) Toast.makeText(this, "Đã chọn thanh toán khi nhận hàng (COD).", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -168,6 +199,18 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
             calculateCartTotal();
         }
+
+        // 3. XỬ LÝ KẾT QUẢ TỪ MOMO PAYMENT ACTIVITY
+        if (requestCode == REQUEST_CODE_MOMO_PAYMENT) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Đơn hàng đã được thanh toán thành công qua Momo.", Toast.LENGTH_LONG).show();
+                // CHUYỂN SANG MÀN HÌNH THÀNH CÔNG VÀ DỌN DẸP
+                // Giả định order đã được lưu và xác thực bởi MomoPaymentActivity
+                deleteUserCartAndGoToSuccess(null);
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Thanh toán Momo thất bại hoặc bị hủy.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void setupRecyclerView() {
@@ -178,7 +221,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     private void loadDefaultAddress() {
         if (userId == null) return;
-
+        // Logic tải địa chỉ
         db.collection("users").document(userId).collection("addresses")
                 .whereEqualTo("isDefault", true)
                 .limit(1)
@@ -212,6 +255,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     }
 
     private void loadCartItems() {
+        // ... (Logic tải Cart Items)
         if (userId == null) {
             Toast.makeText(this, "Bạn cần đăng nhập để xem giỏ hàng.", Toast.LENGTH_LONG).show();
             return;
@@ -254,7 +298,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     }
 
     private Task<Void> loadProductDetailForCartItem(CartItem item) {
-        // 1. Tải chi tiết Product
+        // ... (Logic tải chi tiết Product)
         Task<DocumentSnapshot> productTask = db.collection("products").document(item.getProductId()).get();
 
         return productTask.continueWithTask(task -> {
@@ -286,6 +330,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     }
 
     private void fetchAndApplyVoucher(double subtotal) {
+        // ... (Logic kiểm tra và áp dụng Voucher)
         if (appliedVoucherCode == null || subtotal <= 0) {
             voucherDiscountValue = 0.0;
             updateCartTotalUI(subtotal, voucherDiscountValue, subtotal);
@@ -298,13 +343,11 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     voucherDiscountValue = 0.0;
-
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
                         Voucher voucher = querySnapshot.getDocuments().get(0).toObject(Voucher.class);
 
                         Date now = new Date();
                         boolean isValid = true;
-
                         if (voucher.getStartDate() == null || voucher.getEndDate() == null || voucher.getStartDate().after(now) || voucher.getEndDate().before(now)) {
                             isValid = false;
                         } else if (voucher.getTimesUsed() >= voucher.getMaxUsageLimit()) {
@@ -349,6 +392,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     }
 
     private void updateCartTotalUI(double subtotal, double discount, double total) {
+        // ... (Logic cập nhật UI)
         textSubtotal.setText(String.format(Locale.getDefault(), "%,.0f VND", subtotal));
 
         if (discount > 0) {
@@ -381,6 +425,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     @Override
     public void onItemDeleted(CartItem item) {
+        // ... (Logic xóa item)
         if (userId == null) return;
 
         String documentId = item.getProductId() + "_" + item.getVariantId();
@@ -398,6 +443,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
     @Override
     public void onQuantityChanged(CartItem item, int newQuantity) {
+        // ... (Logic thay đổi số lượng)
         if (userId == null) return;
 
         String documentId = item.getProductId() + "_" + item.getVariantId();
@@ -418,10 +464,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 });
     }
 
-    // PHƯƠNG THỨC XỬ LÝ CHECKOUT
+    // PHƯƠNG THỨC XỬ LÝ CHECKOUT (TẠO ORDER)
     private void handleCheckout() {
         if (cartItemList.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng trống.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Giỏ hàng trống. Không thể đặt hàng.", Toast.LENGTH_SHORT).show();
             return;
         }
         if (selectedShippingAddress == null) {
@@ -466,15 +512,78 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 addressMap,
                 itemsList
         );
+        pendingOrder.setPaymentMethod(selectedPaymentMethod);
 
-        // 4. Chuyển sang màn hình chọn phương thức thanh toán
-        Intent intent = new Intent(this, CheckoutActivity.class);
+        // 4. Xử lý logic theo phương thức đã chọn
+        if (selectedPaymentMethod.equals(PAYMENT_COD)) {
+            saveOrderToFirebase(pendingOrder); // Xử lý COD
+        } else if (selectedPaymentMethod.equals(PAYMENT_MOMO)) {
+            requestMomoPayment(pendingOrder); // Xử lý Momo
+        }
+    }
 
-        // Dùng Gson để truyền đối tượng Order
-        String orderJson = new Gson().toJson(pendingOrder);
+    // *** LOGIC XỬ LÝ COD: LƯU ORDER VÀ XÓA GIỎ HÀNG ***
+    private void saveOrderToFirebase(Order order) {
+        if (userId == null) return;
+
+        // Ghi đơn hàng vào Firestore (Collection 'orders')
+        db.collection("orders")
+                .add(order)
+                .addOnSuccessListener(documentReference -> {
+                    String newOrderId = documentReference.getId();
+                    Log.i(TAG, "Order COD đã được lưu thành công. ID: " + newOrderId);
+
+                    // Sau khi lưu thành công, tiến hành xóa giỏ hàng
+                    deleteUserCartAndGoToSuccess(newOrderId);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "LỖI LƯU ORDER COD: " + e.getMessage(), e);
+                    Toast.makeText(this, "Lỗi hệ thống khi đặt hàng. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void deleteUserCartAndGoToSuccess(String orderId) {
+        // 1. Lấy tất cả tài liệu trong giỏ hàng
+        db.collection("users").document(userId).collection("cart")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Task<Void>> deleteTasks = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        deleteTasks.add(doc.getReference().delete());
+                    }
+
+                    // 2. Chờ tất cả các thao tác xóa hoàn tất
+                    Tasks.whenAllComplete(deleteTasks)
+                            .addOnCompleteListener(task -> {
+                                // 3. Hoàn tất và chuyển sang màn hình thành công
+                                if (task.isSuccessful()) {
+                                    Log.i(TAG, "Giỏ hàng đã được dọn dẹp.");
+                                    Intent successIntent = new Intent(this, OrderSuccessActivity.class);
+                                    successIntent.putExtra("ORDER_ID", orderId);
+                                    startActivity(successIntent);
+                                    finish(); // Đóng CartActivity
+                                } else {
+                                    Log.e(TAG, "LỖI DỌN DẸP GIỎ HÀNG: Giỏ hàng chưa được xóa hết.");
+                                    Toast.makeText(this, "Đặt hàng thành công, nhưng giỏ hàng chưa được dọn dẹp.", Toast.LENGTH_LONG).show();
+                                    // Vẫn chuyển Activity, nhưng có thể báo cáo lỗi
+                                    Intent successIntent = new Intent(this, OrderSuccessActivity.class);
+                                    startActivity(successIntent);
+                                    finish();
+                                }
+                            });
+                });
+    }
+    // *** END LOGIC XỬ LÝ COD ***
+
+
+    // PHƯƠNG THỨC XỬ LÝ GỌI MOMO PAYMENT ACTIVITY
+    private void requestMomoPayment(Order order) {
+        String orderJson = new Gson().toJson(order);
+
+        Intent intent = new Intent(this, MomoPaymentActivity.class);
         intent.putExtra("ORDER_DATA_JSON", orderJson);
 
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_MOMO_PAYMENT);
     }
 
     // PHƯƠNG THỨC XỬ LÝ VOUCHER

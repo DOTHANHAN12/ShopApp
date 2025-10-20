@@ -13,12 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopApp">
-        <activity
-            android:name=".PaymentWebViewActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CheckoutActivity"
-            android:exported="false" />
+
         <activity
             android:name=".VoucherAdapter"
             android:exported="false" />
@@ -76,7 +71,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Order"
+            android:name=".OrderSuccessActivity"
             android:exported="false" />
         <activity
             android:name=".FavoriteItem"

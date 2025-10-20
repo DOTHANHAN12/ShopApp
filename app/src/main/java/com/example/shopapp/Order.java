@@ -12,14 +12,13 @@ public class Order {
     public double subtotal;             // Tổng phụ trước giảm giá
     public double discountAmount;       // Giá trị giảm giá từ voucher
     public String voucherCode;          // Mã voucher đã áp dụng
-    public String paymentMethod;        // VD: "VNPAY", "COD"
+    public String paymentMethod;        // VD: "MOMO", "COD"
     public String orderStatus;          // VD: "PENDING", "PROCESSING", "COMPLETED"
 
     // Lưu trữ địa chỉ dưới dạng Map để dễ dàng truy vấn/hiển thị
     public Map<String, String> shippingAddress;
 
     // Danh sách các mặt hàng (lưu trữ dưới dạng list các đối tượng CartItem hoặc Map)
-    // Để đơn giản, ta lưu trữ dưới dạng List<Map>
     public List<Map<String, Object>> items;
 
     public Long createdAt;

@@ -1,46 +1,55 @@
 package com.example.shopapp;
 
 import java.util.List;
+import java.util.Date;
 import java.util.Map;
 
-// Model cho đơn hàng chính
 public class Order {
     public String orderId;
     public String userId;
     public double totalAmount;
-    public String status; // Pending, Shipped, Delivered, etc.
-    public Long createdAt;
+    public double subtotal;
+    public double discountAmount;
+    public String voucherCode;
+    public String paymentMethod;
+    public String orderStatus;
 
-    // Địa chỉ giao hàng (lưu trữ giá trị tĩnh tại thời điểm đặt hàng)
     public Map<String, String> shippingAddress;
-
-    // Danh sách các mặt hàng trong đơn hàng
-    public List<Map<String, Object>> items; // Sử dụng Map<String, Object> để linh hoạt
+    public List<Map<String, Object>> items;
+    public Long createdAt;
 
     public Order() {}
 
-    public double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(double totalAmount) {
+    // Constructor: 7 tham số (Đã được CartActivity gọi đúng)
+    public Order(String userId, double totalAmount, double subtotal, double discountAmount, String voucherCode, Map<String, String> shippingAddress, List<Map<String, Object>> items) {
+        this.userId = userId;
         this.totalAmount = totalAmount;
+        this.subtotal = subtotal;
+        this.discountAmount = discountAmount;
+        this.voucherCode = voucherCode;
+        this.shippingAddress = shippingAddress;
+        this.items = items;
+        this.createdAt = new Date().getTime();
+        this.orderStatus = "PENDING";
     }
 
-    public String getStatus() {
-        return status;
+    // GETTERS VÀ SETTERS
+    public String getOrderId() { return orderId; }
+
+    public String getVoucherCode() {
+        return voucherCode;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
     }
 
-    public Long getCreatedAt() {
-        return createdAt;
+    public String getOrderStatus() {
+        return orderStatus;
     }
 
-    public void setCreatedAt(Long createdAt) {
-        this.createdAt = createdAt;
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
     }
 
     public Map<String, String> getShippingAddress() {
@@ -59,23 +68,33 @@ public class Order {
         this.items = items;
     }
 
-    // Constructor đơn giản
-    public Order(String orderId, String userId, double totalAmount, String status, Long createdAt, Map<String, String> shippingAddress, List<Map<String, Object>> items) {
-        this.orderId = orderId;
-        this.userId = userId;
-        this.totalAmount = totalAmount;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.shippingAddress = shippingAddress;
-        this.items = items;
+    public Long getCreatedAt() {
+        return createdAt;
     }
 
-    // GETTERS VÀ SETTERS (Một phần)
-    public String getOrderId() { return orderId; }
+    public void setCreatedAt(Long createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public void setOrderId(String orderId) { this.orderId = orderId; }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 
-    // ... Thêm các Getters/Setters còn lại ...
+    // ... (Các getters/setters khác)
+
+    // SỬA LỖI: Đảm bảo setter này tồn tại
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
+
+    public double getSubtotal() { return subtotal; }
+    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
+
+    public double getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
+
+    // ... (Các setters khác)
 }

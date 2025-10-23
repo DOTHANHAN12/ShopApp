@@ -22,9 +22,9 @@
         <activity
             android:name=".Voucher"
             android:exported="false" />
-        <activity
-            android:name=".VoucherType"
-            android:exported="false" />
+        <activity android:name=".OrderSuccessActivity"
+            android:exported="false"
+            android:label="Đặt hàng thành công" />
         <activity
             android:name=".AddressSelectionActivity"
             android:exported="false"

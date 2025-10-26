@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore"; 
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"; // Thêm signOut và onAuthStateChanged
-
 // Cấu hình Firebase của bạn - ĐÃ HOÀN TOÀN ĐÚNG
 const firebaseConfig = {
   apiKey: "AIzaSyCbtwv6-UrBcqyfIkeHqMOOTJhQcEGXwgA",

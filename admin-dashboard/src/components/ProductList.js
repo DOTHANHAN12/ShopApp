@@ -1,12 +1,41 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, writeBatch } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
 import VariantManagementModal from './VariantManagementModal';
-import ProductDetailModal from './ProductDetailModal'; // *** ĐÃ SỬA: Đổi từ ProductFormModal sang ProductDetailModal ***
+import ProductDetailModal from './ProductDetailModal'; 
+
+const FIXED_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+
+const generateNewVariantId = (color, size) => {
+    const colorCode = color.substring(0, 2).toUpperCase();
+    const timestamp = Date.now().toString().substring(8); 
+    return `SKU-${colorCode}-${size.toUpperCase()}-${timestamp}`;
+};
+
+// Hàm tính toán giá khuyến mãi (đã đơn giản hóa để tránh lỗi khi dữ liệu offer là null)
+const calculateFinalPrice = (basePrice, offer) => {
+    if (!offer || !offer.isOffer || !basePrice || basePrice <= 0) return basePrice;
+    
+    const value = parseFloat(offer.offerValue) || 0;
+    const price = parseFloat(basePrice);
+    
+    let finalPrice = price;
+
+    if (offer.offerType === 'Percentage') {
+        finalPrice = price - (price * value / 100);
+    } else if (offer.offerType === 'FlatAmount') {
+        finalPrice = price - value;
+    }
+    
+    finalPrice = Math.round(finalPrice * 100) / 100;
+    
+    return Math.max(0, finalPrice);
+};
+
 
 // ----------------------------------------------------------------------
-// THIẾT KẾ STYLES (Uniqlo Style: Đen, Trắng, Đỏ tối giản)
+// THIẾT KẾ STYLES
 // ----------------------------------------------------------------------
 const styles = {
     container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh' },
@@ -29,7 +58,8 @@ const styles = {
     },
     offerTag: { backgroundColor: '#C40000', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' },
     ratingStar: { color: '#ffc107', marginRight: '3px' },
-    featuredIcon: { color: '#C40000', fontSize: '16px', marginLeft: '5px' }
+    featuredIcon: { color: '#C40000', fontSize: '16px', marginLeft: '5px' },
+    adminButton: { backgroundColor: '#f0ad4e', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginRight: '15px' }
 };
 
 const ProductList = () => {
@@ -37,22 +67,68 @@ const ProductList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // States cho các modal
     const [variantModalProduct, setVariantModalProduct] = useState(null);
-    const [detailModalProduct, setDetailModalProduct] = useState(null); // *** ĐÃ SỬA TÊN STATE ***
+    const [detailModalProduct, setDetailModalProduct] = useState(null); 
 
-    // --- STATES CHO BỘ LỌC ---
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [filterOffer, setFilterOffer] = useState(false);
 
-    // Dữ liệu tĩnh cho Dropdown
     const availableStatuses = ['All', 'Active', 'Draft', 'Archived'];
-    // const availableCategories = ['All', 'Áo Nam', 'Quần Nam', 'Phụ kiện', 'Áo Nữ', 'Quần Nữ']; // Ví dụ
 
     // ----------------------------------------------------------------------
-    // HÀM FETCH DỮ LIỆU CHÍNH
+    // HÀM TỔNG QUÁT XÓA TẤT CẢ THÔNG TIN KHUYẾN MÃI (CLEAR ALL OFFERS)
     // ----------------------------------------------------------------------
+    const clearAllOffers = async () => {
+        const BATCH_SIZE = 400;
+        const productsCollectionRef = collection(db, "products");
+        let confirm = window.confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ thông tin khuyến mãi (Offer) khỏi database không? Thao tác này không thể hoàn tác!");
+        if (!confirm) return;
+
+        try {
+            console.log("Bắt đầu xóa toàn bộ thông tin Offer...");
+            const productSnapshot = await getDocs(productsCollectionRef);
+            
+            let batch = writeBatch(db);
+            let count = 0;
+
+            productSnapshot.docs.forEach((productDoc) => {
+                const productRef = doc(db, 'products', productDoc.id);
+                
+                // Chuẩn bị cập nhật: đặt isOffer = false và offer = null
+                const updateData = {
+                    isOffer: false,
+                    offer: null, // Đặt object offer về null
+                    updatedAt: Date.now()
+                };
+                
+                batch.update(productRef, updateData);
+                count++;
+
+                if (count % BATCH_SIZE === 0) {
+                    batch.commit();
+                    batch = writeBatch(db);
+                }
+            });
+
+            if (count > 0) {
+                await batch.commit();
+            }
+
+            console.log(`✅ Hoàn tất xóa thông tin Offer khỏi ${count} sản phẩm.`);
+            alert(`Hoàn tất xóa thông tin Offer khỏi ${count} sản phẩm!`);
+            fetchProducts(); // Tải lại dữ liệu
+            return count;
+
+        } catch (err) {
+            console.error("LỖI LỚN khi xóa Offer hàng loạt:", err);
+            alert(`LỖI: Không thể xóa thông tin Offer. Kiểm tra console và Firestore Rules.`);
+            return 0;
+        }
+    };
+    // ----------------------------------------------------------------------
+
+
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -61,16 +137,23 @@ const ProductList = () => {
 
             const productsList = productSnapshot.docs.map(doc => {
                 const data = doc.data();
-                // Tính toán Tổng tồn kho
                 const totalStock = data.variants ? data.variants.reduce((sum, v) => sum + (v.quantity || 0), 0) : 0;
-                // Giá niêm yết là basePrice
                 const listPrice = data.basePrice;
+
+                const offerDetails = { 
+                    isOffer: data.isOffer, 
+                    offerType: data.offer?.offerType, 
+                    offerValue: data.offer?.offerValue 
+                };
+
+                const finalPrice = calculateFinalPrice(data.basePrice, offerDetails);
 
                 return {
                     id: doc.id,
                     ...data,
                     totalStock,
-                    listPrice
+                    listPrice: data.basePrice,
+                    finalPrice 
                 };
             });
 
@@ -88,13 +171,9 @@ const ProductList = () => {
         fetchProducts();
     }, []);
 
-    // ----------------------------------------------------------------------
-    // HÀM TÍNH TOÁN DỮ LIỆU ĐÃ LỌC
-    // ----------------------------------------------------------------------
     const filteredProducts = useMemo(() => {
         let currentProducts = products;
 
-        // 1. Lọc theo Tìm kiếm (Tên & ID)
         if (searchTerm) {
             currentProducts = currentProducts.filter(p =>
                 p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,12 +181,10 @@ const ProductList = () => {
             );
         }
 
-        // 2. Lọc theo Trạng thái
         if (filterStatus !== 'All') {
             currentProducts = currentProducts.filter(p => p.status === filterStatus);
         }
 
-        // 3. Lọc theo Khuyến mãi
         if (filterOffer) {
             currentProducts = currentProducts.filter(p => p.isOffer === true);
         }
@@ -115,10 +192,6 @@ const ProductList = () => {
         return currentProducts;
     }, [products, searchTerm, filterStatus, filterOffer]);
 
-
-    // ----------------------------------------------------------------------
-    // HÀM HÀNH ĐỘNG (CRUD)
-    // ----------------------------------------------------------------------
     const handleDelete = async (productId) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm ID: ${productId}? Thao tác này không thể hoàn tác.`)) {
             try {
@@ -141,7 +214,6 @@ const ProductList = () => {
     };
 
     const handleCreate = () => {
-        // Mở form với object rỗng cho chức năng Thêm mới, kèm các giá trị mặc định
         setDetailModalProduct({
             isOffer: false,
             isFeatured: false,
@@ -159,6 +231,24 @@ const ProductList = () => {
     return (
         <div style={styles.container}>
             <h1 style={styles.title}>Quản Lý Sản Phẩm</h1>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                {/* Nút Admin: XÓA TẤT CẢ KHUYẾN MÃI */}
+                <button 
+                    onClick={clearAllOffers} 
+                    style={styles.adminButton}
+                    title="Xóa toàn bộ thông tin khuyến mãi (isOffer=false, offer=null)"
+                >
+                    ADMIN: CLEAR ALL OFFERS
+                </button>
+                {/* Nút Thêm sản phẩm mới */}
+                <button
+                    style={styles.createButton}
+                    onClick={handleCreate}
+                >
+                    + Thêm Sản Phẩm Mới
+                </button>
+            </div>
 
             <div style={styles.filterBar}>
                 {/* Thanh Tìm kiếm */}
@@ -204,7 +294,7 @@ const ProductList = () => {
                         <th style={styles.th}>Ảnh</th>
                         <th style={styles.th}>Tên Sản Phẩm</th>
                         <th style={styles.th}>Danh mục/Loại</th>
-                        <th style={styles.th}>Giá Gốc</th>
+                        <th style={styles.th}>Giá Bán Lẻ</th>
                         <th style={styles.th}>Tồn kho</th>
                         <th style={styles.th}>Trạng thái</th>
                         <th style={styles.th}>KM/Nổi bật</th>
@@ -229,7 +319,17 @@ const ProductList = () => {
                             <td style={styles.td}>
                                 {product.category || 'N/A'} ({product.type || 'N/A'})
                             </td>
-                            <td style={styles.td}>{formatCurrency(product.basePrice)}</td>
+                            {/* HIỂN THỊ GIÁ BÁN LẺ VÀ GIÁ KHUYẾN MÃI */}
+                            <td style={styles.td}>
+                                <span style={{ textDecoration: product.isOffer ? 'line-through' : 'none', color: product.isOffer ? '#999' : '#000' }}>
+                                    {formatCurrency(product.basePrice)}
+                                </span>
+                                {product.isOffer && (
+                                    <div style={{ fontWeight: 'bold', color: '#C40000', marginTop: '4px' }}>
+                                        {formatCurrency(product.finalPrice)}
+                                    </div>
+                                )}
+                            </td>
                             <td style={{ ...styles.td, ...(product.totalStock < 10 ? { color: '#C40000', fontWeight: 'bold' } : {}) }}>
                                 {product.totalStock}
                             </td>
@@ -245,7 +345,6 @@ const ProductList = () => {
                                 {(product.averageRating || 0).toFixed(1)} ({product.totalReviews || 0})
                             </td>
                             <td style={styles.td}>
-                                {/* Nút Chỉnh sửa chi tiết */}
                                 <button
                                     style={styles.actionButton}
                                     onClick={() => handleOpenDetailModal(product)}
@@ -253,7 +352,6 @@ const ProductList = () => {
                                     Sửa chi tiết
                                 </button>
 
-                                {/* Nút QUẢN LÝ BIẾN THỂ */}
                                 <button
                                     style={{...styles.actionButton, borderColor: '#C40000', color: '#C40000', fontWeight: 'bold'}}
                                     onClick={() => handleOpenVariantModal(product)}
@@ -273,7 +371,6 @@ const ProductList = () => {
                 </tbody>
             </table>
 
-            {/* Modal Quản lý Biến thể */}
             {variantModalProduct && (
                 <VariantManagementModal
                     product={variantModalProduct}
@@ -282,7 +379,6 @@ const ProductList = () => {
                 />
             )}
 
-            {/* Modal Chỉnh sửa chi tiết (Form đa năng) */}
             {detailModalProduct && (
                 <ProductDetailModal
                     product={detailModalProduct}

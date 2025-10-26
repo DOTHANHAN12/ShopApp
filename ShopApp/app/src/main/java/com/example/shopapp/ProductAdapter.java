@@ -3,6 +3,7 @@ package com.example.shopapp;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,6 +48,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return new ProductViewHolder(view);
     }
 
+    private boolean isOfferValid(OfferDetails offer) {
+        if (offer == null || offer.getStartDate() == null || offer.getEndDate() == null) {
+            return false;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date startDate = sdf.parse(offer.getStartDate());
+            Date endDate = sdf.parse(offer.getEndDate());
+            Date currentDate = new Date();
+            return !currentDate.before(startDate) && !currentDate.after(endDate);
+        } catch (ParseException e) {
+            Log.e("ProductAdapter", "Error parsing offer dates", e);
+            return false;
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
@@ -61,16 +81,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         boolean isDiscounted = false;
 
         // Kiểm tra xem khuyến mãi có hợp lệ không
-        if (product.getIsOfferStatus() && product.getOffer() != null) {
-            long now = System.currentTimeMillis();
-            OfferDetails offer = product.getOffer();
-
-            // Chỉ tính giảm giá nếu khuyến mãi đang diễn ra (kiểm tra thời gian)
-            if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                double discount = offer.getDiscountPercent() / 100.0;
-                displayPrice = basePrice * (1.0 - discount);
-                isDiscounted = true;
-            }
+        if (product.getIsOfferStatus() && isOfferValid(product.getOffer())) {
+            double discount = product.getOffer().getOfferValue() / 100.0;
+            displayPrice = basePrice * (1.0 - discount);
+            isDiscounted = true;
         }
 
         // Định dạng và gán Giá Hiển thị (Giá sau giảm hoặc Giá gốc)

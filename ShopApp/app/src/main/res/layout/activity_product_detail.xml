@@ -138,28 +138,22 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp">
 
-                <TextView
-                    android:id="@+id/text_product_name_detail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="AirSense Jacket | Wool Like"
-                    android:textSize="20sp"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="12dp">
 
                     <TextView
-                        android:id="@+id/text_color_name"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/text_product_name_detail"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Color: 08 DARK GRAY"
-                        android:textSize="14sp"
-                        android:textColor="#333"/>
+                        android:layout_toStartOf="@+id/img_favorite_detail"
+                        android:layout_centerVertical="true"
+                        android:text="AirSense Jacket | Wool Like"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="16dp"/>
 
                     <ImageView
                         android:id="@+id/img_favorite_detail"
@@ -170,6 +164,15 @@
                         android:layout_centerVertical="true"
                         app:tint="#444"/>
                 </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/text_color_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Color: 08 DARK GRAY"
+                    android:textSize="14sp"
+                    android:textColor="#333"
+                    android:layout_marginBottom="8dp"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_color_selector"
@@ -204,18 +207,33 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
+                    android:gravity="bottom"
                     android:layout_marginTop="8dp">
 
-                    <TextView
-                        android:id="@+id/text_price"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="1.471.000 VND"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="#DD0000"/>
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_price"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.471.000 VND"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="#DD0000"/>
+
+                        <TextView
+                            android:id="@+id/text_original_price"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.699.000 VND"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/darker_gray"
+                            android:alpha="0.8"/>
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="wrap_content"

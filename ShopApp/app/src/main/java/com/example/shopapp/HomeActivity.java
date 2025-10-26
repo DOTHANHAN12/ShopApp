@@ -18,8 +18,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -66,7 +71,7 @@ public class HomeActivity extends AppCompatActivity {
         setupHeaderIcons(); // <--- THIẾT LẬP LISTENER ICONS
 
         // 2. Khởi tạo Adapter và ViewPager2
-        adapter = new FeaturedProductAdapter(featuredProductsList);
+        adapter = new FeaturedProductAdapter(featuredProductsList, this::isOfferValid);
         viewPagerFeaturedProducts.setAdapter(adapter);
 
         // 3. Thiết lập Listener cho các Tab
@@ -203,6 +208,22 @@ public class HomeActivity extends AppCompatActivity {
         currentSelectedTab.setTextSize(18);
     }
 
+    private boolean isOfferValid(OfferDetails offer) {
+        if (offer == null || offer.getStartDate() == null || offer.getEndDate() == null) {
+            return false;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date startDate = sdf.parse(offer.getStartDate());
+            Date endDate = sdf.parse(offer.getEndDate());
+            Date currentDate = new Date();
+            return !currentDate.before(startDate) && !currentDate.after(endDate);
+        } catch (ParseException e) {
+            Log.e(TAG, "Error parsing offer dates", e);
+            return false;
+        }
+    }
+
     // ------------------- TẢI DANH SÁCH SẢN PHẨM NỔI BẬT THEO CATEGORY -------------------
 
     /**
@@ -217,8 +238,68 @@ public class HomeActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         featuredProductsList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Product product = document.toObject(Product.class);
-                            featuredProductsList.add(product);
+                            try {
+                                Product product = new Product();
+                                product.setProductId(document.getString("productId"));
+                                product.setName(document.getString("name"));
+                                product.setDesc(document.getString("desc"));
+
+                                if (document.get("basePrice") instanceof Number) {
+                                    product.setBasePrice(((Number) document.get("basePrice")).doubleValue());
+                                }
+
+                                product.setMainImage(document.getString("mainImage"));
+                                product.setCategory(document.getString("category"));
+                                product.setType(document.getString("type"));
+                                product.setStatus(document.getString("status"));
+
+                                if (document.getBoolean("isOffer") != null) {
+                                    product.setIsOfferStatus(document.getBoolean("isOffer"));
+                                }
+
+                                if (document.get("averageRating") instanceof Number) {
+                                    product.setAverageRating(((Number) document.get("averageRating")).doubleValue());
+                                }
+
+                                product.setTotalReviews(document.getLong("totalReviews"));
+
+                                if (document.getBoolean("isFeatured") != null) {
+                                    product.setFeatured(document.getBoolean("isFeatured"));
+                                }
+
+                                product.setColorImages((Map<String, List<String>>) document.get("colorImages"));
+                                product.setCreatedAt(document.getLong("createdAt"));
+                                product.setUpdatedAt(document.getLong("updatedAt"));
+
+                                if (document.contains("offer")) {
+                                    product.setOffer(document.get("offer", OfferDetails.class));
+                                }
+
+                                if (document.contains("variants")) {
+                                    List<Map<String, Object>> variantMaps = (List<Map<String, Object>>) document.get("variants");
+                                    List<ProductVariant> variants = new ArrayList<>();
+                                    for (Map<String, Object> map : variantMaps) {
+                                        ProductVariant variant = new ProductVariant();
+                                        variant.setVariantId((String) map.get("variantId"));
+                                        variant.setSize((String) map.get("size"));
+                                        variant.setColor((String) map.get("color"));
+                                        variant.setQuantity((Long) map.get("quantity"));
+
+                                        if (map.get("price") instanceof Number) {
+                                            variant.setPrice(((Number) map.get("price")).doubleValue());
+                                        }
+
+                                        if (map.containsKey("status")) {
+                                            variant.setStatus((String) map.get("status"));
+                                        }
+                                        variants.add(variant);
+                                    }
+                                    product.setVariants(variants);
+                                }
+                                featuredProductsList.add(product);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Could not parse product", e);
+                            }
                         }
 
                         if (!featuredProductsList.isEmpty()) {

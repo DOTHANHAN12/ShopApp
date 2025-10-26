@@ -2,6 +2,7 @@ package com.example.shopapp;
 
 import android.content.Intent;
 import android.graphics.Paint; // Cần import Paint
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +14,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProductAdapter.FeaturedProductViewHolder> {
 
-    private final List<Product> featuredProducts;
+    @FunctionalInterface
+    public interface OfferValidator {
+        boolean isOfferValid(OfferDetails offer);
+    }
 
-    public FeaturedProductAdapter(List<Product> featuredProducts) {
+    private final List<Product> featuredProducts;
+    private final OfferValidator offerValidator;
+
+    public FeaturedProductAdapter(List<Product> featuredProducts, OfferValidator offerValidator) {
         this.featuredProducts = featuredProducts;
+        this.offerValidator = offerValidator;
     }
 
     @NonNull
@@ -35,7 +47,7 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
     @Override
     public void onBindViewHolder(@NonNull FeaturedProductViewHolder holder, int position) {
         Product product = featuredProducts.get(position);
-        holder.bind(product);
+        holder.bind(product, offerValidator);
 
         // THIẾT LẬP LISTENER CLICK VÀ TRUYỀN ID
         holder.itemView.setOnClickListener(v -> {
@@ -76,7 +88,7 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
             textLimitedOfferBadge = itemView.findViewById(R.id.text_limited_offer_badge);
         }
 
-        public void bind(Product product) {
+        public void bind(Product product, OfferValidator offerValidator) {
             // Gán Tên
             textTitle.setText(product.getName());
 
@@ -91,23 +103,26 @@ public class FeaturedProductAdapter extends RecyclerView.Adapter<FeaturedProduct
             double displayPrice = basePrice;
             boolean hasValidOffer = false;
 
-            if (product.getIsOfferStatus() && product.getOffer() != null) {
-                long now = System.currentTimeMillis();
+            if (product.getIsOfferStatus() && offerValidator.isOfferValid(product.getOffer())) {
+                hasValidOffer = true;
                 OfferDetails offer = product.getOffer();
+                double discount = offer.getOfferValue() / 100.0;
+                displayPrice = basePrice * (1.0 - discount);
 
-                // Kiểm tra thời gian khuyến mãi còn hiệu lực
-                if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                    hasValidOffer = true;
-                    double discount = offer.getDiscountPercent() / 100.0;
-                    displayPrice = basePrice * (1.0 - discount);
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    Date endDate = sdf.parse(offer.getEndDate());
+                    long diffInMillis = endDate.getTime() - new Date().getTime();
+                    long diffInDays = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
 
-                    // Hiển thị chi tiết khuyến mãi
                     textOfferDetails.setText(String.format(Locale.getDefault(), "%d%% OFF, Hết hạn %d ngày",
-                            offer.getDiscountPercent(),
-                            (offer.getEndDate() - now) / (1000 * 60 * 60 * 24) // Tính số ngày còn lại
-                    ));
-                    textDisclaimer.setText("Sản phẩm số lượng có hạn.");
+                            offer.getOfferValue(),
+                            diffInDays));
+                } catch (ParseException | NullPointerException e) {
+                    Log.e("FeaturedProductAdapter", "Error parsing date", e);
+                    textOfferDetails.setText(String.format(Locale.getDefault(), "%d%% OFF", offer.getOfferValue()));
                 }
+                textDisclaimer.setText("Sản phẩm số lượng có hạn.");
             } else {
                 textOfferDetails.setText("Mua ngay giá tốt!");
                 textDisclaimer.setText("");

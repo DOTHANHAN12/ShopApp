@@ -23,7 +23,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -108,6 +111,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
         textImageIndicator = findViewById(R.id.text_image_indicator);
         textProductName = findViewById(R.id.text_product_name_detail);
         textPrice = findViewById(R.id.text_price);
+        textOriginalPrice = findViewById(R.id.text_original_price);
         textReviewCount = findViewById(R.id.text_review_count);
         textColorName = findViewById(R.id.text_color_name);
         textSizeLabel = findViewById(R.id.text_size_label);
@@ -163,6 +167,22 @@ public class ProductDetailActivity extends AppCompatActivity implements
     // LOGIC ADD TO CART
     // --------------------------------------------------------------------------------
 
+    private boolean isOfferValid(OfferDetails offer) {
+        if (offer == null || offer.getStartDate() == null || offer.getEndDate() == null) {
+            return false;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date startDate = sdf.parse(offer.getStartDate());
+            Date endDate = sdf.parse(offer.getEndDate());
+            Date currentDate = new Date();
+            return !currentDate.before(startDate) && !currentDate.after(endDate);
+        } catch (ParseException e) {
+            Log.e(TAG, "Error parsing offer dates", e);
+            return false;
+        }
+    }
+
     private void addToCart() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -188,13 +208,9 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         // 1. TÍNH TOÁN GIÁ HIỂN THỊ CUỐI CÙNG
         double priceAtTimeOfAdd = currentSelectedVariant.price;
-        if (currentProduct.getIsOfferStatus() && currentProduct.getOffer() != null) {
-            long now = System.currentTimeMillis();
-            OfferDetails offer = currentProduct.getOffer();
-            if (offer != null && now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                double discount = offer.getDiscountPercent() / 100.0;
-                priceAtTimeOfAdd = currentSelectedVariant.price * (1.0 - discount);
-            }
+        if (currentProduct.getIsOfferStatus() && isOfferValid(currentProduct.getOffer())) {
+            double discount = currentProduct.getOffer().getOfferValue() / 100.0;
+            priceAtTimeOfAdd = currentSelectedVariant.price * (1.0 - discount);
         }
 
         final String userId = user.getUid();
@@ -396,9 +412,65 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
                         if (document.exists()) {
                             try {
-                                currentProduct = document.toObject(Product.class);
+                                currentProduct = new Product();
+                                currentProduct.setProductId(document.getString("productId"));
+                                currentProduct.setName(document.getString("name"));
+                                currentProduct.setDesc(document.getString("desc"));
 
-                                if (currentProduct != null && currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
+                                if (document.get("basePrice") instanceof Number) {
+                                    currentProduct.setBasePrice(((Number) document.get("basePrice")).doubleValue());
+                                }
+
+                                currentProduct.setMainImage(document.getString("mainImage"));
+                                currentProduct.setCategory(document.getString("category"));
+                                currentProduct.setType(document.getString("type"));
+                                currentProduct.setStatus(document.getString("status"));
+
+                                if (document.getBoolean("isOffer") != null) {
+                                    currentProduct.setIsOfferStatus(document.getBoolean("isOffer"));
+                                }
+
+                                if (document.get("averageRating") instanceof Number) {
+                                    currentProduct.setAverageRating(((Number) document.get("averageRating")).doubleValue());
+                                }
+
+                                currentProduct.setTotalReviews(document.getLong("totalReviews"));
+
+                                if (document.getBoolean("isFeatured") != null) {
+                                    currentProduct.setFeatured(document.getBoolean("isFeatured"));
+                                }
+
+                                currentProduct.setColorImages((Map<String, List<String>>) document.get("colorImages"));
+                                currentProduct.setCreatedAt(document.getLong("createdAt"));
+                                currentProduct.setUpdatedAt(document.getLong("updatedAt"));
+
+                                if (document.contains("offer")) {
+                                    currentProduct.setOffer(document.get("offer", OfferDetails.class));
+                                }
+
+                                if (document.contains("variants")) {
+                                    List<Map<String, Object>> variantMaps = (List<Map<String, Object>>) document.get("variants");
+                                    List<ProductVariant> variants = new ArrayList<>();
+                                    for (Map<String, Object> map : variantMaps) {
+                                        ProductVariant variant = new ProductVariant();
+                                        variant.setVariantId((String) map.get("variantId"));
+                                        variant.setSize((String) map.get("size"));
+                                        variant.setColor((String) map.get("color"));
+                                        variant.setQuantity((Long) map.get("quantity"));
+
+                                        if (map.get("price") instanceof Number) {
+                                            variant.setPrice(((Number) map.get("price")).doubleValue());
+                                        }
+
+                                        if (map.containsKey("status")) {
+                                            variant.setStatus((String) map.get("status"));
+                                        }
+                                        variants.add(variant);
+                                    }
+                                    currentProduct.setVariants(variants);
+                                }
+
+                                if (currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
                                     displayProductData(currentProduct);
                                     checkFavoriteStatus();
                                 } else {
@@ -465,13 +537,10 @@ public class ProductDetailActivity extends AppCompatActivity implements
         double displayPrice = basePrice;
         boolean hasValidOffer = false;
 
-        if (isOffer && offer != null) {
-            long now = System.currentTimeMillis();
-            if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                hasValidOffer = true;
-                double discount = offer.getDiscountPercent() / 100.0;
-                displayPrice = basePrice * (1.0 - discount);
-            }
+        if (isOffer && isOfferValid(offer)) {
+            hasValidOffer = true;
+            double discount = offer.getOfferValue() / 100.0;
+            displayPrice = basePrice * (1.0 - discount);
         }
 
         // GÁN GIÁ HIỆN TẠI (ĐÃ GIẢM HOẶC BASE PRICE)
@@ -522,18 +591,10 @@ public class ProductDetailActivity extends AppCompatActivity implements
         double finalDisplayPrice = variantBasePrice;
         boolean hasValidOffer = false;
 
-        if (currentProduct.getIsOfferStatus() && currentProduct.getOffer() != null) {
-            long now = System.currentTimeMillis();
-            OfferDetails offer = currentProduct.getOffer();
-
-            // Kiểm tra thời gian khuyến mãi còn hiệu lực
-            if (offer != null && now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                hasValidOffer = true;
-                double discount = offer.getDiscountPercent() / 100.0;
-
-                // TÍNH GIÁ HIỂN THỊ CUỐI CÙNG = GIÁ VARIANT - PHẦN TRĂM GIẢM
-                finalDisplayPrice = variantBasePrice * (1.0 - discount);
-            }
+        if (currentProduct.getIsOfferStatus() && isOfferValid(currentProduct.getOffer())) {
+            hasValidOffer = true;
+            double discount = currentProduct.getOffer().getOfferValue() / 100.0;
+            finalDisplayPrice = variantBasePrice * (1.0 - discount);
         }
 
         // 3. Cập nhật GIÁ HIỆN TẠI (Giá sau khi giảm)
@@ -643,13 +704,9 @@ public class ProductDetailActivity extends AppCompatActivity implements
                             {
                                 // TÍNH GIÁ HIỂN THỊ CHO SẢN PHẨM ĐỀ XUẤT
                                 double recDisplayPrice = recommendedProduct.getBasePrice();
-                                if (recommendedProduct.getIsOfferStatus() && recommendedProduct.getOffer() != null) {
-                                    long now = System.currentTimeMillis();
-                                    OfferDetails offer = recommendedProduct.getOffer();
-
-                                    if (now >= offer.getStartDate() && now <= offer.getEndDate()) {
-                                        recDisplayPrice = recommendedProduct.getBasePrice() * (1.0 - offer.getDiscountPercent() / 100.0);
-                                    }
+                                if (recommendedProduct.getIsOfferStatus() && isOfferValid(recommendedProduct.getOffer())) {
+                                    double discount = recommendedProduct.getOffer().getOfferValue() / 100.0;
+                                    recDisplayPrice = recommendedProduct.getBasePrice() * (1.0 - discount);
                                 }
                                 // KẾT THÚC LOGIC TÍNH GIÁ ĐỀ XUẤT
 

@@ -7,17 +7,19 @@ public class ProductVariant {
     public String color;     // Ví dụ: "Black", "Navy"
     public Long quantity;    // Tồn kho RIÊNG cho biến thể này
     public double price;     // (Tùy chọn) Giá RIÊNG cho biến thể này (nếu khác giá gốc)
+    public String status;
 
     // Constructor rỗng bắt buộc cho Firestore
     public ProductVariant() {}
 
     // Constructor đầy đủ
-    public ProductVariant(String variantId, String size, String color, Long quantity, double price) {
+    public ProductVariant(String variantId, String size, String color, Long quantity, double price, String status) {
         this.variantId = variantId;
         this.size = size;
         this.color = color;
         this.quantity = quantity;
         this.price = price;
+        this.status = status;
     }
 
     // *** KHẮC PHỤC LỖI: Cannot resolve method 'getVariantId' ***
@@ -33,4 +35,6 @@ public class ProductVariant {
     public void setQuantity(Long quantity) { this.quantity = quantity; }
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

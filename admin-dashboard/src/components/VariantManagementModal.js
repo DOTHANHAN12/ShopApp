@@ -40,7 +40,11 @@ const generateNewVariantId = (color, size) => {
 };
 
 const VariantManagementModal = ({ product, onClose, onSave }) => {
-    const [variants, setVariants] = useState(JSON.parse(JSON.stringify(product.variants || [])));
+    const initialVariantsWithKeys = useMemo(() => {
+        return (product.variants || []).map((v, index) => ({...v, index}));
+    }, [product.variants]);
+
+    const [variants, setVariants] = useState(initialVariantsWithKeys);
     const [saving, setSaving] = useState(false);
     const [openColor, setOpenColor] = useState(null); 
     const [uploading, setUploading] = useState({});
@@ -98,8 +102,91 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
 
 
     // ------------------------------------------------------------------
-    // LOGIC THÊM MÀU MỚI VÀO SẢN PHẨM
+    // LOGIC CHỈNH SỬA VÀ LƯU
     // ------------------------------------------------------------------
+
+    const handleVariantChange = (uniqueKey, field, value) => {
+        setVariants(prevVariants => prevVariants.map(v => {
+            const key = v.variantId || `new_temp_${v.color}_${v.size}`; 
+            
+            if (key === uniqueKey) {
+                const processedValue = (field === 'price' || field === 'quantity') ? (value === '' ? 0 : parseFloat(value)) : value;
+                
+                let updatedStatus = v.status;
+                if (v.status === 'Inactive' && field !== 'status' && processedValue !== 0) {
+                    updatedStatus = 'Active';
+                }
+
+                return { 
+                    ...v, 
+                    [field]: processedValue, 
+                    status: updatedStatus,
+                    isActive: updatedStatus === 'Active'
+                }; 
+            }
+            return v;
+        }));
+    };
+
+    // [Hàm tiện ích] Xử lý sự kiện thay đổi Dropdown Status (FIXED)
+    const handleStatusChange = (uniqueKey, newStatus) => {
+        setVariants(prevVariants => prevVariants.map(v => {
+            const key = v.variantId || `new_temp_${v.color}_${v.size}`;
+            if (key === uniqueKey) {
+                
+                const isActive = newStatus === 'Active';
+                
+                const currentPrice = v.price || product.basePrice || 0; 
+                const currentQuantity = v.quantity || 1; 
+
+                return { 
+                    ...v, 
+                    status: newStatus, 
+                    isActive: isActive,
+                    
+                    price: isActive ? currentPrice : 0, 
+                    quantity: isActive ? currentQuantity : 0 
+                };
+            }
+            return v;
+        }));
+    };
+
+    // [Hàm tiện ích] Đặt trạng thái cho TOÀN BỘ nhóm màu (Active/Inactive)
+    const handleGroupStatusChange = (colorKey, newStatus) => {
+        const isActive = newStatus === 'Active';
+
+        setVariants(prevVariants => prevVariants.map(v => {
+            if (v.color === colorKey) {
+                const currentPrice = v.price || product.basePrice || 0; 
+                const currentQuantity = v.quantity || 1; 
+
+                return {
+                    ...v,
+                    status: newStatus,
+                    isActive: isActive,
+                    price: isActive ? currentPrice : 0,
+                    quantity: isActive ? currentQuantity : 0
+                };
+            }
+            return v;
+        }));
+    };
+    
+    // [Hàm tiện ích] Xóa TOÀN BỘ nhóm màu (Xóa khỏi State và DB khi lưu)
+    const handleDeleteColorGroupPermanently = (colorKey) => {
+        if (!window.confirm(`CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN toàn bộ biến thể của màu "${colorKey}" không? Thao tác này sẽ xóa chúng khỏi database khi bạn lưu!`)) {
+            return;
+        }
+
+        // Lọc bỏ 5 biến thể của màu đó khỏi mảng variants
+        setVariants(prevVariants => prevVariants.filter(v => v.color !== colorKey));
+
+        if (openColor === colorKey) setOpenColor(null); 
+        alert(`Tất cả biến thể của màu "${colorKey}" đã bị xóa khỏi bộ nhớ và sẽ bị xóa khỏi database sau khi lưu.`);
+    };
+
+    // ... (Các hàm khác giữ nguyên: addNewColorToProduct, selectSuggestedColor, handleNewColorInputChange, handleSave) ...
     const addNewColorToProduct = useCallback((colorName) => {
         if (!colorName || colorName.trim() === '') {
             alert("Vui lòng nhập tên màu.");
@@ -126,85 +213,6 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         setOpenColor(colorName); 
     }, [groupedVariants, product.basePrice, product.mainImage, product.colorImages, setNewColorInput, setVariants]);
 
-    // ------------------------------------------------------------------
-    // LOGIC CHỈNH SỬA VÀ LƯU
-    // ------------------------------------------------------------------
-
-    const handleVariantChange = (uniqueKey, field, value) => {
-        setVariants(prevVariants => prevVariants.map(v => {
-            const key = v.variantId || `new_temp_${v.color}_${v.size}`; 
-            
-            if (key === uniqueKey) {
-                const processedValue = (field === 'price' || field === 'quantity') ? (value === '' ? 0 : parseFloat(value)) : value;
-                
-                // Kích hoạt khi giá trị được chỉnh sửa (trừ khi chỉnh sửa trường status)
-                let updatedStatus = v.status;
-                if (v.status === 'Inactive' && field !== 'status' && processedValue !== 0) {
-                    updatedStatus = 'Active';
-                }
-
-                return { 
-                    ...v, 
-                    [field]: processedValue, 
-                    status: updatedStatus,
-                    isActive: updatedStatus === 'Active'
-                }; 
-            }
-            return v;
-        }));
-    };
-
-    // [Hàm tiện ích] Xử lý sự kiện thay đổi Dropdown Status (FIXED)
-    const handleStatusChange = (uniqueKey, newStatus) => {
-        setVariants(prevVariants => prevVariants.map(v => {
-            const key = v.variantId || `new_temp_${v.color}_${v.size}`;
-            if (key === uniqueKey) {
-                
-                const isActive = newStatus === 'Active';
-                
-                // Lấy giá trị hiện tại (đã nhập) để khôi phục khi chuyển sang Active
-                const currentPrice = v.price || product.basePrice || 0; 
-                const currentQuantity = v.quantity || 1; 
-
-                return { 
-                    ...v, 
-                    status: newStatus, 
-                    isActive: isActive,
-                    
-                    // Khôi phục giá trị khi Active, đặt về 0 khi Inactive
-                    price: isActive ? currentPrice : 0, 
-                    quantity: isActive ? currentQuantity : 0 
-                };
-            }
-            return v;
-        }));
-    };
-    
-    // [Hàm tiện ích] Xóa toàn bộ nhóm màu (Chuyển tất cả về Inactive)
-    const handleDeleteColorGroup = (colorKey) => {
-        if (!window.confirm(`Bạn có chắc chắn muốn xóa toàn bộ màu "${colorKey}" không? Thao tác này sẽ chuyển tất cả biến thể về trạng thái Inactive.`)) {
-            return;
-        }
-
-        setVariants(prevVariants => prevVariants.map(v => {
-            if (v.color === colorKey) {
-                return {
-                    ...v,
-                    status: 'Inactive',
-                    isActive: false,
-                    price: 0,
-                    quantity: 0
-                };
-            }
-            return v;
-        }));
-
-        if (openColor === colorKey) setOpenColor(null); 
-        alert(`Tất cả biến thể của màu "${colorKey}" đã được chuyển sang Inactive và sẽ bị xóa khỏi cửa hàng sau khi lưu.`);
-    };
-
-    // ... (Các hàm Autosuggest và Save giữ nguyên) ...
-
     const handleNewColorInputChange = (e) => {
         const value = e.target.value;
         setNewColorInput(value);
@@ -230,9 +238,8 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         try {
             const docRef = doc(db, 'products', product.id);
             
-            // LỌC BỎ CÁC BIẾN THỂ INACTIVE trước khi lưu
+            // LƯU Ý: Không lọc các biến thể Inactive, chúng ta chỉ lọc các cờ UI tạm thời
             const finalVariants = variants
-                .filter(v => v.status === 'Active' || v.isActive === true)
                 .map(v => {
                     const cleaned = { ...v };
                     if (typeof cleaned.variantId === 'string' && cleaned.variantId.startsWith('new_temp_')) {
@@ -249,7 +256,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
 
             onSave(); 
             onClose();
-            alert("Đã lưu biến thể thành công!");
+            alert("Đã lưu Thay đổi trạng thái biến thể thành công! (Bao gồm cả Inactive).");
         } catch (error) {
             console.error("Lỗi khi lưu variants:", error);
             alert("LỖI LƯU: Không thể cập nhật biến thể.");
@@ -337,13 +344,6 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                             <option value="Active">Active</option>
                                             <option value="Inactive">Inactive</option>
                                         </select>
-                                        <button 
-                                            onClick={() => handleDeleteColorGroup(v.color)}
-                                            style={MODAL_STYLES.actionButton}
-                                            title="Xóa biến thể (chuyển sang Inactive)"
-                                        >
-                                            🗑️
-                                        </button>
                                     </td>
                                 </tr>
                             );
@@ -458,10 +458,10 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                             <button 
                                                 onClick={(e) => {
                                                     e.stopPropagation(); // Ngăn chặn mở/đóng chi tiết khi xóa
-                                                    handleDeleteColorGroup(colorKey);
+                                                    handleDeleteColorGroupPermanently(colorKey);
                                                 }}
                                                 style={{...MODAL_STYLES.actionButton, color: '#C40000'}}
-                                                title={`Xóa toàn bộ biến thể của màu ${colorKey} (Chuyển sang Inactive)`}
+                                                title={`Xóa VĨNH VIỄN toàn bộ biến thể của màu ${colorKey}`}
                                             >
                                                 🗑️
                                             </button>

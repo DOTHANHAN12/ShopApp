@@ -145,7 +145,7 @@ public class HomeActivity extends AppCompatActivity {
         if (iconProfile != null) {
             iconProfile.setOnClickListener(v -> {
                 if (mAuth.getCurrentUser() != null) {
-                    startActivity(new Intent(this, UserProfileActivity.class));
+                    startActivity(new Intent(this, ProfileActivity.class));
                 } else {
                     Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin cá nhân.", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(this, LoginActivity.class));

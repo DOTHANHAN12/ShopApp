@@ -14,13 +14,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopApp">
         <activity
-            android:name=".VoucherAdapter"
+            android:name=".MyReviewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WriteReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReviewListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".VoucherSelectionActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Voucher"
             android:exported="false" />
         <activity android:name=".OrderSuccessActivity"
             android:exported="false"
@@ -37,28 +52,13 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AddressAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".ShippingAddress"
-            android:exported="false" />
-        <activity
             android:name=".FavoriteActivity"
             android:exported="false" />
         <activity
             android:name=".CartActivity"
             android:exported="false" />
         <activity
-            android:name=".FavoriteAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".CartAdapter"
-            android:exported="false" />
-        <activity
             android:name=".UserProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProductAdapter"
             android:exported="false" />
         <activity
             android:name=".HomeActivity"
@@ -70,49 +70,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Order"
-            android:exported="false" />
-        <activity
-            android:name=".FavoriteItem"
-            android:exported="false" />
-        <activity
-            android:name=".CartItem"
-            android:exported="false" />
-        <activity
-            android:name=".Address"
-            android:exported="false" />
-        <activity
-            android:name=".User"
-            android:exported="false" />
-        <activity
-            android:name=".OfferDetails"
-            android:exported="false" />
-        <activity
-            android:name=".RecommendationAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".SizeSelectorAdapter"
-            android:exported="false" />
-        <activity
             android:name=".ProductDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ColorSelectorAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".ProductImageSliderAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".Recommendation"
-            android:exported="false" />
-        <activity
-            android:name=".ProductImageDetails"
-            android:exported="false" />
-        <activity
-            android:name=".SubCategoryAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".SubCategory"
             android:exported="false" />
         <activity
             android:name=".CategorySearchActivity"

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -21,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private EditText edtEmail, edtPassword;
     private Button btnRegister, btnLogin;
+    private TextView tvForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +36,17 @@ public class LoginActivity extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtPassword);
         btnRegister = findViewById(R.id.btnRegister);
         btnLogin = findViewById(R.id.btnLogin);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         // ====== Điều hướng sang màn Đăng ký ======
         btnRegister.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+
+        // ====== Điều hướng sang màn Quên mật khẩu ======
+        tvForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
 

@@ -43,11 +43,11 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
     // UI Elements
     private TextView textImageIndicator, textProductName, textPrice, textReviewCount, textColorName, textSizeLabel, textStockStatus, textSelectedQuantity, textInventoryCount;
-    private TextView textOriginalPrice;
+    private TextView textOriginalPrice, textSeeAllReviews;
     private ViewPager2 viewPager;
     private RatingBar ratingBarDetail;
-    private Button btnAddToCart;
-    private RecyclerView recyclerColors, recyclerSizes, recyclerRecommendations;
+    private Button btnAddToCart, btnWriteReview;
+    private RecyclerView recyclerColors, recyclerSizes, recyclerRecommendations, recyclerReviews;
     private ImageView imgBack;
     private ImageView navHomeDetail;
     private TextView textToolbarTitle;
@@ -118,15 +118,18 @@ public class ProductDetailActivity extends AppCompatActivity implements
         textStockStatus = findViewById(R.id.text_stock_status);
         textSelectedQuantity = findViewById(R.id.text_selected_quantity);
         textInventoryCount = findViewById(R.id.text_inventory_count);
-//        textToolbarTitle = findViewById(R.id.text_toolbar_title);
+        textSeeAllReviews = findViewById(R.id.text_see_all_reviews);
 
         ratingBarDetail = findViewById(R.id.rating_bar_detail);
 
         recyclerColors = findViewById(R.id.recycler_color_selector);
         recyclerSizes = findViewById(R.id.recycler_size_selector);
         recyclerRecommendations = findViewById(R.id.recycler_frequently_bought);
+        recyclerReviews = findViewById(R.id.recycler_reviews);
+
         imgBack = findViewById(R.id.img_back);
         btnAddToCart = findViewById(R.id.btn_add_to_cart);
+        btnWriteReview = findViewById(R.id.btn_write_review);
 
         // Ánh xạ nút Cộng/Trừ
         btnIncrementQty = findViewById(R.id.btn_increment_qty);
@@ -146,7 +149,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
         if (iconFavoriteDetail != null) {
             iconFavoriteDetail.setOnClickListener(v -> toggleFavorite());
         }
-
 
         // Ánh xạ nút Home (Footer)
         navHomeDetail = findViewById(R.id.nav_home_cs);
@@ -473,6 +475,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
                                 if (currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
                                     displayProductData(currentProduct);
                                     checkFavoriteStatus();
+                                    loadReviews(productId);
                                 } else {
                                     Log.e(TAG, "LỖI DỮ LIỆU: currentProduct là NULL hoặc thiếu trường colorImages.");
                                     Toast.makeText(this, "Thiếu dữ liệu ảnh chi tiết. Vui lòng ghi lại dữ liệu mẫu.", Toast.LENGTH_LONG).show();
@@ -497,9 +500,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private void displayProductData(Product product) {
         // 1. Gán dữ liệu cơ bản
         textProductName.setText(product.getName());
-        if (textToolbarTitle != null) {
-            textToolbarTitle.setText(product.getName());
-        }
 
         // 2. TÍNH TOÁN VÀ GÁN GIÁ (Áp dụng KM cho lần đầu)
         updatePriceUIInitial(product.getBasePrice(), product.getIsOfferStatus(), product.getOffer());
@@ -528,6 +528,41 @@ public class ProductDetailActivity extends AppCompatActivity implements
         } else {
             Log.w(TAG, "Sản phẩm thiếu trường 'type' để đề xuất.");
         }
+
+        // Setup button clicks for reviews
+        btnWriteReview.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductDetailActivity.this, WriteReviewActivity.class);
+            intent.putExtra("PRODUCT_ID", currentProduct.getProductId());
+            startActivity(intent);
+        });
+
+        textSeeAllReviews.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductDetailActivity.this, ReviewListActivity.class);
+            intent.putExtra("PRODUCT_ID", currentProduct.getProductId());
+            startActivity(intent);
+        });
+    }
+
+    private void loadReviews(String productId) {
+        db.collection("products").document(productId).collection("reviews")
+                .limit(3) // Giới hạn ở 3 bài đánh giá gần nhất
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Review> reviews = new ArrayList<>();
+                        for (DocumentSnapshot document : task.getResult()) {
+                            reviews.add(document.toObject(Review.class));
+                        }
+                        setupReviewsRecyclerView(reviews);
+                    } else {
+                        Log.e(TAG, "Error getting reviews: ", task.getException());
+                    }
+                });
+    }
+
+    private void setupReviewsRecyclerView(List<Review> reviews) {
+        recyclerReviews.setLayoutManager(new LinearLayoutManager(this));
+        recyclerReviews.setAdapter(new ReviewAdapter(reviews));
     }
 
     /**

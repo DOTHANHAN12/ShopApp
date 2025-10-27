@@ -51,6 +51,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database") // Realtime Database
     implementation("com.google.firebase:firebase-firestore") // Cloud Firestore
+    implementation("com.google.firebase:firebase-storage") // Firebase Storage
 
     // -----------------------------------------------------------------
     // 2. ANDROIDX CORE & UI COMPONENTS

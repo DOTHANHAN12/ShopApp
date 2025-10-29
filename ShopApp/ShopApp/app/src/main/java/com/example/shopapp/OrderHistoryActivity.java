@@ -1,5 +1,6 @@
 package com.example.shopapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -33,11 +34,31 @@ public class OrderHistoryActivity extends AppCompatActivity {
 
         recyclerOrders = findViewById(R.id.recycler_orders);
         setupRecyclerView();
-
-        ImageView imgBack = findViewById(R.id.img_back);
-        imgBack.setOnClickListener(v -> finish());
+        setupNavigation();
 
         loadOrders();
+    }
+
+    private void setupNavigation() {
+        ImageView cartButton = findViewById(R.id.ic_cart);
+        if (cartButton != null) {
+            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
+
+        ImageView homeButton = findViewById(R.id.nav_home_cs);
+        if (homeButton != null) {
+            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        }
+
+        ImageView userButton = findViewById(R.id.nav_user_cs);
+        if (userButton != null) {
+            userButton.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        }
+
+        ImageView backButton = findViewById(R.id.img_back);
+        if (backButton != null) {
+            backButton.setOnClickListener(v -> finish());
+        }
     }
 
     private void setupRecyclerView() {

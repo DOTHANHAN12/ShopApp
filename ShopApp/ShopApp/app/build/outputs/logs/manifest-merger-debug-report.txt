@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-111:12
-INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-111:12
-INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-111:12
-INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-111:12
+ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-109:12
+INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-109:12
+INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-109:12
+INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:2:1-109:12
 MERGED from [com.google.firebase:firebase-firestore:26.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\d72376f9fb44c62dfc1e0c534cf2cfaa\transformed\firebase-firestore-26.0.1\AndroidManifest.xml:2:1-26:12
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\maid2\.gradle\caches\8.13\transforms\52fb9e5c3d04e5fce95c3c47788f0c74\transformed\grpc-android-1.62.2\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.firebase:firebase-analytics:23.0.0] C:\Users\maid2\.gradle\caches\8.13\transforms\03965cbd25704ec0d7ed87bd8b839e5b\transformed\firebase-analytics-23.0.0\AndroidManifest.xml:2:1-9:12
@@ -148,8 +148,8 @@ MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\maid2\.grad
 	android:name
 		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:6:22-74
 application
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-109:19
-INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-109:19
+ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-107:19
+INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-107:19
 MERGED from [com.google.firebase:firebase-firestore:26.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\d72376f9fb44c62dfc1e0c534cf2cfaa\transformed\firebase-firestore-26.0.1\AndroidManifest.xml:13:5-24:19
 MERGED from [com.google.firebase:firebase-firestore:26.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\d72376f9fb44c62dfc1e0c534cf2cfaa\transformed\firebase-firestore-26.0.1\AndroidManifest.xml:13:5-24:19
 MERGED from [com.google.firebase:firebase-analytics:23.0.0] C:\Users\maid2\.gradle\caches\8.13\transforms\03965cbd25704ec0d7ed87bd8b839e5b\transformed\firebase-analytics-23.0.0\AndroidManifest.xml:7:5-20
@@ -418,28 +418,22 @@ ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\An
 		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:98:13-37
 	android:name
 		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:97:13-51
-activity#com.example.shopapp.SearchActivity
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:99:9-101:40
-	android:exported
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:101:13-37
-	android:name
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:100:13-43
 activity#com.example.shopapp.LoginActivity
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:102:9-104:40
+ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:100:9-102:40
 	android:exported
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:104:13-37
+		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:102:13-37
 	android:name
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:103:13-42
+		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:101:13-42
 activity#com.example.shopapp.RegisterActivity
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:105:9-107:40
+ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:103:9-105:40
 	android:exported
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:107:13-37
+		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:105:13-37
 	android:name
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:13-45
+		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:104:13-45
 activity#com.example.shopapp.ProductListActivity
-ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:108:9-76
+ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:9-76
 	android:name
-		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:108:19-73
+		ADDED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:19-73
 uses-sdk
 INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml

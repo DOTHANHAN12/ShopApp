@@ -1,4 +1,3 @@
-
 package com.example.shopapp;
 
 public class Review {
@@ -7,18 +6,28 @@ public class Review {
     private float rating;
     private String comment;
     private long timestamp;
+    private String productId;
+    private String orderId;
+    private boolean isEdited;
+    private long updatedAt;
 
     public Review() {
         // Default constructor required for calls to DataSnapshot.getValue(Review.class)
     }
 
-    public Review(String userId, String userName, float rating, String comment, long timestamp) {
+    public Review(String userId, String userName, float rating, String comment, long timestamp, String productId, String orderId) {
         this.userId = userId;
         this.userName = userName;
         this.rating = rating;
         this.comment = comment;
         this.timestamp = timestamp;
+        this.productId = productId;
+        this.orderId = orderId;
+        this.isEdited = false;
+        this.updatedAt = 0;
     }
+
+    // Getters and Setters
 
     public String getUserId() {
         return userId;
@@ -58,5 +67,37 @@ public class Review {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public boolean isEdited() {
+        return isEdited;
+    }
+
+    public void setEdited(boolean edited) {
+        isEdited = edited;
+    }
+
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -46,7 +46,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private TextView textOriginalPrice, textSeeAllReviews;
     private ViewPager2 viewPager;
     private RatingBar ratingBarDetail;
-    private Button btnAddToCart, btnWriteReview;
+    private Button btnAddToCart;
     private RecyclerView recyclerColors, recyclerSizes, recyclerRecommendations, recyclerReviews;
     private ImageView imgBack;
     private ImageView navHomeDetail;
@@ -129,7 +129,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         imgBack = findViewById(R.id.img_back);
         btnAddToCart = findViewById(R.id.btn_add_to_cart);
-        btnWriteReview = findViewById(R.id.btn_write_review);
 
         // Ánh xạ nút Cộng/Trừ
         btnIncrementQty = findViewById(R.id.btn_increment_qty);
@@ -529,13 +528,6 @@ public class ProductDetailActivity extends AppCompatActivity implements
             Log.w(TAG, "Sản phẩm thiếu trường 'type' để đề xuất.");
         }
 
-        // Setup button clicks for reviews
-        btnWriteReview.setOnClickListener(v -> {
-            Intent intent = new Intent(ProductDetailActivity.this, WriteReviewActivity.class);
-            intent.putExtra("PRODUCT_ID", currentProduct.getProductId());
-            startActivity(intent);
-        });
-
         textSeeAllReviews.setOnClickListener(v -> {
             Intent intent = new Intent(ProductDetailActivity.this, ReviewListActivity.class);
             intent.putExtra("PRODUCT_ID", currentProduct.getProductId());
@@ -746,6 +738,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
                                 // KẾT THÚC LOGIC TÍNH GIÁ ĐỀ XUẤT
 
                                 recommendations.add(new Recommendation(
+                                        recommendedProduct.getProductId(), // Đã thêm productId
                                         recommendedProduct.getName(),
                                         recDisplayPrice, // Dùng giá đã tính toán
                                         recommendedProduct.getMainImage(),
@@ -758,7 +751,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
                         if (!recommendations.isEmpty()) {
                             Log.d(TAG, "Đã tải " + recommendations.size() + " sản phẩm đề xuất cùng loại.");
                             recyclerRecommendations.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-                            recyclerRecommendations.setAdapter(new RecommendationAdapter(recommendations));
+                            recyclerRecommendations.setAdapter(new RecommendationAdapter(recommendations, this)); // Sửa lỗi ở đây
                         } else {
                             Log.d(TAG, "Không tìm thấy sản phẩm cùng loại để đề xuất.");
                         }

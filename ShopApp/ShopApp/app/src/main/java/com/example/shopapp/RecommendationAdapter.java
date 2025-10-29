@@ -1,5 +1,7 @@
 package com.example.shopapp;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +17,16 @@ import java.util.Locale;
 public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAdapter.RecommendationViewHolder> {
 
     private final List<Recommendation> recommendationList;
+    private final Context context;
 
-    public RecommendationAdapter(List<Recommendation> recommendationList) {
+    public RecommendationAdapter(List<Recommendation> recommendationList, Context context) {
         this.recommendationList = recommendationList;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public RecommendationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Layout: item_product_recommendation.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product_recommendation, parent, false);
         return new RecommendationViewHolder(view);
     }
@@ -36,7 +39,6 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
         holder.sizeTextView.setText(rec.sizeRange);
         holder.priceTextView.setText(String.format(Locale.getDefault(), "%,.0f VND", rec.price));
 
-        // Tải ảnh đề xuất
         if (rec.imageUrl != null && !rec.imageUrl.isEmpty()) {
             Picasso.get()
                     .load(rec.imageUrl)
@@ -44,7 +46,11 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
                     .into(holder.imageView);
         }
 
-        // TODO: Xử lý click item đề xuất
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_ID", rec.productId);
+            context.startActivity(intent);
+        });
     }
 
     @Override

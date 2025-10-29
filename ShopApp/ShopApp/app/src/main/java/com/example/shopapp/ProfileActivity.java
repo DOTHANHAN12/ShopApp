@@ -41,6 +41,7 @@ public class ProfileActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mapViews();
+        setupNavigation();
         loadUserProfile();
 
         btnEditProfile.setOnClickListener(v -> {
@@ -75,9 +76,25 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(ProfileActivity.this, MyReviewsActivity.class);
             startActivity(intent);
         });
+    }
 
-        ImageView imgBack = findViewById(R.id.img_back);
-        imgBack.setOnClickListener(v -> finish());
+    private void setupNavigation() {
+        ImageView cartButton = findViewById(R.id.ic_cart);
+        if (cartButton != null) {
+            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
+
+        ImageView homeButton = findViewById(R.id.nav_home_cs);
+        if (homeButton != null) {
+            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        }
+
+        ImageView userButton = findViewById(R.id.nav_user_cs);
+        if (userButton != null) {
+            userButton.setOnClickListener(v -> {
+                // Already on profile, do nothing or refresh
+            });
+        }
     }
 
     @Override

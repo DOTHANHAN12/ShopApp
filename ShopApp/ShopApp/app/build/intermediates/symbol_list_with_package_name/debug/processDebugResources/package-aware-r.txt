@@ -3762,6 +3762,7 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable placeholder_image
 drawable rounded_border_gray
 drawable rounded_border_gray_button
 drawable rounded_button_black
@@ -4041,7 +4042,9 @@ id fitXY
 id fixed
 id flip
 id floating
+id footer_layout
 id forever
+id fragment_container
 id fragment_container_view_tag
 id frost
 id fullscreen_header
@@ -4054,6 +4057,7 @@ id group_divider
 id grouping
 id groups
 id header
+id header_layout
 id header_title
 id hidden
 id hide_ime_id
@@ -4073,6 +4077,7 @@ id ifRoom
 id ignore
 id ignoreRequest
 id image
+id image_product
 id img_back
 id img_back_arrow
 id img_back_cart
@@ -4116,7 +4121,6 @@ id layout_bottom_buttons
 id layout_bottom_nav
 id layout_bottom_nav_cs
 id layout_bottom_nav_float
-id layout_footer
 id layout_footer_sticky
 id layout_header
 id layout_header_edit
@@ -4208,6 +4212,7 @@ id mtrl_view_tag_bottom_padding
 id multiply
 id nav_home_cs
 id nav_profile
+id nav_user_cs
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_content_container
 id navigation_bar_item_icon_container
@@ -4303,6 +4308,7 @@ id recycler_size_selector
 id recycler_unavailable_vouchers
 id recycler_view_all_reviews
 id recycler_view_my_reviews
+id recycler_view_order_products
 id recycler_wish_list
 id report_drawn
 id retreat
@@ -4446,8 +4452,10 @@ id text_price
 id text_product_id
 id text_product_id_overlay
 id text_product_info_overlay
+id text_product_name
 id text_product_name_detail
 id text_product_name_list
+id text_product_quantity
 id text_product_title
 id text_product_type_list
 id text_rec_product_name
@@ -4467,6 +4475,7 @@ id text_stock_status
 id text_street_address
 id text_sub_category_name
 id text_subtotal
+id text_toolbar_title
 id text_unavailable_voucher_header
 id text_user_email
 id text_user_name
@@ -4486,6 +4495,7 @@ id textinput_suffix_text
 id time
 id title
 id titleDividerNoCustom
+id title_bar
 id title_template
 id toggle
 id toolbar
@@ -4665,6 +4675,7 @@ layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_address
 layout activity_address_selection
+layout activity_base
 layout activity_cart
 layout activity_cart_item
 layout activity_category_search
@@ -4724,6 +4735,7 @@ layout item_cart
 layout item_color_selector
 layout item_featured_product
 layout item_order
+layout item_order_product
 layout item_order_summary_row
 layout item_product
 layout item_product_image_slide
@@ -4736,6 +4748,7 @@ layout item_voucher
 layout item_wish_list
 layout layout_floating_bottom_nav
 layout layout_top_icons_simple
+layout layout_top_icons_with_back
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title

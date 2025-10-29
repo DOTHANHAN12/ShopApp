@@ -128,9 +128,6 @@
             android:name="com.example.shopapp.CategorySearchActivity"
             android:exported="false" />
         <activity
-            android:name="com.example.shopapp.SearchActivity"
-            android:exported="false" />
-        <activity
             android:name="com.example.shopapp.LoginActivity"
             android:exported="false" />
         <activity

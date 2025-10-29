@@ -54,13 +54,33 @@ public class EditProfileActivity extends AppCompatActivity {
         storageRef = FirebaseStorage.getInstance().getReference();
 
         mapViews();
+        setupNavigation();
         loadUserProfile();
 
         textChangePhoto.setOnClickListener(v -> openFileChooser());
         btnSave.setOnClickListener(v -> saveProfileChanges());
+    }
 
-        ImageView imgBack = findViewById(R.id.img_back);
-        imgBack.setOnClickListener(v -> finish());
+    private void setupNavigation() {
+        ImageView cartButton = findViewById(R.id.ic_cart);
+        if (cartButton != null) {
+            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
+
+        ImageView homeButton = findViewById(R.id.nav_home_cs);
+        if (homeButton != null) {
+            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        }
+
+        ImageView userButton = findViewById(R.id.nav_user_cs);
+        if (userButton != null) {
+            userButton.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        }
+
+        ImageView backButton = findViewById(R.id.img_back);
+        if (backButton != null) {
+            backButton.setOnClickListener(v -> finish());
+        }
     }
 
     private void mapViews() {
@@ -175,6 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
         db.collection("users").document(userId).update(updates)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(EditProfileActivity.this, "Cập nhật hồ sơ thành công", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
                     finish();
                 })
                 .addOnFailureListener(e -> Toast.makeText(EditProfileActivity.this, "Lỗi cập nhật hồ sơ", Toast.LENGTH_SHORT).show());

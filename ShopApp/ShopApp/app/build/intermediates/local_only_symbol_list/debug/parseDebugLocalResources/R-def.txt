@@ -66,6 +66,7 @@ drawable ic_user_placeholder
 drawable ic_voucher
 drawable ic_voucher_checked
 drawable limited_offer_background
+drawable placeholder_image
 drawable rounded_border_gray
 drawable rounded_border_gray_button
 drawable rounded_button_black
@@ -130,10 +131,14 @@ id edtEmail
 id edtFullName
 id edtPassword
 id edt_search_keyword
+id footer_layout
+id fragment_container
 id header
+id header_layout
 id ic_cart
 id ic_favorite
 id ic_notification
+id image_product
 id img_back
 id img_back_arrow
 id img_back_cart
@@ -164,7 +169,6 @@ id layout_bottom_buttons
 id layout_bottom_nav
 id layout_bottom_nav_cs
 id layout_bottom_nav_float
-id layout_footer
 id layout_footer_sticky
 id layout_header
 id layout_header_edit
@@ -188,6 +192,7 @@ id layout_wishlist
 id main
 id nav_home_cs
 id nav_profile
+id nav_user_cs
 id profile_email
 id profile_image
 id profile_name
@@ -218,6 +223,7 @@ id recycler_size_selector
 id recycler_unavailable_vouchers
 id recycler_view_all_reviews
 id recycler_view_my_reviews
+id recycler_view_order_products
 id recycler_wish_list
 id switch_set_default
 id tab_baby
@@ -266,8 +272,10 @@ id text_price
 id text_product_id
 id text_product_id_overlay
 id text_product_info_overlay
+id text_product_name
 id text_product_name_detail
 id text_product_name_list
+id text_product_quantity
 id text_product_title
 id text_product_type_list
 id text_rec_product_name
@@ -287,6 +295,7 @@ id text_stock_status
 id text_street_address
 id text_sub_category_name
 id text_subtotal
+id text_toolbar_title
 id text_unavailable_voucher_header
 id text_user_email
 id text_user_name
@@ -298,6 +307,7 @@ id text_voucher_info_line
 id text_voucher_not_available
 id text_voucher_selected_summary
 id title
+id title_bar
 id toolbar
 id toolbar_vnpay
 id tvBackToLogin
@@ -316,6 +326,7 @@ id view_pager_product_images
 id webview_vnpay
 layout activity_address
 layout activity_address_selection
+layout activity_base
 layout activity_cart
 layout activity_cart_item
 layout activity_category_search
@@ -355,6 +366,7 @@ layout item_cart
 layout item_color_selector
 layout item_featured_product
 layout item_order
+layout item_order_product
 layout item_order_summary_row
 layout item_product
 layout item_product_image_slide
@@ -367,6 +379,7 @@ layout item_voucher
 layout item_wish_list
 layout layout_floating_bottom_nav
 layout layout_top_icons_simple
+layout layout_top_icons_with_back
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name

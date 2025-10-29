@@ -44,13 +44,6 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_address_selection);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        );
-
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -70,6 +63,29 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
         mapViews();
         setupRecyclerView();
+        setupNavigation();
+    }
+
+    private void setupNavigation() {
+        ImageView cartButton = findViewById(R.id.ic_cart);
+        if (cartButton != null) {
+            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
+
+        ImageView homeButton = findViewById(R.id.nav_home_cs);
+        if (homeButton != null) {
+            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        }
+
+        ImageView userButton = findViewById(R.id.nav_user_cs);
+        if (userButton != null) {
+            userButton.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        }
+
+        ImageView backButton = findViewById(R.id.img_back_arrow);
+        if (backButton != null) {
+            backButton.setOnClickListener(v -> finish());
+        }
     }
 
     @Override
@@ -80,10 +96,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
     private void mapViews() {
         recyclerView = findViewById(R.id.recycler_addresses);
-        ImageView imgBack = findViewById(R.id.img_back_arrow);
         TextView btnAddNewAddress = findViewById(R.id.btn_add_new_address);
-
-        imgBack.setOnClickListener(v -> finish());
 
         btnAddNewAddress.setOnClickListener(v -> {
             Intent intent = new Intent(AddressSelectionActivity.this, EditAddressActivity.class);

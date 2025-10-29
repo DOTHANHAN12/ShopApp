@@ -54,6 +54,7 @@
             android:layout_width="0dp"
             android:layout_weight="1">
             <ImageView
+                android:id="@+id/nav_user_cs"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:layout_gravity="center"

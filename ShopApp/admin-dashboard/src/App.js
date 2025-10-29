@@ -6,13 +6,103 @@ import ProductList from './components/ProductList';
 import OrderList from './components/OrderList'; 
 import LoginScreen from './components/LoginScreen'; 
 import UserList from './components/UserList'; 
-import NotificationManager from './components/NotificationManager'; // <-- IMPORT MỚI
+import NotificationManager from './components/NotificationManager'; 
+
+// --- DARK/MINIMALIST STYLES ---
+const styles = {
+    layout: { display: 'flex', minHeight: '100vh', backgroundColor: '#1A1A1A', color: '#E0E0E0' },
+    
+    sidebar: {
+        width: '250px',
+        backgroundColor: '#000000',
+        padding: '20px 0',
+        boxShadow: '4px 0 10px rgba(0,0,0,0.5)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        position: 'fixed',
+        height: '100%',
+        zIndex: 100
+    },
+    
+    logo: {
+        color: '#C40000',
+        fontSize: '32px',
+        fontWeight: 900,
+        textTransform: 'uppercase',
+        letterSpacing: '3px',
+        marginBottom: '40px',
+        marginTop: '10px'
+    },
+    
+    nav: {
+        width: '100%',
+        flexGrow: 1
+    },
+    
+    navItem: (isActive) => ({
+        display: 'flex',
+        alignItems: 'center',
+        padding: '15px 30px',
+        cursor: 'pointer',
+        color: isActive ? '#FFFFFF' : '#A0A0A0',
+        backgroundColor: isActive ? '#1A1A1A' : 'transparent',
+        borderLeft: isActive ? '5px solid #C40000' : '5px solid transparent',
+        fontWeight: isActive ? 'bold' : 'normal',
+        transition: 'all 0.2s ease-in-out',
+        marginBottom: '5px'
+    }),
+    
+    mainContent: {
+        flexGrow: 1,
+        marginLeft: '250px', // Đảm bảo nội dung không bị che bởi sidebar
+        padding: '40px 30px',
+        width: 'calc(100% - 250px)',
+        boxSizing: 'border-box'
+    },
+
+    // Card/Container style cho nội dung chính
+    contentContainer: {
+        backgroundColor: '#292929', // Màu tối hơn cho container
+        padding: '30px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+        minHeight: '85vh'
+    },
+    
+    logoutContainer: {
+        marginTop: 'auto', // Đẩy xuống cuối sidebar
+        padding: '20px',
+        width: '100%',
+        borderTop: '1px solid #333'
+    },
+    
+    logoutButton: {
+        width: '100%',
+        backgroundColor: '#C40000',
+        color: 'white',
+        border: 'none',
+        padding: '10px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        transition: 'background-color 0.3s',
+        fontSize: '16px'
+    }
+};
+
+const navItems = [
+    { key: 'products', name: '📦 SẢN PHẨM', component: ProductList },
+    { key: 'orders', name: '📋 ĐƠN HÀNG', component: OrderList },
+    { key: 'users', name: '👥 NGƯỜI DÙNG', component: UserList },
+    { key: 'notifications', name: '🔔 THÔNG BÁO', component: NotificationManager },
+];
+
 
 function App() {
     const [currentPage, setCurrentPage] = useState('products');
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
-    // Theo dõi trạng thái Auth Firebase
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setIsLoggedIn(!!user); 
@@ -30,174 +120,55 @@ function App() {
         }
     };
 
-    const styles = {
-        navbar: {
-            backgroundColor: '#000000',
-            color: '#FFFFFF',
-            padding: '15px 30px',
-            fontWeight: 'bold',
-            fontSize: '20px',
-            letterSpacing: '2px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-        },
-        logo: {
-            color: '#C40000',
-            fontSize: '28px',
-            fontWeight: 900,
-            textTransform: 'uppercase'
-        },
-        navItem: {
-            color: '#FFFFFF',
-            textDecoration: 'none',
-            padding: '0 15px',
-            cursor: 'pointer',
-            transition: 'color 0.3s',
-        },
-        navItemSelected: {
-            color: '#C40000',
-            fontWeight: 'bold',
-            borderBottom: '2px solid #C40000',
-            paddingBottom: '5px',
-        },
-        mainContent: {
-            backgroundColor: '#F5F5F5',
-            minHeight: 'calc(100vh - 60px)',
-            padding: '40px 20px',
-        },
-        container: {
-            maxWidth: '1200px',
-            margin: '0 auto',
-            backgroundColor: '#FFFFFF',
-            padding: '30px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        },
-        title: {
-            fontSize: '32px',
-            fontWeight: 'bold',
-            marginBottom: '20px',
-            color: '#000',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-        },
-        card: {
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E0E0E0',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '15px',
-            transition: 'box-shadow 0.3s',
-        },
-        logoutButton: {
-            backgroundColor: '#FF4D4D',
-            color: 'white',
-            border: 'none',
-            padding: '8px 15px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            marginLeft: '20px',
-            transition: 'background-color 0.3s',
-        }
-    };
-
     const renderContent = () => {
         if (!isLoggedIn) {
-            return <LoginScreen setIsLoggedIn={setIsLoggedIn} />; 
+            // Căn giữa LoginScreen cho giao diện tối
+            return (
+                <div style={{...styles.layout, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                    <LoginScreen setIsLoggedIn={setIsLoggedIn} />
+                </div>
+            );
         }
         
-        if (currentPage === 'products') {
-            return <ProductList />;
-        }
-        
-        if (currentPage === 'orders') {
-            return <OrderList />;
-        }
-        
-        if (currentPage === 'users') {
-            return <UserList />;
-        }
-
-        // --- RENDER TRANG THÔNG BÁO ---
-        if (currentPage === 'notifications') {
-            return <NotificationManager />;
-        }
-        // ------------------------------
+        const CurrentComponent = navItems.find(item => item.key === currentPage)?.component;
         
         return (
-            <div style={styles.container}>
-                <h1 style={styles.title}>Trang không tồn tại</h1>
+            <div style={styles.layout}>
+                
+                {/* --- SIDEBAR --- */}
+                <div style={styles.sidebar}>
+                    <div style={styles.logo}>ADMIN HUB</div>
+                    <nav style={styles.nav}>
+                        {navItems.map(item => (
+                            <div 
+                                key={item.key}
+                                style={styles.navItem(currentPage === item.key)}
+                                onClick={() => setCurrentPage(item.key)}
+                            >
+                                {item.name}
+                            </div>
+                        ))}
+                    </nav>
+                    <div style={styles.logoutContainer}>
+                         <button style={styles.logoutButton} onClick={handleLogout}>
+                            Đăng Xuất
+                        </button>
+                    </div>
+                </div>
+
+                {/* --- MAIN CONTENT --- */}
+                <main style={styles.mainContent}>
+                    <div style={styles.contentContainer}>
+                        {CurrentComponent ? <CurrentComponent /> : <div>Trang không tồn tại</div>}
+                    </div>
+                </main>
             </div>
         );
     };
 
     return (
-        <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, padding: 0 }}>
-            {isLoggedIn && (
-                <nav style={styles.navbar}>
-                    <div style={styles.logo}>ADMIN DASH</div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span 
-                            style={{ 
-                                ...styles.navItem, 
-                                ...(currentPage === 'products' ? styles.navItemSelected : {}) 
-                            }}
-                            onClick={() => setCurrentPage('products')}
-                            onMouseEnter={(e) => { if (currentPage !== 'products') { e.target.style.color = '#C40000'; } }}
-                            onMouseLeave={(e) => { if (currentPage !== 'products') { e.target.style.color = '#FFFFFF'; } }}
-                        >
-                            SẢN PHẨM
-                        </span>
-                        <span 
-                            style={{ 
-                                ...styles.navItem, 
-                                ...(currentPage === 'orders' ? styles.navItemSelected : {}) 
-                            }}
-                            onClick={() => setCurrentPage('orders')}
-                            onMouseEnter={(e) => { if (currentPage !== 'orders') { e.target.style.color = '#C40000'; } }}
-                            onMouseLeave={(e) => { if (currentPage !== 'orders') { e.target.style.color = '#FFFFFF'; } }}
-                        >
-                            ĐƠN HÀNG
-                        </span>
-                        <span 
-                            style={{ 
-                                ...styles.navItem, 
-                                ...(currentPage === 'users' ? styles.navItemSelected : {}) 
-                            }}
-                            onClick={() => setCurrentPage('users')}
-                            onMouseEnter={(e) => { if (currentPage !== 'users') { e.target.style.color = '#C40000'; } }}
-                            onMouseLeave={(e) => { if (currentPage !== 'users') { e.target.style.color = '#FFFFFF'; } }}
-                        >
-                            NGƯỜI DÙNG
-                        </span>
-                        {/* --- NÚT THÔNG BÁO --- */}
-                        <span 
-                            style={{ 
-                                ...styles.navItem, 
-                                // Đổi từ 'vouchers' thành 'notifications'
-                                ...(currentPage === 'notifications' ? styles.navItemSelected : {}) 
-                            }}
-                            onClick={() => setCurrentPage('notifications')}
-                            onMouseEnter={(e) => { if (currentPage !== 'notifications') { e.target.style.color = '#C40000'; } }}
-                            onMouseLeave={(e) => { if (currentPage !== 'notifications') { e.target.style.color = '#FFFFFF'; } }}
-                        >
-                            THÔNG BÁO
-                        </span>
-                        {/* ----------------------------- */}
-                        <button style={styles.logoutButton} onClick={handleLogout}
-                            onMouseEnter={(e) => { e.target.style.backgroundColor = '#FF0000'; }}
-                            onMouseLeave={(e) => { e.target.style.backgroundColor = '#FF4D4D'; }}
-                        >
-                            Đăng Xuất
-                        </button>
-                    </div>
-                </nav>
-            )}
-            <main style={styles.mainContent}>
-                {renderContent()}
-            </main>
+        <div style={{ fontFamily: 'Segoe UI, sans-serif', margin: 0, padding: 0 }}>
+            {renderContent()}
         </div>
     );
 }

@@ -1,63 +1,63 @@
 import React, { useState, useRef } from 'react'; 
-import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, setDoc } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig';
 import { uploadFile, deleteFile } from '../firebaseConfig'; 
 
-// --- HÀM TIỆN ÍCH THỜI GIAN ---
+// --- HÀM TIỆN ÍCH MỚI: TẠO SLUG ID ---
+// Giúp tạo ra ID có định dạng: ten_san_pham_ngau_nhien12345
+const createSlugId = (name, firestoreId) => {
+    // 1. Chuẩn hóa tên sản phẩm: chuyển sang chữ thường, bỏ dấu, thay khoảng trắng bằng gạch dưới
+    const slug = name
+        .toLowerCase()
+        .normalize("NFD") // Chuẩn hóa Unicode (tách dấu)
+        .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+        .replace(/\s/g, '_') // Thay khoảng trắng bằng gạch dưới
+        .replace(/[^a-z0-9_&,-]/g, '') // Giữ lại chữ, số, gạch dưới, &, dấu phẩy/gạch ngang
+        .substring(0, 40); // Giới hạn độ dài
+
+    // 2. Lấy 8 ký tự cuối cùng của Firestore ID (để đảm bảo tính ngẫu nhiên)
+    const uniqueSuffix = firestoreId.substring(firestoreId.length - 8);
+
+    // 3. Kết hợp
+    return `${slug}_${uniqueSuffix}`;
+};
+// --- END HÀM TIỆN ÍCH ---
+
+
+// --- HÀM TIỆN ÍCH THỜI GIAN (Giữ nguyên) ---
 const formatTimestampToDateInput = (timestamp) => {
     if (!timestamp || typeof timestamp !== 'number') return '';
-    // Tạo đối tượng Date từ timestamp số
     const date = new Date(timestamp); 
-    // Chuyển sang định dạng YYYY-MM-DD
     return date.toISOString().split('T')[0];
 };
 
 const dateInputToTimestamp = (dateString) => {
     if (!dateString) return null;
-    // Tạo timestamp từ đầu ngày (midnight) theo múi giờ cục bộ
     return new Date(dateString).getTime();
 };
-
-// HÀM TÍNH TOÁN GIÁ SAU KHUYẾN MÃI CHO VARIANT
-const calculateFinalPriceForVariant = (variantPrice, offer) => {
-    if (!offer || !offer.isOffer || !variantPrice) return variantPrice;
-    
-    const value = parseFloat(offer.offerValue) || 0;
-    const price = parseFloat(variantPrice);
-    
-    let finalPrice = price;
-
-    if (offer.offerType === 'Percentage') {
-        finalPrice = price - (price * value / 100);
-    }
-    if (offer.offerType === 'FlatAmount') {
-        finalPrice = price - value;
-    }
-    
-    finalPrice = Math.round(finalPrice * 100) / 100;
-    return Math.max(0, finalPrice);
-};
+// --- END HÀM TIỆN ÍCH THỜI GIAN ---
 
 
 const modalStyles = {
-    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: '#FFFFFF', padding: '30px', borderRadius: '8px', width: '90%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto' },
+    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
+    modalContent: { backgroundColor: '#1A1A1A', padding: '30px', borderRadius: '8px', width: '90%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', color: '#E0E0E0' },
     formGroup: { marginBottom: '15px' },
     label: { display: 'block', fontWeight: 'bold', marginBottom: '5px' },
-    input: { width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' },
-    saveButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' },
-    tabBar: { display: 'flex', borderBottom: '1px solid #eee', marginBottom: '20px' },
+    input: { width: '100%', padding: '10px', border: '1px solid #444', borderRadius: '4px', boxSizing: 'border-box', backgroundColor: '#333', color: '#E0E0E0' },
+    saveButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px', transition: 'background-color 0.2s' },
+    tabBar: { display: 'flex', borderBottom: '1px solid #555', marginBottom: '20px' },
     tab: (isActive) => ({
         padding: '10px 20px',
         cursor: 'pointer',
         fontWeight: isActive ? 'bold' : 'normal',
         borderBottom: isActive ? '3px solid #C40000' : '3px solid transparent',
-        color: isActive ? '#C40000' : '#333',
+        color: isActive ? '#C40000' : '#A0A0A0',
+        transition: 'color 0.2s'
     }),
-    uploadBox: { border: '2px dashed #000', padding: '20px', textAlign: 'center', cursor: 'pointer', backgroundColor: '#f9f9f9' },
+    uploadBox: { border: '2px dashed #C40000', padding: '20px', textAlign: 'center', cursor: 'pointer', backgroundColor: '#292929' },
     imagePreview: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', marginRight: '10px' },
     imageContainer: { position: 'relative', display: 'inline-block', margin: '5px' },
-    removeImageButton: { position: 'absolute', top: '-8px', right: '-8px', background: '#C40000', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer' }
+    removeImageButton: { position: 'absolute', top: '-8px', right: '-8px', background: '#FF4D4D', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer' }
 };
 
 const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
@@ -93,7 +93,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         
         let processedValue = value;
         if (type === 'date') {
-            // Chuyển đổi date string thành timestamp số khi input thay đổi
             processedValue = dateInputToTimestamp(value);
         } else if (type === 'number') {
             processedValue = parseFloat(value);
@@ -108,9 +107,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         }));
     };
 
-    // ----------------------------------------------------------------------
-    // LOGIC UPLOAD VÀ IMAGE MANAGEMENT
-    // ----------------------------------------------------------------------
+    // --- LOGIC UPLOAD VÀ IMAGE MANAGEMENT (Giữ nguyên) ---
     const handleFileUpload = async (e, fieldName, colorKey = null, oldImageUrl = null) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -164,33 +161,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         }
     };
     
-    const handleAddColorLogic = (colorName) => { 
-        if (!colorName || colorName.trim() === '') {
-            alert("Vui lòng nhập tên màu.");
-            return;
-        }
-        
-        if (product.colorImages?.[colorName]) {
-            alert(`Màu "${colorName}" đã tồn tại.`);
-            return;
-        }
-
-        setProduct(prev => ({
-            ...prev,
-            colorImages: {
-                ...prev.colorImages,
-                [colorName]: [] 
-            }
-        }));
-        
-        colorInputRef.current.value = ''; 
-    };
-
-    const handleAddColor = () => {
-        const colorName = colorInputRef.current?.value?.trim();
-        handleAddColorLogic(colorName);
-    };
-
     const handleRemoveImage = async (imageUrl, color = null, urlIndex = -1) => {
         if (!imageUrl) return;
 
@@ -215,7 +185,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         alert("Đã xóa ảnh thành công!");
     };
 
-    // Hàm tiện ích để kích hoạt upload file input
     const triggerUpload = (refName, oldImageUrl = null) => {
         if (!product.id || isAnyUploading) return;
         
@@ -230,8 +199,9 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         fileInput.click();
     };
 
+
     // ----------------------------------------------------------------------
-    // HÀM LƯU DỮ LIỆU
+    // HÀM LƯU DỮ LIỆU (ĐÃ SỬA ĐỊNH DẠNG ID)
     // ----------------------------------------------------------------------
     const handleSave = async (e) => {
         e.preventDefault();
@@ -242,33 +212,65 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
              return;
         }
         
-        // Chuẩn bị dữ liệu Offer (vì offer dates đã là timestamp trong state)
+        if (!product.name) {
+            alert("Vui lòng nhập Tên Sản Phẩm.");
+            setSaving(false);
+            return;
+        }
+
         const offerDataToSave = product.isOffer ? {
             ...product.offer,
             startDate: product.offer.startDate || null,
             endDate: product.offer.endDate || null,
         } : null;
 
-        const dataToSave = {
-            ...product,
-            basePrice: parseFloat(product.basePrice || 0),
-            isOffer: product.isOffer || false,
-            isFeatured: product.isFeatured || false,
-            offer: offerDataToSave, 
-            updatedAt: Date.now() 
-        };
-        
         let newProductId = product.id;
 
         try {
             if (isEditing) {
+                // Trường hợp CHỈNH SỬA (ID không đổi)
                 const docRef = doc(db, 'products', product.id);
+                const dataToSave = {
+                    ...product,
+                    basePrice: parseFloat(product.basePrice || 0),
+                    isOffer: product.isOffer || false,
+                    isFeatured: product.isFeatured || false,
+                    offer: offerDataToSave, 
+                    updatedAt: Date.now() 
+                };
                 await updateDoc(docRef, dataToSave);
                 alert("Cập nhật thành công!");
             } else {
-                const newDocRef = await addDoc(collection(db, 'products'), dataToSave);
-                newProductId = newDocRef.id;
-                setProduct(prev => ({ ...prev, id: newProductId })); 
+                // Trường hợp THÊM MỚI: TẠO ID MỚI THEO FORMAT CŨ
+                const productsCollectionRef = collection(db, 'products');
+                const newDocRef = doc(productsCollectionRef); // Lấy Document Reference với ID ngẫu nhiên
+                
+                // 1. TẠO ID CUỐI CÙNG THEO FORMAT CŨ: [SLUG_SẢN_PHẨM]_[8_KÝ_TỰ_RANDOM]
+                const temporaryFirestoreId = newDocRef.id;
+                const finalCustomId = createSlugId(product.name, temporaryFirestoreId);
+                
+                // 2. TẠO REF MỚI BẰNG CUSTOM ID (Nếu ID này quá dài, nó sẽ tự động bị cắt ngắn, nhưng thường ID Firestore hợp lệ)
+                const finalDocRef = doc(db, 'products', finalCustomId);
+                newProductId = finalCustomId;
+
+                const dataToSave = {
+                    ...product,
+                    // ĐỒNG BỘ ID: Gán CUSTOM ID cho trường productId bên trong document
+                    productId: finalCustomId, 
+                    basePrice: parseFloat(product.basePrice || 0),
+                    status: product.status || 'Draft',
+                    isOffer: product.isOffer || false,
+                    isFeatured: product.isFeatured || false,
+                    offer: offerDataToSave, 
+                    createdAt: Date.now(),
+                    updatedAt: Date.now() 
+                };
+                
+                // 3. LƯU VÀO FIRESTORE DÙNG setDoc VỚI CUSTOM ID
+                await setDoc(finalDocRef, dataToSave); 
+                
+                // 4. Cập nhật State
+                setProduct(prev => ({ ...prev, id: newProductId, productId: newProductId, createdAt: Date.now(), updatedAt: Date.now() })); 
                 alert(`Thêm sản phẩm mới thành công! ID: ${newProductId}. Bạn có thể tải ảnh ngay bây giờ.`);
             }
 
@@ -277,15 +279,13 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
 
         } catch (error) {
             console.error("Lỗi khi lưu sản phẩm:", error);
-            alert("LỖI LƯU DỮ LIỆU: Vui lòng kiểm tra console.");
+            alert("LỖI LƯU DỮ LIỆU: Vui lòng kiểm tra console. (ID đã tồn tại?)");
         } finally {
             setSaving(false);
         }
     };
 
-    // ----------------------------------------------------------------------
-    // HÀM RENDER CÁC TAB RIÊNG LẺ
-    // ----------------------------------------------------------------------
+    // --- LOGIC RENDER CÁC TAB (Giữ nguyên) ---
     const renderCoreTab = () => (
         <div>
             <div style={modalStyles.formGroup}>
@@ -318,7 +318,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
     );
 
     const renderImageTab = () => {
-        // FIXED: Lấy tất cả các key màu (kể cả màu được thêm từ Modal Biến thể)
         let colorKeys = new Set(Object.keys(product.colorImages || {}));
         (product.variants || []).forEach(v => {
             if (v.color) colorKeys.add(v.color);
@@ -350,7 +349,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                         style={{ 
                             ...modalStyles.uploadBox, 
                             cursor: product.id && !isAnyUploading ? 'pointer' : 'not-allowed',
-                            backgroundColor: isAnyUploading ? '#ffe0e0' : '#f9f9f9'
+                            backgroundColor: isAnyUploading ? '#444' : '#292929'
                         }}
                         onClick={() => triggerUpload('mainImageUpload', product.mainImage || null)} 
                     >
@@ -370,14 +369,14 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
 
                 <h3>Ảnh theo Màu sắc (Color Images)</h3>
                 {(colorKeys.length === 0) && (
-                    <p style={{ color: '#666' }}>Chưa có màu nào được tạo. Vui lòng tạo màu ở tab Quản lý Biến thể.</p>
+                    <p style={{ color: '#888' }}>Chưa có màu nào được tạo. Vui lòng tạo màu ở tab Quản lý Biến thể.</p>
                 )}
                 {colorKeys.map(color => {
                     const isUploadingColor = Object.keys(uploading).some(key => key.includes(`colorImages_${color}_`));
                     const currentImages = product.colorImages?.[color] || [];
 
                     return (
-                        <div key={color} style={{ border: '1px dashed #ccc', padding: '10px', marginTop: '10px' }}>
+                        <div key={color} style={{ border: '1px dashed #555', padding: '10px', marginTop: '10px', backgroundColor: '#292929' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                 <label style={modalStyles.label}>{color}:</label>
                                 <button 
@@ -388,7 +387,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                                         delete newColorImages[color];
                                         setProduct(prev => ({...prev, colorImages: newColorImages}));
                                     }}
-                                    style={{ backgroundColor: '#aaa', color: 'white', padding: '5px', borderRadius: '4px', border: 'none' }}
+                                    style={{ backgroundColor: '#666', color: 'white', padding: '5px', borderRadius: '4px', border: 'none' }}
                                 >
                                     Xóa Thư mục Ảnh
                                 </button>
@@ -427,7 +426,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                                     ...modalStyles.uploadBox, 
                                     cursor: product.id && !isUploadingColor ? 'pointer' : 'not-allowed', 
                                     padding: '10px',
-                                    backgroundColor: isUploadingColor ? '#ffe0e0' : '#f9f9f9'
+                                    backgroundColor: isUploadingColor ? '#444' : '#292929'
                                 }}
                                 onClick={() => triggerUpload(`colorUpload_new_${color}`)} 
                             >
@@ -458,14 +457,14 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                         name="isOffer"
                         checked={product.isOffer || false}
                         onChange={handleChange}
-                        style={modalStyles.toggleSwitch}
+                        style={{marginRight: '10px'}}
                     />
                     **BẬT/TẮT KHUYẾN MÃI**
                 </label>
             </div>
 
             {(product.isOffer) && (
-                <div style={{ padding: '15px', border: '1px solid #C40000', borderRadius: '4px' }}>
+                <div style={{ padding: '15px', border: '1px solid #C40000', borderRadius: '4px', backgroundColor: '#292929' }}>
                     <h3>Chi Tiết Khuyến Mãi (OfferDetails)</h3>
                     <div style={modalStyles.formGroup}>
                         <label style={modalStyles.label}>Loại Giảm giá:</label>
@@ -477,7 +476,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                         <label style={modalStyles.label}>Giá Trị Giảm Giá:</label>
                         <input type="number" name="offerValue" value={product.offer?.offerValue || 0} onChange={handleOfferChange} style={modalStyles.input} required />
                     </div>
-                    {/* FIXED: Dùng formatTimestampToDateInput để hiển thị date từ timestamp */}
                     <div style={modalStyles.formGroup}>
                         <label style={modalStyles.label}>Ngày Bắt Đầu:</label>
                         <input 
@@ -512,22 +510,18 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                         name="isFeatured"
                         checked={product.isFeatured || false}
                         onChange={handleChange}
-                        style={modalStyles.toggleSwitch}
+                        style={{marginRight: '10px'}}
                     />
                     **Đánh Dấu Nổi Bật (Is Featured)**
                 </label>
             </div>
-            <p>ID Sản Phẩm: **{product.id || 'Chưa lưu'}**</p>
-            {/* FIXED: Định dạng lại timestamp số thành định dạng ngày tháng */}
+            <p style={{color: '#C40000'}}>ID Sản Phẩm: **{product.id || 'Chưa lưu'}**</p>
             <p>Ngày Tạo: **{product.createdAt ? new Date(Number(product.createdAt)).toLocaleString() : 'N/A'}**</p>
             <p>Ngày Cập nhật: **{product.updatedAt ? new Date(Number(product.updatedAt)).toLocaleString() : 'N/A (Sẽ tự động cập nhật)'}**</p>
             <p>Đánh giá TB: **{(product.averageRating || 0).toFixed(1)}** (Tổng Reviews: **{product.totalReviews || 0}**)</p>
         </div>
     );
 
-    // ----------------------------------------------------------------------
-    // HÀM TỔNG HỢP RENDER
-    // ----------------------------------------------------------------------
     const renderContent = () => { 
         switch (activeTab) {
             case 'core': return renderCoreTab();
@@ -541,10 +535,10 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
     return (
         <div style={modalStyles.overlay}>
             <div style={modalStyles.modalContent}>
-                <h2 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px' }}>
+                <h2 style={{ borderBottom: '1px solid #555', paddingBottom: '10px', marginBottom: '20px', color: '#C40000' }}>
                     {isEditing ? `Sửa Sản Phẩm: ${product.name}` : 'Thêm Sản Phẩm Mới'}
                 </h2>
-                {product.id ? null : <p style={{color: '#C40000', fontWeight: 'bold'}}>*** LƯU Ý: Phải LƯU THÔNG TIN CƠ BẢN trước khi tải ảnh! ***</p>}
+                {product.id ? null : <p style={{color: '#FF4D4D', fontWeight: 'bold'}}>*** LƯU Ý: Phải LƯU THÔNG TIN CƠ BẢN trước khi tải ảnh! ***</p>}
 
                 <div style={modalStyles.tabBar}>
                     <span style={modalStyles.tab(activeTab === 'core')} onClick={() => setActiveTab('core')}>Thông tin Cơ bản</span>
@@ -556,7 +550,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                 <form onSubmit={handleSave}>
                     {renderContent()}
 
-                    <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                    <div style={{ marginTop: '30px', borderTop: '1px solid #555', paddingTop: '20px' }}>
                         <button type="submit" style={modalStyles.saveButton} disabled={saving || isAnyUploading}>
                             {saving ? 'Đang lưu...' : (isAnyUploading ? 'Vui lòng đợi tải ảnh...' : 'Lưu Tất Cả Thay Đổi')}
                         </button>

@@ -5,20 +5,25 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; 
 
 // ----------------------------------------------------------------------
-// CẤU HÌNH VÀ STYLES
+// CẤU HÌNH VÀ STYLES (DARK/MINIMALIST)
 // ----------------------------------------------------------------------
 const styles = {
-    container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh', maxWidth: '1000px', margin: '0 auto' },
-    title: { color: '#000000', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
-    formSection: { padding: '20px', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '30px' },
+    // container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh', maxWidth: '1000px', margin: '0 auto' }, // REMOVED
+    title: { color: '#E0E0E0', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
+    
+    formSection: { padding: '20px', border: '1px solid #444', borderRadius: '8px', marginBottom: '30px', backgroundColor: '#333' }, // Nền form tối
     formGroup: { marginBottom: '15px' },
-    label: { display: 'block', fontWeight: 'bold', marginBottom: '5px' },
-    input: { padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%' },
-    textArea: { padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%', minHeight: '100px' },
-    sendButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginTop: '15px' },
-    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px' },
-    th: { backgroundColor: '#000000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 500 },
-    td: { padding: '10px 15px', borderBottom: '1px solid #EEEEEE' },
+    label: { display: 'block', fontWeight: 'bold', marginBottom: '5px', color: '#E0E0E0' },
+    
+    input: { padding: '10px', border: '1px solid #555', borderRadius: '4px', width: '100%', backgroundColor: '#444', color: '#E0E0E0' },
+    textArea: { padding: '10px', border: '1px solid #555', borderRadius: '4px', width: '100%', minHeight: '100px', backgroundColor: '#444', color: '#E0E0E0' },
+    
+    sendButton: { backgroundColor: '#007bff', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginTop: '15px', transition: 'background-color 0.2s' },
+    
+    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px', color: '#E0E0E0' },
+    th: { backgroundColor: '#C40000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600 },
+    td: { padding: '10px 15px', borderBottom: '1px solid #444' },
+    
     statusTag: (status) => {
         let color = '#666';
         if (status === 'SENT') color = '#28a745';
@@ -36,7 +41,7 @@ const NotificationManager = () => {
     const [history, setHistory] = useState([]);
 
     // ----------------------------------------------------------------------
-    // HÀM FETCH LỊCH SỬ
+    // HÀM FETCH LỊCH SỬ (Logic giữ nguyên)
     // ----------------------------------------------------------------------
     const fetchHistory = async () => {
         try {
@@ -48,7 +53,6 @@ const NotificationManager = () => {
                 ...doc.data()
             }));
 
-            // Sắp xếp theo ngày gần nhất
             historyList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             setHistory(historyList);
         } catch (err) {
@@ -61,7 +65,7 @@ const NotificationManager = () => {
     }, []);
 
     // ----------------------------------------------------------------------
-    // HÀM XỬ LÝ GỬI / ĐẶT LỊCH
+    // HÀM XỬ LÝ GỬI / ĐẶT LỊCH (Logic giữ nguyên)
     // ----------------------------------------------------------------------
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -84,15 +88,14 @@ const NotificationManager = () => {
         }
 
         const notificationData = {
-    title: title,
-    body: body,
-    scheduleTime: scheduledTimestamp || Date.now(), 
-    status: 'PENDING', // <--- FIXED: Luôn là PENDING để Backend xử lý
-    createdAt: Date.now(),
-};
+            title: title,
+            body: body,
+            scheduleTime: scheduledTimestamp || Date.now(), 
+            status: 'PENDING', 
+            createdAt: Date.now(),
+        };
 
         try {
-            // Lưu vào Firestore. Backend Cloud Function sẽ đọc collection này và gửi đi.
             const collectionRef = collection(db, "scheduledNotifications");
             await addDoc(collectionRef, notificationData);
 
@@ -100,7 +103,6 @@ const NotificationManager = () => {
                 ? `Đã đặt lịch thông báo thành công vào: ${new Date(scheduledTimestamp).toLocaleString()}` 
                 : 'Yêu cầu gửi thông báo NGAY LẬP TỨC đã được ghi nhận. Backend sẽ xử lý.');
             
-            // Reset form và tải lại lịch sử
             setTitle('');
             setBody('');
             setScheduleTime('');
@@ -124,8 +126,8 @@ const NotificationManager = () => {
             
             {/* FORM TẠO/ĐẶT LỊCH THÔNG BÁO */}
             <div style={styles.formSection}>
-                <h2>Tạo Thông báo mới (Notification Payload)</h2>
-                <p style={{color: '#666', marginBottom: '15px'}}>Ứng dụng di động sẽ tự động hiển thị tiêu đề và nội dung này.</p>
+                <h2 style={{color: '#E0E0E0'}}>Tạo Thông báo mới (Notification Payload)</h2>
+                <p style={{color: '#888', marginBottom: '15px'}}>Ứng dụng di động sẽ tự động hiển thị tiêu đề và nội dung này.</p>
                 
                 <form onSubmit={handleSubmit}>
                     <div style={styles.formGroup}>
@@ -138,7 +140,7 @@ const NotificationManager = () => {
                         <textarea value={body} onChange={(e) => setBody(e.target.value)} style={styles.textArea} placeholder="Nội dung chi tiết của thông báo" required />
                     </div>
 
-                    <hr style={{margin: '20px 0'}}/>
+                    <hr style={{margin: '20px 0', borderTop: '1px solid #555'}}/>
 
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Đặt lịch gửi (Schedule Time - Tùy chọn):</label>
@@ -160,7 +162,7 @@ const NotificationManager = () => {
 
             {/* BẢNG LỊCH SỬ VÀ LỊCH ĐÃ ĐẶT */}
             <div style={{ marginTop: '40px' }}>
-                <h2>Lịch sử & Thông báo đã Đặt lịch</h2>
+                <h2 style={{color: '#E0E0E0'}}>Lịch sử & Thông báo đã Đặt lịch</h2>
                 <table style={styles.table}>
                     <thead>
                         <tr>
@@ -185,13 +187,13 @@ const NotificationManager = () => {
                                     </span>
                                 </td>
                                 <td style={styles.td}>
-                                    <small>{new Date(item.createdAt).toLocaleDateString()}</small>
+                                    <small style={{color: '#A0A0A0'}}>{new Date(item.createdAt).toLocaleDateString()}</small>
                                 </td>
                             </tr>
                         ))}
                         {history.length === 0 && (
                             <tr>
-                                <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                                <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
                                     Chưa có thông báo nào được lưu.
                                 </td>
                             </tr>

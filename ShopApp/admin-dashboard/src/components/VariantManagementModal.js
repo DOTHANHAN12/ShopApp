@@ -1,38 +1,49 @@
+// src/components/VariantManagementModal.js
 import React, { useState, useMemo, useRef, useCallback } from 'react'; 
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
 
+// --- DARK/MINIMALIST STYLES CHO MODAL ---
 const MODAL_STYLES = {
-    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: '#FFFFFF', padding: '30px', borderRadius: '8px', width: '95%', maxWidth: '1200px', maxHeight: '90vh', overflowY: 'auto' },
+    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
+    modalContent: { backgroundColor: '#1A1A1A', padding: '30px', borderRadius: '8px', width: '95%', maxWidth: '1200px', maxHeight: '90vh', overflowY: 'auto', color: '#E0E0E0' },
+    
+    // Tối ưu hóa Table
     table: { width: '100%', borderCollapse: 'separate', borderSpacing: 0, marginTop: '15px', fontSize: '13px' },
-    th: { backgroundColor: '#000000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600, border: '1px solid #000' },
-    td: { padding: '8px 15px', borderBottom: '1px solid #eee', verticalAlign: 'middle', borderRight: '1px solid #eee' },
-    input: { padding: '5px', border: '1px solid #ccc', borderRadius: '3px', boxSizing: 'border-box', width: '90%', fontSize: '13px' },
-    select: { padding: '5px', border: '1px solid #ccc', borderRadius: '3px', boxSizing: 'border-box', width: '100%', fontSize: '13px' }, 
+    th: { backgroundColor: '#C40000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600, border: '1px solid #C40000' },
+    td: { padding: '8px 15px', borderBottom: '1px solid #444', verticalAlign: 'middle', borderRight: '1px solid #444', backgroundColor: '#292929' },
+    
+    // Tối ưu hóa Input
+    input: { padding: '5px', border: '1px solid #555', borderRadius: '3px', boxSizing: 'border-box', width: '90%', fontSize: '13px', backgroundColor: '#333', color: '#E0E0E0' },
+    select: { padding: '5px', border: '1px solid #555', borderRadius: '3px', boxSizing: 'border-box', width: '100%', fontSize: '13px', backgroundColor: '#333', color: '#E0E0E0' }, 
+    
     saveButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px', marginRight: '10px' },
     variantImage: { width: '40px', height: '40px', objectFit: 'cover', borderRadius: '2px' },
+    
     groupRow: { cursor: 'pointer', transition: 'background-color 0.1s' },
-    detailTable: { backgroundColor: '#f0f0f0', width: '98%', margin: '10px auto', borderCollapse: 'collapse' },
-    lowStock: { color: '#C40000', fontWeight: 'bold' },
-    actionButton: { background: 'none', border: 'none', cursor: 'pointer', marginLeft: '5px' },
+    detailTable: { backgroundColor: '#292929', width: '98%', margin: '10px auto', borderCollapse: 'collapse' },
+    lowStock: { color: '#FF4D4D', fontWeight: 'bold' },
+    actionButton: { background: 'none', border: 'none', cursor: 'pointer', marginLeft: '5px', color: '#FF4D4D' },
+    
     statusDropdown: (status) => ({
         padding: '5px 8px', 
         borderRadius: '4px', 
         border: '1px solid', 
-        backgroundColor: status === 'Active' ? '#d4edda' : '#f8d7da', 
-        color: status === 'Active' ? '#155724' : '#721c24', 
+        backgroundColor: status === 'Active' ? '#155724' : '#721c24', // Nền đậm
+        color: '#FFFFFF', // Chữ trắng
         fontSize: '11px',
         width: '100%'
     }),
-    autosuggestList: { border: '1px solid #ccc', maxHeight: '150px', overflowY: 'auto', position: 'absolute', zIndex: 10, backgroundColor: 'white', width: '200px' },
-    suggestItem: { padding: '8px', cursor: 'pointer', ':hover': { backgroundColor: '#f0f0f0' } }
+    
+    autosuggestList: { border: '1px solid #555', maxHeight: '150px', overflowY: 'auto', position: 'absolute', zIndex: 10, backgroundColor: '#333', width: '200px' },
+    suggestItem: { padding: '8px', cursor: 'pointer', color: '#C40000' }
 };
 
 const FIXED_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const PRESET_COLORS = ['White', 'Black', 'Red', 'Blue', 'Green', 'Yellow', 'Grey', 'Pink', 'Brown', 'Purple']; 
 
+// Hàm tạo Variant ID (Logic giữ nguyên)
 const generateNewVariantId = (color, size) => {
     const colorCode = color.substring(0, 2).toUpperCase();
     const timestamp = Date.now().toString().substring(8); 
@@ -47,14 +58,13 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
     const [variants, setVariants] = useState(initialVariantsWithKeys);
     const [saving, setSaving] = useState(false);
     const [openColor, setOpenColor] = useState(null); 
-    const [uploading, setUploading] = useState({});
     
     const [newColorInput, setNewColorInput] = useState('');
     const [suggestedColors, setSuggestedColors] = useState([]);
     const newColorInputRef = useRef(null); 
 
     // ------------------------------------------------------------------
-    // HÀM TÍNH TOÁN & NHÓM BIẾN THỂ (groupedVariants)
+    // HÀM TÍNH TOÁN & NHÓM BIẾN THỂ (Logic giữ nguyên)
     // ------------------------------------------------------------------
     const groupedVariants = useMemo(() => {
         const groups = {};
@@ -102,7 +112,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
 
 
     // ------------------------------------------------------------------
-    // LOGIC CHỈNH SỬA VÀ LƯU
+    // LOGIC CHỈNH SỬA VÀ LƯU (Logic giữ nguyên)
     // ------------------------------------------------------------------
 
     const handleVariantChange = (uniqueKey, field, value) => {
@@ -128,7 +138,6 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         }));
     };
 
-    // [Hàm tiện ích] Xử lý sự kiện thay đổi Dropdown Status (FIXED)
     const handleStatusChange = (uniqueKey, newStatus) => {
         setVariants(prevVariants => prevVariants.map(v => {
             const key = v.variantId || `new_temp_${v.color}_${v.size}`;
@@ -152,41 +161,17 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         }));
     };
 
-    // [Hàm tiện ích] Đặt trạng thái cho TOÀN BỘ nhóm màu (Active/Inactive)
-    const handleGroupStatusChange = (colorKey, newStatus) => {
-        const isActive = newStatus === 'Active';
-
-        setVariants(prevVariants => prevVariants.map(v => {
-            if (v.color === colorKey) {
-                const currentPrice = v.price || product.basePrice || 0; 
-                const currentQuantity = v.quantity || 1; 
-
-                return {
-                    ...v,
-                    status: newStatus,
-                    isActive: isActive,
-                    price: isActive ? currentPrice : 0,
-                    quantity: isActive ? currentQuantity : 0
-                };
-            }
-            return v;
-        }));
-    };
-    
-    // [Hàm tiện ích] Xóa TOÀN BỘ nhóm màu (Xóa khỏi State và DB khi lưu)
     const handleDeleteColorGroupPermanently = (colorKey) => {
         if (!window.confirm(`CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN toàn bộ biến thể của màu "${colorKey}" không? Thao tác này sẽ xóa chúng khỏi database khi bạn lưu!`)) {
             return;
         }
 
-        // Lọc bỏ 5 biến thể của màu đó khỏi mảng variants
         setVariants(prevVariants => prevVariants.filter(v => v.color !== colorKey));
 
         if (openColor === colorKey) setOpenColor(null); 
         alert(`Tất cả biến thể của màu "${colorKey}" đã bị xóa khỏi bộ nhớ và sẽ bị xóa khỏi database sau khi lưu.`);
     };
 
-    // ... (Các hàm khác giữ nguyên: addNewColorToProduct, selectSuggestedColor, handleNewColorInputChange, handleSave) ...
     const addNewColorToProduct = useCallback((colorName) => {
         if (!colorName || colorName.trim() === '') {
             alert("Vui lòng nhập tên màu.");
@@ -211,7 +196,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         setVariants(prev => [...prev, ...newVariantsForColor]);
         setNewColorInput('');
         setOpenColor(colorName); 
-    }, [groupedVariants, product.basePrice, product.mainImage, product.colorImages, setNewColorInput, setVariants]);
+    }, [groupedVariants, product.basePrice]);
 
     const handleNewColorInputChange = (e) => {
         const value = e.target.value;
@@ -238,12 +223,11 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
         try {
             const docRef = doc(db, 'products', product.id);
             
-            // LƯU Ý: Không lọc các biến thể Inactive, chúng ta chỉ lọc các cờ UI tạm thời
             const finalVariants = variants
                 .map(v => {
                     const cleaned = { ...v };
                     if (typeof cleaned.variantId === 'string' && cleaned.variantId.startsWith('new_temp_')) {
-                         delete cleaned.variantId; 
+                        delete cleaned.variantId; 
                     }
                     delete cleaned.isActive;
                     delete cleaned.index;
@@ -266,7 +250,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
     };
     
     // ------------------------------------------------------------------
-    // HÀM RENDER CHI TIẾT BIẾN THỂ CON (SỬ DỤNG CẤU TRÚC CỐ ĐỊNH)
+    // HÀM RENDER CHI TIẾT BIẾN THỂ CON 
     // ------------------------------------------------------------------
     const renderVariantDetails = (colorKey, variantsList) => (
         <tr key={`${colorKey}-details`}>
@@ -289,11 +273,11 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                             const isDisabled = !v.isActive;
 
                             return (
-                                <tr key={uniqueKey} style={isDisabled ? { opacity: 0.5, backgroundColor: '#f9f9f9' } : {}}>
+                                <tr key={uniqueKey} style={isDisabled ? { opacity: 0.5, backgroundColor: '#333' } : {}}>
                                     
                                     {/* Size (Cố định) */}
-                                    <td style={MODAL_STYLES.td}>
-                                        <span style={{ fontWeight: 'bold', color: isDisabled ? '#aaa' : '#000' }}>{v.size}</span>
+                                    <td style={{...MODAL_STYLES.td, borderLeft: 'none'}}>
+                                        <span style={{ fontWeight: 'bold', color: isDisabled ? '#aaa' : '#E0E0E0' }}>{v.size}</span>
                                     </td>
                                     
                                     {/* Mã SKU (VariantId) - Inline Editing */}
@@ -318,11 +302,11 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                             min="0"
                                             disabled={isDisabled}
                                         />
-                                        <small style={{display: 'block', color: '#666', marginTop: '4px'}}>{formatCurrency(v.price)}</small>
+                                        <small style={{display: 'block', color: '#888', marginTop: '4px'}}>{formatCurrency(v.price)}</small>
                                     </td>
 
                                     {/* Tồn kho - Inline Editing & Cảnh báo */}
-                                    <td style={{...MODAL_STYLES.td, ...(isLowStock ? MODAL_STYLES.lowStock : isOutOfStock ? { backgroundColor: '#ffe0e0' } : {})}}>
+                                    <td style={{...MODAL_STYLES.td, ...(isLowStock ? MODAL_STYLES.lowStock : isOutOfStock ? { backgroundColor: '#721c24' } : {})}}>
                                         <input 
                                             type="number" 
                                             value={v.quantity || 0} 
@@ -335,7 +319,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                     </td>
                                     
                                     {/* Trạng thái (Dropdown Status) */}
-                                    <td style={MODAL_STYLES.td}>
+                                    <td style={{...MODAL_STYLES.td, borderRight: 'none'}}>
                                         <select
                                             value={v.status || 'Inactive'}
                                             onChange={(e) => handleStatusChange(uniqueKey, e.target.value)}
@@ -358,7 +342,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
     return (
         <div style={MODAL_STYLES.overlay}>
             <div style={MODAL_STYLES.modalContent}>
-                <h2 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '10px' }}>
+                <h2 style={{ borderBottom: '1px solid #555', paddingBottom: '10px', marginBottom: '10px', color: '#C40000' }}>
                     Quản Lý Biến Thể: {product.name}
                 </h2>
 
@@ -369,19 +353,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                             type="text" 
                             placeholder="Nhập/Gợi ý tên Màu mới (Whi -> White)" 
                             value={newColorInput}
-                            onChange={(e) => {
-                                setNewColorInput(e.target.value);
-                                const value = e.target.value;
-                                if (value.length > 2) {
-                                    const suggestions = PRESET_COLORS.filter(color => 
-                                        color.toLowerCase().startsWith(value.toLowerCase()) && 
-                                        !Object.keys(groupedVariants).includes(color) 
-                                    );
-                                    setSuggestedColors(suggestions);
-                                } else {
-                                    setSuggestedColors([]);
-                                }
-                            }}
+                            onChange={handleNewColorInputChange}
                             ref={newColorInputRef}
                             style={{...MODAL_STYLES.input, width: '100%', border: '2px solid #C40000'}}
                         />
@@ -390,11 +362,8 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                 {suggestedColors.map(color => (
                                     <div 
                                         key={color} 
-                                        onClick={() => {
-                                            setNewColorInput(color);
-                                            setSuggestedColors([]);
-                                        }}
-                                        style={MODAL_STYLES.suggestItem}
+                                        onClick={() => selectSuggestedColor(color)}
+                                        style={{...MODAL_STYLES.suggestItem, ':hover': { backgroundColor: '#444' }}}
                                     >
                                         {color}
                                     </div>
@@ -404,7 +373,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                     </div>
                     <button 
                         onClick={() => addNewColorToProduct(newColorInput)} 
-                        style={{...MODAL_STYLES.saveButton, backgroundColor: '#000', margin: 0, padding: '10px 15px'}}
+                        style={{...MODAL_STYLES.saveButton, backgroundColor: '#007bff', margin: 0, padding: '10px 15px'}}
                     >
                         + Thêm Màu
                     </button>
@@ -418,18 +387,18 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                 {/* -------------------------------------- */}
 
 
-                <p style={{marginBottom: '15px', color: '#666'}}>
+                <p style={{marginBottom: '15px', color: '#888'}}>
                     Click vào dòng Màu sắc để mở/đóng chi tiết các Size.
                 </p>
 
                 <table style={MODAL_STYLES.table}>
                     <thead>
                         <tr>
-                            <th style={{...MODAL_STYLES.th, width: '5%'}}>Ảnh</th>
+                            <th style={{...MODAL_STYLES.th, width: '5%', borderLeft: 'none'}}>Ảnh</th>
                             <th style={{...MODAL_STYLES.th, width: '20%'}}>Màu sắc</th>
                             <th style={{...MODAL_STYLES.th, width: '15%'}}>Số biến thể</th>
                             <th style={{...MODAL_STYLES.th, width: '15%'}}>Tổng Tồn kho</th>
-                            <th style={{...MODAL_STYLES.th, width: '10%'}}>Chi tiết</th>
+                            <th style={{...MODAL_STYLES.th, width: '10%', borderRight: 'none'}}>Chi tiết</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -441,10 +410,10 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                 <React.Fragment key={colorKey}>
                                     {/* DÒNG TỔNG HỢP MÀU (CÓ THỂ CLICK) */}
                                     <tr 
-                                        style={{...MODAL_STYLES.groupRow, backgroundColor: isOpen ? '#e6f7ff' : 'white'}}
+                                        style={{...MODAL_STYLES.groupRow, backgroundColor: isOpen ? '#333' : '#1A1A1A', border: isOpen ? '1px solid #C40000' : 'none'}}
                                         onClick={() => setOpenColor(isOpen ? null : colorKey)}
                                     >
-                                        <td style={MODAL_STYLES.td}>
+                                        <td style={{...MODAL_STYLES.td, borderLeft: 'none'}}>
                                             <img 
                                                 src={group.displayImage} 
                                                 alt={colorKey} 
@@ -457,10 +426,10 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                             {/* Nút XÓA MÀU (ở dòng tổng hợp) */}
                                             <button 
                                                 onClick={(e) => {
-                                                    e.stopPropagation(); // Ngăn chặn mở/đóng chi tiết khi xóa
+                                                    e.stopPropagation(); 
                                                     handleDeleteColorGroupPermanently(colorKey);
                                                 }}
-                                                style={{...MODAL_STYLES.actionButton, color: '#C40000'}}
+                                                style={MODAL_STYLES.actionButton}
                                                 title={`Xóa VĨNH VIỄN toàn bộ biến thể của màu ${colorKey}`}
                                             >
                                                 🗑️
@@ -468,7 +437,7 @@ const VariantManagementModal = ({ product, onClose, onSave }) => {
                                         </td>
                                         <td style={MODAL_STYLES.td}>{group.variants.filter(v => v.isActive).length} / {FIXED_SIZES.length}</td>
                                         <td style={{...MODAL_STYLES.td, ...totalStockStyle}}>{group.totalStock}</td>
-                                        <td style={MODAL_STYLES.td}>
+                                        <td style={{...MODAL_STYLES.td, borderRight: 'none'}}>
                                             {isOpen ? '🔽 Đóng' : '▶️ Mở chi tiết'}
                                         </td>
                                     </tr>

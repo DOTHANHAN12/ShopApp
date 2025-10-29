@@ -6,7 +6,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 // -----------------------------------------------------------
-// CLOUD FUNCTION: XỬ LÝ ĐẶT HÀNG COD (TRỪ TỒN KHO & VOUCHER)
+// CLOUD FUNCTION: XỬ LÝ ĐẶT HÀNG (TRỪ TỒN KHO & VOUCHER)
 // -----------------------------------------------------------
 exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => {
     const snap = event.data;
@@ -20,7 +20,6 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
 
             // --- BƯỚC 1: THỰC HIỆN TẤT CẢ CÁC THAO TÁC ĐỌC (READS) ---
 
-            // 1.1. Khởi tạo mảng lưu trữ các Document cần đọc và các bản cập nhật
             const itemsToUpdate = [];
 
             // Đọc tất cả Product Documents cần thiết
@@ -32,7 +31,6 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
                     throw new Error(`Sản phẩm không tồn tại: ${item.productId}`);
                 }
 
-                // Lưu trữ dữ liệu và tham chiếu để xử lý sau
                 itemsToUpdate.push({
                     item: item,
                     docRef: productRef,
@@ -58,7 +56,7 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
 
             // --- BƯỚC 2: XỬ LÝ LOGIC & TÍNH TOÁN (KHÔNG CÓ READ/WRITE DB) ---
 
-            // 2.1. Xử lý tồn kho và tạo bản cập nhật
+            // Xử lý tồn kho và tạo bản cập nhật
             for (const updateEntry of itemsToUpdate) {
                 const { item, productData } = updateEntry;
                 const quantityToSubtract = item.quantity;
@@ -67,7 +65,6 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
                 let variants = productData.variants || [];
                 let variantFound = false;
 
-                // Lặp và cập nhật số lượng
                 variants = variants.map(variant => {
                     if (variant.variantId === variantId) {
                         variantFound = true;
@@ -76,7 +73,7 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
                         if (currentStock < quantityToSubtract) {
                             throw new Error(`Over-selling: Tồn kho ${variantId} không đủ (${currentStock} < ${quantityToSubtract})`);
                         }
-                        variant.quantity = currentStock - quantityToSubtract; // Cập nhật số lượng trong mảng
+                        variant.quantity = currentStock - quantityToSubtract;
                     }
                     return variant;
                 });
@@ -85,11 +82,10 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
                     throw new Error(`Biến thể không tồn tại: ${variantId}`);
                 }
 
-                // Lưu bản cập nhật vào đối tượng updateEntry
                 updateEntry.newVariants = variants;
             }
 
-            // 2.2. Xử lý Voucher (tạo bản cập nhật)
+            // Xử lý Voucher (tạo bản cập nhật)
             let newTimesUsed;
             if (voucherRef) {
                 const currentTimesUsed = voucherData.timesUsed || 0;
@@ -103,21 +99,25 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
 
             // --- BƯỚC 3: THỰC HIỆN TẤT CẢ CÁC THAO TÁC GHI (WRITES) ---
 
-            // 3.1. Ghi cập nhật Tồn kho
+            // Ghi cập nhật Tồn kho
             for (const updateEntry of itemsToUpdate) {
                 transaction.update(updateEntry.docRef, { variants: updateEntry.newVariants });
             }
 
-            // 3.2. Ghi cập nhật Voucher
+            // Ghi cập nhật Voucher
             if (voucherRef) {
                 transaction.update(voucherRef, { timesUsed: newTimesUsed });
             }
 
-            // 3.3. Cập nhật Trạng thái Order (Quan trọng: Phải là thao tác cuối cùng)
-            transaction.update(snap.ref, {
-                orderStatus: "PROCESSING",
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
+            // ✅ Cập nhật Trạng thái Order có điều kiện
+            // Chỉ đổi thành 'PROCESSING' nếu trạng thái hiện tại là 'PENDING'.
+            // Sẽ không ghi đè 'PAID' của VNPAY.
+            if (order.orderStatus === "PENDING") {
+                transaction.update(snap.ref, {
+                    orderStatus: "PROCESSING",
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+            }
 
             return "Transaction thành công: Tồn kho và Voucher đã được cập nhật.";
         });

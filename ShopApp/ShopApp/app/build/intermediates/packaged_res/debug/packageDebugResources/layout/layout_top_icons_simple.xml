@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="?attr/actionBarSize"
+    android:gravity="end">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/notification_desc"
+        android:src="@drawable/ic_notification"
+        app:tint="@android:color/black"
+        tools:ignore="ContentDescription"/>
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/favorite_desc"
+        android:src="@drawable/ic_favorite"
+        app:tint="@android:color/black"
+        tools:ignore="ContentDescription"/>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ic_cart"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/cart_desc"
+            android:src="@drawable/ic_shopping_bag"
+            app:tint="@android:color/black"
+            tools:ignore="ContentDescription" />
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="top|end"-->
+<!--            android:layout_marginTop="-4dp"-->
+<!--            android:layout_marginEnd="-4dp"-->
+<!--            android:background="@drawable/circle_badge"-->
+<!--            android:gravity="center"-->
+<!--            android:padding="2dp"-->
+<!--            android:text="1"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            android:textSize="10sp" />-->
+    </FrameLayout>
+</LinearLayout>

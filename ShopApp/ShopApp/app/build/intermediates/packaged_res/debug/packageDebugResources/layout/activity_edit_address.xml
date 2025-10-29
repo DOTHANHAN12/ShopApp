@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:paddingTop="26dp"
+    android:paddingBottom="20dp"
+    tools:context=".EditAddressActivity">
+
+    <RelativeLayout
+        android:id="@+id/layout_header_edit"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/img_back_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@android:color/black"
+            android:contentDescription="Back"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sửa Địa chỉ"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@id/img_back_arrow"/>
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/layout_header_edit"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_buttons">
+
+        <LinearLayout
+            android:paddingTop="26dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/rounded_red_bg_light"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_document"
+                    android:drawablePadding="8dp"
+                    android:text="Dán và nhập nhanh"
+                    android:textSize="16sp"
+                    android:textColor="#DD0000"
+                    android:textStyle="bold"
+                    app:drawableTint="#DD0000"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dán hoặc nhập thông tin, nhấn chọn Tự động điền để nhập tên, số điện thoại và địa chỉ."
+                    android:textSize="14sp"
+                    android:textColor="#DD0000"
+                    android:layout_marginTop="4dp"/>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_border_gray"
+                    android:hint="Dán hoặc nhập thông tin, nhấn chọn Tự động điền để nhập tên, số điện thoại và địa chỉ"
+                    android:padding="8dp"
+                    android:textSize="14sp"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Địa chỉ (dùng thông tin trước sắp nhập)"
+                android:textSize="14sp"
+                android:textColor="#555"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/edit_full_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Họ và tên"
+                android:background="@drawable/bottom_border_gray"
+                android:paddingVertical="12dp"
+                android:inputType="textPersonName"
+                tools:text="Đỗ Thành An"/>
+
+            <EditText
+                android:id="@+id/edit_phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Số điện thoại"
+                android:background="@drawable/bottom_border_gray"
+                android:paddingVertical="12dp"
+                android:inputType="phone"
+                tools:text="(+84) 967851513"/>
+
+            <EditText
+                android:id="@+id/edit_city_district"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tỉnh/Thành phố, Quận/Huyện, Phường/Xã"
+                android:background="@drawable/bottom_border_gray"
+                android:paddingVertical="12dp"
+                android:drawableEnd="@drawable/ic_arrow_right"
+                android:focusable="false"
+                android:clickable="true"
+                tools:text="Hà Nội, Huyện Đông Anh, Xã Uy Nỗ"/>
+
+            <EditText
+                android:id="@+id/edit_street_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tên đường, Tòa nhà, Số nhà"
+                android:background="@drawable/bottom_border_gray"
+                android:paddingVertical="12dp"
+                tools:text="Cổng sau nhà trẻ Xóm Trong"/>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="16dp"
+                android:background="#EFEFEF"
+                android:src="@drawable/ic_map_placeholder"
+                android:contentDescription="Map location"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Đặt làm địa chỉ mặc định"
+                    android:textSize="16sp"
+                    android:textColor="#333"/>
+
+                <Switch
+                    android:id="@+id/switch_set_default"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:thumbTint="@color/switch_thumb_color"
+                    android:trackTint="@color/switch_track_color"
+                    tools:checked="true"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loại địa chỉ:"
+                android:textSize="16sp"
+                android:textColor="#333"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/label_address_type_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nhà Riêng"
+                    android:background="@drawable/rounded_red_border"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="16dp"/>
+
+                <TextView
+                    android:id="@+id/label_address_type_office"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Văn Phòng"
+                    android:background="@drawable/rounded_gray_border"
+                    android:textColor="@android:color/darker_gray"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/layout_bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btn_delete_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="XÓA ĐỊA CHỈ"
+            android:textColor="@android:color/holo_red_dark"
+            android:backgroundTint="#FFF5F5"
+            android:layout_marginEnd="8dp"
+            android:textStyle="bold"
+            android:visibility="visible"/>
+
+        <Button
+            android:id="@+id/btn_save_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="HOÀN THÀNH"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginStart="8dp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

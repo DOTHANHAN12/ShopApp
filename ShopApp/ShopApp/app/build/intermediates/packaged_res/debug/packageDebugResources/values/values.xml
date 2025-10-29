@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="colorAccent">#EE4D2D</color>
+    <color name="colorPrimary">#FF0000</color>
+    <color name="colorPrimaryDark">#CD381C</color>
+    <color name="grey_dark">#9E9E9E</color>
+    <color name="grey_light">#F5F5F5</color>
+    <color name="grey_lightest">#FAFAFA</color>
+    <color name="grey_medium">#E0E0E0</color>
+    <color name="grey_text">#616161</color>
+    <color name="red">#FF0000</color>
+    <color name="red_warning">#FF0000</color>
+    <color name="shopee_green">#00BFA5</color>
+    <color name="switch_thumb_color">#DD0000</color>
+    <color name="switch_track_color">#CCCCCC</color>
+    <color name="text_discount">#EE4D2D</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">AnAn</string>
+    <string name="back_button">Back</string>
+    <string name="back_desc">Back button</string>
+    <string name="cart_desc">Shopping Cart</string>
+    <string name="favorite_desc">Favorites</string>
+    <string name="filter_desc">Filter Icon</string>
+    <string name="gcm_defaultSenderId" translatable="false">69140808985</string>
+    <string name="google_api_key" translatable="false">AIzaSyCXVHXS75tx8qmZYDWZBQFa2ZuNYPHdiXU</string>
+    <string name="google_app_id" translatable="false">1:69140808985:android:17476471a00a27de023188</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCXVHXS75tx8qmZYDWZBQFa2ZuNYPHdiXU</string>
+    <string name="google_storage_bucket" translatable="false">android-c164b.firebasestorage.app</string>
+    <string name="home_desc">Home Navigation Icon</string>
+    <string name="notification_desc">Notifications</string>
+    <string name="product_image_desc">Product Image</string>
+    <string name="profile_desc">Profile Navigation Icon</string>
+    <string name="project_id" translatable="false">android-c164b</string>
+    <string name="search_desc">Search</string>
+    <style name="Base.Theme.ShopApp" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        
+    </style>
+    <style name="BottomNavIcon">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:contentDescription">Navigation Icon</item>
+    </style>
+    <style name="BottomNavIcon.WhiteBg" parent="BottomNavIcon">
+        <item name="android:layout_height">28dp</item>
+        <item name="android:padding">4dp</item>
+    </style>
+    <style name="CartBadge" parent="android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">top|end</item>
+        <item name="android:layout_marginTop">-4dp</item>
+        <item name="android:layout_marginEnd">-4dp</item>
+        <item name="android:background">@drawable/circle_badge</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:text">1</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+    <style name="CategoryTab">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingHorizontal">8dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:alpha">0.7</item>
+    </style>
+    <style name="CategoryTab.Selected" parent="CategoryTab">
+        <item name="android:alpha">1.0</item>
+    </style>
+    <style name="CategoryTab.WhiteBg" parent="CategoryTab">
+        <item name="android:textColor">#333333</item>
+    </style>
+    <style name="OrderSummaryKey">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#333</item>
+    </style>
+    <style name="OrderSummaryNegativeValue" parent="OrderSummaryValue">
+        <item name="android:textColor">#DD0000</item>
+    </style>
+    <style name="OrderSummaryRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingVertical">4dp</item>
+    </style>
+    <style name="OrderSummaryValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="OrderTotalText" parent="android:style/Widget.TextView">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    <style name="Theme.ShopApp" parent="Base.Theme.ShopApp"/>
+</resources>

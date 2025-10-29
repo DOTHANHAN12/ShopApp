@@ -6,19 +6,23 @@ import { db } from '../firebaseConfig';
 import UserDetailModal from './UserDetailModal'; // Modal chi tiết/chỉnh sửa
 
 // ----------------------------------------------------------------------
-// CẤU HÌNH VÀ STYLES
+// CẤU HÌNH VÀ STYLES (DARK/MINIMALIST)
 // ----------------------------------------------------------------------
 const USER_ROLES = ['Admin', 'Staff', 'Customer'];
 const USERS_PER_PAGE = 10;
 
 const styles = {
-    container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh' },
-    title: { color: '#000000', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
-    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px' },
-    th: { backgroundColor: '#000000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 500 },
-    td: { padding: '10px 15px', borderBottom: '1px solid #EEEEEE', verticalAlign: 'middle' },
+    title: { color: '#E0E0E0', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
+    
+    // Tối ưu hóa Table
+    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px', color: '#E0E0E0' },
+    th: { backgroundColor: '#000000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600 },
+    td: { padding: '10px 15px', borderBottom: '1px solid #444', verticalAlign: 'middle' },
+    
+    // Tối ưu hóa Filter Bar
     filterBar: { display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' },
-    filterInput: { padding: '8px 10px', border: '1px solid #ccc', borderRadius: '4px' },
+    filterInput: { padding: '8px 10px', border: '1px solid #555', borderRadius: '4px', backgroundColor: '#333', color: '#E0E0E0' },
+    
     statusTag: (status) => {
         let color = '#666';
         if (status === 'Active') color = '#28a745';
@@ -26,14 +30,33 @@ const styles = {
         if (status === 'Pending') color = '#ffc107';
         return { backgroundColor: color, color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' };
     },
-    actionButton: (isPrimary) => ({ border: '1px solid #000', background: isPrimary ? '#000' : 'none', color: isPrimary ? '#fff' : '#000', cursor: 'pointer', padding: '5px 10px', borderRadius: '4px', marginRight: '5px', fontSize: '12px' }),
-    lockButton: (isLocked) => ({ backgroundColor: isLocked ? '#28a745' : '#dc3545', color: 'white', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }),
-    pagination: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' },
-    // ĐỊNH NGHĨA HÀM STYLE
+    
+    actionButton: (isPrimary) => ({ 
+        border: '1px solid #C40000', 
+        background: isPrimary ? '#C40000' : 'none', 
+        color: isPrimary ? '#fff' : '#C40000', 
+        cursor: 'pointer', 
+        padding: '5px 10px', 
+        borderRadius: '4px', 
+        marginRight: '5px', 
+        fontSize: '12px' 
+    }),
+    
+    lockButton: (isLocked) => ({ 
+        backgroundColor: isLocked ? '#28a745' : '#dc3545', 
+        color: 'white', 
+        padding: '5px 10px', 
+        borderRadius: '4px', 
+        cursor: 'pointer', 
+        marginRight: '5px'
+    }),
+    
+    pagination: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', color: '#E0E0E0' },
     pageButton: (disabled) => ({ 
         padding: '8px 15px', 
-        border: '1px solid #000', 
-        backgroundColor: disabled ? '#f0f0f0' : '#fff', 
+        border: '1px solid #C40000', 
+        backgroundColor: disabled ? '#333' : '#C40000', 
+        color: disabled ? '#888' : '#fff',
         cursor: disabled ? 'not-allowed' : 'pointer' 
     })
 };
@@ -77,7 +100,6 @@ const UserList = () => {
 
         } catch (err) {
             console.error("Lỗi khi tải người dùng:", err);
-            // ... (xử lý lỗi)
         } finally {
             setLoading(false);
         }
@@ -88,7 +110,7 @@ const UserList = () => {
     }, []);
 
     // ----------------------------------------------------------------------
-    // LỌC VÀ PHÂN TRANG
+    // LỌC VÀ PHÂN TRANG (Logic giữ nguyên)
     // ----------------------------------------------------------------------
     const filteredAndPaginatedUsers = useMemo(() => {
         let currentUsers = users;
@@ -149,11 +171,11 @@ const UserList = () => {
     // RENDER
     // ----------------------------------------------------------------------
 
-    if (loading) return <div style={styles.container}>Đang tải dữ liệu người dùng...</div>;
+    if (loading) return <div>Đang tải dữ liệu người dùng...</div>;
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.title}>Quản Lý Người Dùng & Quyền Hạn</h1>
+            <h1 style={styles.title}>Quản Lý Người Dùng & Quyền Hạn ({totalItems} users)</h1>
             
             {/* Thanh Bộ lọc và Tìm kiếm */}
             <div style={styles.filterBar}>
@@ -189,7 +211,7 @@ const UserList = () => {
 
                 <button 
                     style={styles.actionButton(true)}
-                    onClick={() => setDetailModalUser({})} // Mở modal để thêm mới
+                    onClick={() => setDetailModalUser({ id: `temp_${Date.now()}` })} // Mở modal để thêm mới
                 >
                     + Thêm Người Dùng Mới
                 </button>
@@ -212,7 +234,7 @@ const UserList = () => {
                         <tr key={user.id}>
                             <td style={styles.td}>
                                 <strong>{user.email}</strong><br/>
-                                <small style={{color: '#666'}}>ID: {user.id}</small>
+                                <small style={{color: '#888'}}>ID: {user.id}</small>
                             </td>
                             <td style={styles.td}>{user.fullName}</td>
                             <td style={styles.td}>{user.role || 'Customer'}</td>
@@ -251,7 +273,6 @@ const UserList = () => {
                     <button 
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        // FIX: Gọi hàm styles.pageButton(disabled)
                         style={styles.pageButton(currentPage === 1)} 
                     >
                         &laquo; Trước
@@ -260,7 +281,6 @@ const UserList = () => {
                     <button 
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages || totalPages === 0}
-                        // FIX: Gọi hàm styles.pageButton(disabled)
                         style={styles.pageButton(currentPage === totalPages || totalPages === 0)} 
                     >
                         Sau &raquo;

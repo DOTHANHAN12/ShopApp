@@ -10,6 +10,7 @@
     <color name="colorPrimaryDark">#CD381C</color>
     <color name="colorAccent">#EE4D2D</color>
 
+    <color name="grey_lightest">#FAFAFA</color> <!-- Thêm màu này -->
     <color name="grey_light">#F5F5F5</color>
     <color name="grey_medium">#E0E0E0</color>
     <color name="grey_dark">#9E9E9E</color>

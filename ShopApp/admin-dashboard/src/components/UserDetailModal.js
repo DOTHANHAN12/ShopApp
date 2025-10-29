@@ -7,19 +7,19 @@ import { db } from '../firebaseConfig'; // Đảm bảo db được import
 const USER_ROLES = ['Admin', 'Staff', 'Customer'];
 const USER_STATUSES = ['Active', 'Locked', 'Pending']; 
 
+// --- DARK/MINIMALIST STYLES CHO MODAL ---
 const modalStyles = {
-    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: '#FFFFFF', padding: '30px', borderRadius: '8px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' },
+    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
+    modalContent: { backgroundColor: '#1A1A1A', padding: '30px', borderRadius: '8px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', color: '#E0E0E0' },
     formGroup: { marginBottom: '15px' },
     label: { display: 'block', fontWeight: 'bold', marginBottom: '5px' },
-    input: { width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' },
-    saveButton: { backgroundColor: '#000000', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' },
-    roleSelect: { padding: '8px', border: '1px solid #C40000', borderRadius: '4px' }
+    input: { width: '100%', padding: '10px', border: '1px solid #444', borderRadius: '4px', boxSizing: 'border-box', backgroundColor: '#333', color: '#E0E0E0' },
+    saveButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' },
+    roleSelect: { padding: '8px', border: '1px solid #C40000', borderRadius: '4px', backgroundColor: '#333', color: '#E0E0E0' }
 };
 
 const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
-    // Nếu user rỗng, đây là thao tác Thêm mới
-    const isEditing = !!initialUser.id;
+    const isEditing = !!initialUser.email; // Sử dụng email để kiểm tra tính chỉnh sửa thực tế
     const [user, setUser] = useState(initialUser);
     const [saving, setSaving] = useState(false);
 
@@ -34,9 +34,7 @@ const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
 
         const dataToSave = {
             ...user,
-            // Đảm bảo trạng thái disabled đồng bộ với status (dùng cho Auth)
             disabled: user.status === 'Locked', 
-            // Cập nhật các trường cá nhân
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             phoneNumber: user.phoneNumber || '',
@@ -44,17 +42,14 @@ const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
         };
 
         try {
-            const userRef = doc(db, 'users', user.id || 'new_user_temp');
+            const userRef = doc(db, 'users', user.id);
 
             if (isEditing) {
-                // UPDATE (Chỉnh sửa thông tin mở rộng)
                 await updateDoc(userRef, dataToSave);
                 alert("Cập nhật thông tin người dùng thành công!");
             } else {
-                // THÊM MỚI (Chỉ lưu vào Firestore. Cần thêm logic tạo Auth User nếu là sản phẩm thực tế)
                 alert("Tính năng Thêm mới chỉ lưu vào Firestore. Cần thêm logic Auth.");
-                // Dùng setDoc với ID tạm thời hoặc tự tạo ID Auth trước
-                // await setDoc(doc(db, 'users', dataToSave.email), dataToSave);
+                // Thay setDoc nếu cần tạo mới
             }
 
             onSave(); 
@@ -70,7 +65,7 @@ const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
     return (
         <div style={modalStyles.overlay} onClick={onClose}>
             <div style={modalStyles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <h2 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px' }}>
+                <h2 style={{ borderBottom: '1px solid #555', paddingBottom: '10px', marginBottom: '20px', color: '#C40000' }}>
                     {isEditing ? `Sửa Chi Tiết: ${user.fullName || user.email}` : 'Thêm Người Dùng Mới'}
                 </h2>
                 
@@ -97,7 +92,7 @@ const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
                         <input type="tel" name="phoneNumber" value={user.phoneNumber || ''} onChange={handleChange} style={modalStyles.input} />
                     </div>
 
-                    <hr style={{margin: '20px 0'}}/>
+                    <hr style={{margin: '20px 0', borderTop: '1px solid #555'}}/>
 
                     {/* VAI TRÒ & TRẠNG THÁI */}
                     <div style={{ display: 'flex', gap: '20px' }}>
@@ -116,13 +111,13 @@ const UserDetailModal = ({ user: initialUser, onClose, onSave }) => {
                     </div>
 
                     {isEditing && (
-                        <div style={{ marginTop: '15px', padding: '10px', border: '1px dashed #ccc' }}>
+                        <div style={{ marginTop: '15px', padding: '10px', border: '1px dashed #555' }}>
                             <p><strong>Ngày tạo:</strong> {user.createdAt ? new Date(Number(user.createdAt)).toLocaleString() : 'N/A'}</p>
                             <p><strong>Đăng nhập cuối:</strong> {user.lastLoginDate || 'N/A'}</p>
                         </div>
                     )}
                     
-                    <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                    <div style={{ marginTop: '30px', borderTop: '1px solid #555', paddingTop: '20px' }}>
                         <button type="submit" style={modalStyles.saveButton} disabled={saving}>
                             {saving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                         </button>

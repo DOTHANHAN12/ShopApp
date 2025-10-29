@@ -1,4 +1,5 @@
 // src/components/OrderList.js
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; 
@@ -6,32 +7,48 @@ import { formatCurrency } from '../utils/format';
 import OrderDetailModal from './OrderDetailModal'; 
 
 // Định nghĩa trạng thái cho bộ lọc
-const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
-const ORDERS_PER_PAGE = 10; // Số lượng đơn hàng mỗi trang
+const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'PAID'];
+const ORDERS_PER_PAGE = 10; 
 
 // ----------------------------------------------------------------------
-// THIẾT KẾ STYLES (Đen/Trắng/Đỏ)
+// THIẾT KẾ STYLES (DARK/MINIMALIST)
 // ----------------------------------------------------------------------
 const styles = {
-    container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh' },
-    title: { color: '#000000', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
-    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px' },
-    th: { backgroundColor: '#000000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 500 },
-    td: { padding: '10px 15px', borderBottom: '1px solid #EEEEEE', verticalAlign: 'middle' },
+    // container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh' }, 
+    title: { color: '#E0E0E0', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
+    
+    // Tối ưu hóa Table
+    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px', color: '#E0E0E0' },
+    th: { backgroundColor: '#C40000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600 },
+    td: { padding: '10px 15px', borderBottom: '1px solid #444', verticalAlign: 'middle' },
+    
+    // Tối ưu hóa Filter Bar
     filterBar: { display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' },
-    filterInput: { padding: '8px 10px', border: '1px solid #ccc', borderRadius: '4px' },
+    filterInput: { padding: '8px 10px', border: '1px solid #555', borderRadius: '4px', backgroundColor: '#333', color: '#E0E0E0' },
+    
+    // Status Tags (Logic màu giữ nguyên)
     statusTag: (status) => {
         let color = '#666';
-        if (status === 'DELIVERED') color = '#28a745';
-        if (status === 'PENDING') color = '#ffc107';
-        if (status === 'PROCESSING') color = '#007bff';
+        if (status === 'PAID') color = '#8A2BE2'; 
+        if (status === 'DELIVERED') color = '#28a745'; 
+        if (status === 'PENDING') color = '#ffc107'; 
+        if (status === 'PROCESSING') color = '#007bff'; 
         if (status === 'SHIPPED') color = '#007bff';
-        if (status === 'CANCELLED') color = '#dc3545';
+        if (status === 'CANCELLED' || status === 'FAILED_PAYMENT') color = '#dc3545'; 
         return { backgroundColor: color, color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' };
     },
-    actionButton: { border: '1px solid #000', background: 'none', color: '#000', cursor: 'pointer', padding: '5px 10px', borderRadius: '4px', marginRight: '5px', fontSize: '12px' },
-    pagination: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' },
-    pageButton: (disabled) => ({ padding: '8px 15px', border: '1px solid #000', backgroundColor: disabled ? '#f0f0f0' : '#fff', cursor: disabled ? 'not-allowed' : 'pointer' })
+    
+    actionButton: { border: '1px solid #C40000', background: 'none', color: '#C40000', cursor: 'pointer', padding: '5px 10px', borderRadius: '4px', marginRight: '5px', fontSize: '12px', transition: 'all 0.2s' },
+    
+    pagination: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', color: '#E0E0E0' },
+    pageButton: (disabled) => ({ 
+        padding: '8px 15px', 
+        border: '1px solid #C40000', 
+        backgroundColor: disabled ? '#333' : '#C40000', 
+        color: disabled ? '#888' : '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'background-color 0.2s'
+    })
 };
 
 const OrderList = () => {
@@ -41,18 +58,16 @@ const OrderList = () => {
     const [filterStatus, setFilterStatus] = useState('All');
     const [detailModalOrder, setDetailModalOrder] = useState(null);
 
-    // STATES MỚI CHO BỘ LỌC
     const [filterMinPrice, setFilterMinPrice] = useState('');
     const [filterMaxPrice, setFilterMaxPrice] = useState('');
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
 
-    // STATES CHO PHÂN TRANG
     const [currentPage, setCurrentPage] = useState(1);
 
 
     // ----------------------------------------------------------------------
-    // HÀM FETCH DỮ LIỆU CHÍNH
+    // HÀM FETCH DỮ LIỆU CHÍNH (Logic giữ nguyên)
     // ----------------------------------------------------------------------
     const fetchOrders = async () => {
         setLoading(true);
@@ -62,14 +77,11 @@ const OrderList = () => {
 
             const ordersList = orderSnapshot.docs.map(doc => {
                 const data = doc.data();
-                // Chuyển đổi timestamp thành đối tượng Date
                 const orderDate = data.createdAt ? new Date(Number(data.createdAt)) : null;
 
-                // XỬ LÝ LẤY DỮ LIỆU ĐỊA CHỈ AN TOÀN
                 const shippingAddress = data.shippingAddress || {};
                 const shippingName = shippingAddress.name || shippingAddress.fullName || 'N/A';
-                // Thử cả city và province
-                const shippingCity = shippingAddress.city || shippingAddress.province || 'N/A'; 
+                const shippingCity = shippingAddress.city || shippingAddress.province || 'N/A';
                 
                 return { 
                     id: doc.id, 
@@ -80,14 +92,12 @@ const OrderList = () => {
                 };
             });
 
-            // Sắp xếp mặc định: Mới nhất lên trên
             ordersList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
             setOrders(ordersList);
 
         } catch (err) {
             console.error("Lỗi khi tải đơn hàng:", err);
-            // ... (xử lý lỗi)
         } finally {
             setLoading(false);
         }
@@ -98,12 +108,11 @@ const OrderList = () => {
     }, []);
 
     // ----------------------------------------------------------------------
-    // HÀM TÍNH TOÁN DỮ LIỆU ĐÃ LỌC VÀ PHÂN TRANG
+    // HÀM TÍNH TOÁN DỮ LIỆU ĐÃ LỌC VÀ PHÂN TRANG (Logic giữ nguyên)
     // ----------------------------------------------------------------------
     const filteredAndPaginatedOrders = useMemo(() => {
         let currentOrders = orders;
 
-        // 1. Lọc theo Tìm kiếm ID
         if (searchTerm) {
             const lowerSearchTerm = searchTerm.toLowerCase();
             currentOrders = currentOrders.filter(o =>
@@ -112,12 +121,10 @@ const OrderList = () => {
             );
         }
 
-        // 2. Lọc theo Trạng thái
         if (filterStatus !== 'All') {
             currentOrders = currentOrders.filter(o => o.orderStatus === filterStatus);
         }
         
-        // 3. Lọc theo Giá trị Đơn hàng (Total Amount)
         const minPrice = parseFloat(filterMinPrice);
         const maxPrice = parseFloat(filterMaxPrice);
 
@@ -128,7 +135,6 @@ const OrderList = () => {
             currentOrders = currentOrders.filter(o => o.totalAmount <= maxPrice);
         }
 
-        // 4. Lọc theo Ngày Đặt hàng (Timestamp)
         const startTimestamp = filterStartDate ? new Date(filterStartDate).getTime() : 0;
         const endTimestamp = filterEndDate ? new Date(filterEndDate).getTime() : Infinity;
 
@@ -159,7 +165,6 @@ const OrderList = () => {
         };
     }, [orders, searchTerm, filterStatus, filterMinPrice, filterMaxPrice, filterStartDate, filterEndDate, currentPage]);
 
-    // Đặt lại trang về 1 khi bất kỳ bộ lọc nào thay đổi
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, filterStatus, filterMinPrice, filterMaxPrice, filterStartDate, filterEndDate]);
@@ -169,13 +174,13 @@ const OrderList = () => {
     // RENDER
     // ----------------------------------------------------------------------
 
-    if (loading) return <div style={styles.container}>Đang tải dữ liệu đơn hàng...</div>;
+    if (loading) return <div>Đang tải dữ liệu đơn hàng...</div>;
     
     const { paginatedOrders, totalItems, totalPages } = filteredAndPaginatedOrders;
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.title}>Quản Lý Đơn Hàng</h1>
+            <h1 style={styles.title}>Quản Lý Đơn Hàng ({totalItems} items)</h1>
             
             {/* Thanh Bộ lọc */}
             <div style={styles.filterBar}>
@@ -213,6 +218,7 @@ const OrderList = () => {
                 />
 
                 {/* 3. Lọc theo Ngày */}
+                <span style={{color: '#E0E0E0'}}>Từ:</span>
                 <input
                     type="date"
                     title="Ngày Bắt đầu"
@@ -220,6 +226,7 @@ const OrderList = () => {
                     onChange={(e) => setFilterStartDate(e.target.value)}
                     style={styles.filterInput}
                 />
+                <span style={{color: '#E0E0E0'}}>Đến:</span>
                 <input
                     type="date"
                     title="Ngày Kết thúc"
@@ -245,7 +252,7 @@ const OrderList = () => {
                 <tbody>
                     {paginatedOrders.map((order) => (
                         <tr key={order.id}>
-                            <td style={styles.td}><small>{order.orderId || order.id}</small></td>
+                            <td style={styles.td}><small style={{color: '#A0A0A0'}}>{order.orderId || order.id}</small></td>
                             <td style={styles.td}>
                                 {order.orderDate ? order.orderDate.toLocaleString() : 'N/A'}
                             </td>
@@ -277,7 +284,6 @@ const OrderList = () => {
             
             {/* Phân trang */}
             <div style={styles.pagination}>
-                {/* Đã sửa lỗi: Thay thế <Text> bằng <span> */}
                 <span>
                     Hiển thị {paginatedOrders.length} trên {totalItems} đơn hàng
                 </span>

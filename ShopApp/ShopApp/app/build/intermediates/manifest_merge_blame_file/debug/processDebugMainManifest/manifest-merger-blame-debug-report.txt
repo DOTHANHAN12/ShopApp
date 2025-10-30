@@ -9,11 +9,11 @@
 9        android:targetSdkVersion="36" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
-11-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:5:5-67
-11-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:5:22-64
+11-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:5:5-67
+11-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:5:22-64
 12    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-12-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:6:5-77
-12-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:6:22-74
+12-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:6:5-77
+12-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:6:22-74
 13
 14    <!-- Although the *SdkVersion is captured in gradle build files, this is required for non gradle builds -->
 15    <!-- <uses-sdk android:minSdkVersion="21" /> -->
@@ -54,211 +54,211 @@
 29-->[androidx.core:core:1.13.0] C:\Users\maid2\.gradle\caches\8.13\transforms\313a152da962e2579cfc4ad456a36610\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
 30
 31    <application
-31-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-107:19
+31-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:8:5-107:19
 32        android:allowBackup="true"
-32-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:9:9-35
+32-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:9:9-35
 33        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 33-->[androidx.core:core:1.13.0] C:\Users\maid2\.gradle\caches\8.13\transforms\313a152da962e2579cfc4ad456a36610\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
 34        android:dataExtractionRules="@xml/data_extraction_rules"
-34-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:10:9-65
+34-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:10:9-65
 35        android:debuggable="true"
 36        android:extractNativeLibs="false"
 37        android:fullBackupContent="@xml/backup_rules"
-37-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:11:9-54
+37-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:11:9-54
 38        android:icon="@mipmap/ic_launcher"
-38-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:12:9-43
+38-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:12:9-43
 39        android:label="@string/app_name"
-39-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:13:9-41
+39-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:13:9-41
 40        android:roundIcon="@mipmap/ic_launcher_round"
-40-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:14:9-54
+40-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:14:9-54
 41        android:supportsRtl="true"
-41-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:15:9-35
+41-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:15:9-35
 42        android:testOnly="true"
 43        android:theme="@style/Theme.ShopApp" >
-43-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:16:9-45
+43-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:16:9-45
 44        <service
-44-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:18:9-24:19
+44-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:18:9-24:19
 45            android:name="com.example.shopapp.MyFirebaseMessagingService"
-45-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:19:13-55
+45-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:19:13-55
 46            android:exported="false" >
-46-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:20:13-37
+46-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:20:13-37
 47            <intent-filter>
-47-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:21:13-23:29
+47-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:21:13-23:29
 48                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-48-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:17-78
-48-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:25-75
+48-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:17-78
+48-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:25-75
 49            </intent-filter>
 50        </service>
 51
 52        <activity
-52-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:26:9-35:20
+52-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:26:9-35:20
 53            android:name="com.example.shopapp.VNPayActivity"
-53-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:27:13-42
+53-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:27:13-42
 54            android:exported="true" >
-54-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:28:13-36
+54-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:28:13-36
 55            <intent-filter>
-55-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:29:13-34:29
+55-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:29:13-34:29
 56                <action android:name="android.intent.action.VIEW" />
-56-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
-56-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
+56-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
+56-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
 57
 58                <category android:name="android.intent.category.DEFAULT" />
-58-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
-58-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
+58-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
+58-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
 59                <category android:name="android.intent.category.BROWSABLE" />
-59-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
-59-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
+59-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
+59-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
 60
 61                <data
-61-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
+61-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
 62                    android:host="shopapp"
-62-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
+62-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
 63                    android:pathPrefix="/vnpay-return"
-63-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:67-101
+63-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:67-101
 64                    android:scheme="app" />
-64-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
+64-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
 65            </intent-filter>
 66        </activity>
 67        <activity
-67-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:37:9-39:40
+67-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:37:9-39:40
 68            android:name="com.example.shopapp.MyReviewsActivity"
-68-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:38:13-46
+68-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:38:13-46
 69            android:exported="false" />
-69-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:39:13-37
+69-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:39:13-37
 70        <activity
-70-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:40:9-42:40
+70-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:40:9-42:40
 71            android:name="com.example.shopapp.WriteReviewActivity"
-71-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:41:13-48
+71-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:41:13-48
 72            android:exported="false" />
-72-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:42:13-37
+72-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:42:13-37
 73        <activity
-73-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:43:9-45:40
+73-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:43:9-45:40
 74            android:name="com.example.shopapp.ReviewListActivity"
-74-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:44:13-47
+74-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:44:13-47
 75            android:exported="false" />
-75-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:45:13-37
+75-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:45:13-37
 76        <activity
-76-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:46:9-48:40
+76-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:46:9-48:40
 77            android:name="com.example.shopapp.ForgotPasswordActivity"
-77-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:47:13-51
+77-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:47:13-51
 78            android:exported="false" />
-78-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:48:13-37
+78-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:48:13-37
 79        <activity
-79-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:49:9-51:40
+79-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:49:9-51:40
 80            android:name="com.example.shopapp.EditProfileActivity"
-80-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:50:13-48
+80-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:50:13-48
 81            android:exported="false" />
-81-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:51:13-37
+81-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:51:13-37
 82        <activity
-82-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:52:9-54:40
+82-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:52:9-54:40
 83            android:name="com.example.shopapp.OrderHistoryActivity"
-83-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:53:13-49
+83-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:53:13-49
 84            android:exported="false" />
-84-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:54:13-37
+84-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:54:13-37
 85        <activity
-85-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:55:9-57:40
+85-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:55:9-57:40
 86            android:name="com.example.shopapp.ProfileActivity"
-86-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:56:13-44
+86-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:56:13-44
 87            android:exported="false" />
-87-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:57:13-37
+87-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:57:13-37
 88        <activity
-88-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:58:9-60:40
+88-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:58:9-60:40
 89            android:name="com.example.shopapp.VoucherSelectionActivity"
-89-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:59:13-53
+89-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:59:13-53
 90            android:exported="false" />
-90-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:60:13-37
+90-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:60:13-37
 91        <activity
-91-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:61:9-63:51
+91-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:61:9-63:51
 92            android:name="com.example.shopapp.OrderSuccessActivity"
-92-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:61:19-55
+92-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:61:19-55
 93            android:exported="false"
-93-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:62:13-37
+93-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:62:13-37
 94            android:label="Đặt hàng thành công" />
-94-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:63:13-48
+94-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:63:13-48
 95        <activity
-95-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:64:9-68:52
+95-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:64:9-68:52
 96            android:name="com.example.shopapp.AddressSelectionActivity"
-96-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:65:13-53
+96-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:65:13-53
 97            android:exported="false"
-97-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:66:13-37
+97-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:66:13-37
 98            android:label="Chọn địa chỉ"
-98-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:67:13-41
+98-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:67:13-41
 99            android:screenOrientation="portrait" />
-99-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:68:13-49
+99-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:68:13-49
 100        <activity
-100-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:69:9-74:58
+100-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:69:9-74:58
 101            android:name="com.example.shopapp.EditAddressActivity"
-101-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:70:13-48
+101-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:70:13-48
 102            android:exported="false"
-102-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:71:13-37
+102-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:71:13-37
 103            android:label="Sửa địa chỉ"
-103-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:72:13-40
+103-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:72:13-40
 104            android:screenOrientation="portrait"
-104-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:73:13-49
+104-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:73:13-49
 105            android:windowSoftInputMode="adjustResize" />
-105-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:74:13-55
+105-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:74:13-55
 106        <activity
-106-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:75:9-77:40
+106-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:75:9-77:40
 107            android:name="com.example.shopapp.FavoriteActivity"
-107-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:76:13-45
+107-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:76:13-45
 108            android:exported="false" />
-108-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:77:13-37
+108-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:77:13-37
 109        <activity
-109-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:78:9-80:40
+109-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:78:9-80:40
 110            android:name="com.example.shopapp.CartActivity"
-110-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:79:13-41
+110-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:79:13-41
 111            android:exported="false" />
-111-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:80:13-37
+111-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:80:13-37
 112        <activity
-112-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:81:9-83:40
+112-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:81:9-83:40
 113            android:name="com.example.shopapp.UserProfileActivity"
-113-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:82:13-48
+113-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:82:13-48
 114            android:exported="false" />
-114-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:83:13-37
+114-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:83:13-37
 115        <activity
-115-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:84:9-92:20
+115-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:84:9-92:20
 116            android:name="com.example.shopapp.HomeActivity"
-116-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:85:13-41
+116-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:85:13-41
 117            android:exported="true" >
-117-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:86:13-36
+117-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:86:13-36
 118            <intent-filter>
-118-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:87:13-91:29
+118-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:87:13-91:29
 119                <action android:name="android.intent.action.MAIN" />
-119-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:88:17-69
-119-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:88:25-66
+119-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:88:17-69
+119-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:88:25-66
 120
 121                <category android:name="android.intent.category.LAUNCHER" />
-121-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:90:17-77
-121-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:90:27-74
+121-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:90:17-77
+121-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:90:27-74
 122            </intent-filter>
 123        </activity>
 124        <activity
-124-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:93:9-95:40
+124-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:93:9-95:40
 125            android:name="com.example.shopapp.ProductDetailActivity"
-125-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:94:13-50
+125-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:94:13-50
 126            android:exported="false" />
-126-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:95:13-37
+126-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:95:13-37
 127        <activity
-127-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:96:9-98:40
+127-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:96:9-98:40
 128            android:name="com.example.shopapp.CategorySearchActivity"
-128-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:97:13-51
+128-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:97:13-51
 129            android:exported="false" />
-129-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:98:13-37
+129-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:98:13-37
 130        <activity
-130-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:100:9-102:40
+130-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:100:9-102:40
 131            android:name="com.example.shopapp.LoginActivity"
-131-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:101:13-42
+131-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:101:13-42
 132            android:exported="false" />
-132-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:102:13-37
+132-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:102:13-37
 133        <activity
-133-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:103:9-105:40
+133-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:103:9-105:40
 134            android:name="com.example.shopapp.RegisterActivity"
-134-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:104:13-45
+134-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:104:13-45
 135            android:exported="false" />
-135-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:105:13-37
+135-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:105:13-37
 136        <activity android:name="com.example.shopapp.ProductListActivity" />
-136-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:9-76
-136-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:19-73
+136-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:9-76
+136-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:106:19-73
 137
 138        <service
 138-->[com.google.firebase:firebase-firestore:26.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\d72376f9fb44c62dfc1e0c534cf2cfaa\transformed\firebase-firestore-26.0.1\AndroidManifest.xml:14:9-23:19
@@ -381,23 +381,23 @@
 198            <intent-filter>
 198-->[com.google.firebase:firebase-auth:24.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\083af0b33c7bca38bef09c5180b290bf\transformed\firebase-auth-24.0.1\AndroidManifest.xml:35:13-45:29
 199                <action android:name="android.intent.action.VIEW" />
-199-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
-199-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
+199-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
+199-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
 200
 201                <category android:name="android.intent.category.DEFAULT" />
-201-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
-201-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
+201-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
+201-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
 202                <category android:name="android.intent.category.BROWSABLE" />
-202-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
-202-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
+202-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
+202-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
 203
 204                <data
-204-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
+204-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
 205                    android:host="firebase.auth"
-205-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
+205-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
 206                    android:path="/"
 207                    android:scheme="genericidp" />
-207-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
+207-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
 208            </intent-filter>
 209        </activity>
 210        <activity
@@ -415,23 +415,23 @@
 216            <intent-filter>
 216-->[com.google.firebase:firebase-auth:24.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\083af0b33c7bca38bef09c5180b290bf\transformed\firebase-auth-24.0.1\AndroidManifest.xml:53:13-63:29
 217                <action android:name="android.intent.action.VIEW" />
-217-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
-217-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
+217-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:17-69
+217-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:30:25-66
 218
 219                <category android:name="android.intent.category.DEFAULT" />
-219-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
-219-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
+219-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:17-76
+219-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:31:27-73
 220                <category android:name="android.intent.category.BROWSABLE" />
-220-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
-220-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
+220-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:17-78
+220-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:32:27-75
 221
 222                <data
-222-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
+222-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:17-104
 223                    android:host="firebase.auth"
-223-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
+223-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:44-66
 224                    android:path="/"
 225                    android:scheme="recaptcha" />
-225-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
+225-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:33:23-43
 226            </intent-filter>
 227        </activity>
 228
@@ -470,10 +470,10 @@
 248            android:exported="false" >
 248-->[com.google.firebase:firebase-messaging:25.0.1] C:\Users\maid2\.gradle\caches\8.13\transforms\350a40da68b4d9085eb91f595df09ab4\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:49:13-37
 249            <intent-filter android:priority="-500" >
-249-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:21:13-23:29
+249-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:21:13-23:29
 250                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-250-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:17-78
-250-->C:\Users\maid2\OneDrive\Desktop\vsweb\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:25-75
+250-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:17-78
+250-->D:\git\ShopApp\ShopApp\ShopApp\app\src\main\AndroidManifest.xml:22:25-75
 251            </intent-filter>
 252        </service>
 253

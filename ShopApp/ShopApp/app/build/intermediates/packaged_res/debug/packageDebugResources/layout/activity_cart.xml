@@ -50,17 +50,20 @@
 
             <!-- Shipping Address Section -->
             <LinearLayout
-                android:id="@+id/layout_shipping_details"
+                android:id="@+id/layout_shipping_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Địa chỉ nhận hàng" 
+                    android:text="Địa chỉ nhận hàng"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -100,7 +103,7 @@
                 android:layout_marginTop="8dp"
                 android:padding="16dp"
                 android:orientation="vertical">
-                
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

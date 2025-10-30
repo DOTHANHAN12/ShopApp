@@ -29,7 +29,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private CircleImageView profileImage;
     private TextView textUserName, textUserEmail;
-    private Button btnEditProfile, btnLogout;
+    private ImageView btnEditProfile;
+    private Button btnLogout;
     private LinearLayout layoutMyOrders, layoutShippingAddresses, layoutWishlist, layoutMyReviews;
 
     @Override
@@ -79,7 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
-        ImageView cartButton = findViewById(R.id.ic_cart);
+        ImageView cartButton = findViewById(R.id.img_cart);
         if (cartButton != null) {
             cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
         }

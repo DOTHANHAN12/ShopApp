@@ -3,6 +3,7 @@ package com.example.shopapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -35,7 +36,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private StorageReference storageRef;
 
     private CircleImageView profileImage;
-    private TextView textChangePhoto;
+    private View textChangePhoto;
     private TextInputEditText editFullName, editPhoneNumber, editAddress;
     private RadioGroup radioGroupGender;
     private RadioButton radioMale, radioFemale, radioOther;
@@ -62,10 +63,10 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
-        ImageView cartButton = findViewById(R.id.ic_cart);
-        if (cartButton != null) {
-            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
-        }
+        // ImageView cartButton = findViewById(R.id.ic_cart);
+        // if (cartButton != null) {
+        //     cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        // }
 
         ImageView homeButton = findViewById(R.id.nav_home_cs);
         if (homeButton != null) {
@@ -85,7 +86,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void mapViews() {
         profileImage = findViewById(R.id.profile_image);
-        textChangePhoto = findViewById(R.id.text_change_photo);
+        textChangePhoto = findViewById(R.id.btn_change_photo);
         editFullName = findViewById(R.id.edit_full_name);
         editPhoneNumber = findViewById(R.id.edit_phone_number);
         editAddress = findViewById(R.id.edit_address);

@@ -53,20 +53,32 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
         boolean isChecked = false;
         if (address.getDocumentId() != null && address.getDocumentId().equals(currentSelectedAddressId)) {
             isChecked = true;
-        // *** ĐÃ SỬA: Gọi getIsDefault() ***
         } else if (currentSelectedAddressId == null && address.getIsDefault()) {
             isChecked = true;
         }
         holder.radioButton.setChecked(isChecked);
 
-        // 2. Kiểm tra Label Mặc Định (Chữ đỏ)
-        // *** ĐÃ SỬA: Gọi getIsDefault() ***
+        // 2. Hiển thị Label "Mặc định" (màu đỏ, ở trên bên cạnh tên)
         if (address.getIsDefault()) {
             holder.textDefaultTag.setVisibility(View.VISIBLE);
             holder.textDefaultTag.setText("Mặc định");
-            holder.textDefaultTag.setTextColor(Color.parseColor("#DD0000"));
         } else {
             holder.textDefaultTag.setVisibility(View.GONE);
+        }
+
+        // 3. Hiển thị Loại Địa Chỉ (viền đỏ, ở dưới)
+        if (address.getAddressType() != null && !address.getAddressType().isEmpty()) {
+            holder.textAddressType.setVisibility(View.VISIBLE);
+
+            if ("Nhà Riêng".equals(address.getAddressType())) {
+                holder.textAddressType.setText("🏠 Nhà Riêng");
+            } else if ("Văn Phòng".equals(address.getAddressType())) {
+                holder.textAddressType.setText("🏢 Văn Phòng");
+            } else {
+                holder.textAddressType.setText(address.getAddressType());
+            }
+        } else {
+            holder.textAddressType.setVisibility(View.GONE);
         }
 
         // Xử lý sự kiện khi click vào toàn bộ item
@@ -103,6 +115,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
         public TextView textLocation;
         public TextView textEdit;
         public TextView textDefaultTag;
+        public TextView textAddressType; // ✅ THÊM
 
         public AddressViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -113,6 +126,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
             textLocation = itemView.findViewById(R.id.text_location);
             textEdit = itemView.findViewById(R.id.btn_edit_address);
             textDefaultTag = itemView.findViewById(R.id.label_default);
+            textAddressType = itemView.findViewById(R.id.text_address_type); // ✅ THÊM
 
             radioButton.setClickable(false);
             radioButton.setFocusable(false);

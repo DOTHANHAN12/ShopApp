@@ -56,10 +56,12 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
             return;
         }
 
-        if (getIntent().getBooleanExtra(MODE_SELECT, false)) {
-            isSelectionMode = true;
-            initialSelectedAddressId = getIntent().getStringExtra("CURRENT_ADDRESS_ID");
-        }
+        // ✅ THÊM LOG ĐỂ DEBUG
+        isSelectionMode = getIntent().getBooleanExtra(MODE_SELECT, false);
+        initialSelectedAddressId = getIntent().getStringExtra("CURRENT_ADDRESS_ID");
+
+        Log.d(TAG, "onCreate - isSelectionMode: " + isSelectionMode);
+        Log.d(TAG, "onCreate - initialSelectedAddressId: " + initialSelectedAddressId);
 
         mapViews();
         setupRecyclerView();
@@ -68,40 +70,76 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
     private void setupNavigation() {
         ImageView cartButton = findViewById(R.id.ic_cart);
-        if (cartButton != null) {
-            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
-        }
-
         ImageView homeButton = findViewById(R.id.nav_home_cs);
-        if (homeButton != null) {
-            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
-        }
-
         ImageView userButton = findViewById(R.id.nav_user_cs);
-        if (userButton != null) {
-            userButton.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        ImageView backButton = findViewById(R.id.img_back_arrow);
+        View headerLayout = findViewById(R.id.header_layout);
+        View footerLayout = findViewById(R.id.footer_layout);
+
+        // ✅ SỬA: Ẩn header và footer khi ở chế độ chọn địa chỉ
+        if (isSelectionMode) {
+            // Ẩn hoặc vô hiệu hóa các nút navigation để tránh nhầm lẫn
+            if (headerLayout != null) headerLayout.setVisibility(View.GONE);
+            if (footerLayout != null) footerLayout.setVisibility(View.GONE);
+            if (cartButton != null) cartButton.setVisibility(View.GONE);
+            if (homeButton != null) homeButton.setVisibility(View.GONE);
+            if (userButton != null) userButton.setVisibility(View.GONE);
+        } else {
+            // Chế độ quản lý thông thường
+            if (cartButton != null) {
+                cartButton.setOnClickListener(v -> {
+                    Log.d(TAG, "Cart button clicked");
+                    startActivity(new Intent(this, CartActivity.class));
+                });
+            }
+
+            if (homeButton != null) {
+                homeButton.setOnClickListener(v -> {
+                    Log.d(TAG, "Home button clicked");
+                    startActivity(new Intent(this, HomeActivity.class));
+                });
+            }
+
+            if (userButton != null) {
+                userButton.setOnClickListener(v -> {
+                    Log.d(TAG, "User button clicked");
+                    startActivity(new Intent(this, ProfileActivity.class));
+                });
+            }
         }
 
-        ImageView backButton = findViewById(R.id.img_back_arrow);
+        // Nút back luôn hoạt động
         if (backButton != null) {
-            backButton.setOnClickListener(v -> finish());
+            backButton.setOnClickListener(v -> {
+                Log.d(TAG, "Back button clicked - isSelectionMode: " + isSelectionMode);
+                // ✅ SỬA: Nếu đang ở chế độ chọn, trả về RESULT_CANCELED
+                if (isSelectionMode) {
+                    setResult(RESULT_CANCELED);
+                }
+                finish();
+            });
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume called");
         loadAddresses();
     }
 
     private void mapViews() {
         recyclerView = findViewById(R.id.recycler_addresses);
-        TextView btnAddNewAddress = findViewById(R.id.btn_add_new_address);
+        // ✅ SỬA: Đúng kiểu CardView như trong XML
+        androidx.cardview.widget.CardView btnAddNewAddress = findViewById(R.id.btn_add_new_address);
 
-        btnAddNewAddress.setOnClickListener(v -> {
-            Intent intent = new Intent(AddressSelectionActivity.this, EditAddressActivity.class);
-            startActivity(intent);
-        });
+        if (btnAddNewAddress != null) {
+            btnAddNewAddress.setOnClickListener(v -> {
+                Log.d(TAG, "Add new address button clicked");
+                Intent intent = new Intent(AddressSelectionActivity.this, EditAddressActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupRecyclerView() {
@@ -112,6 +150,8 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
     private void loadAddresses() {
         if (userId == null) return;
+
+        Log.d(TAG, "Loading addresses for user: " + userId);
 
         db.collection("users").document(userId).collection("addresses")
                 .orderBy("isDefault", Query.Direction.DESCENDING)
@@ -125,9 +165,13 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
                             addressList.add(address);
                         }
                     }
+                    Log.d(TAG, "Loaded " + addressList.size() + " addresses");
                     addressAdapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Lỗi tải địa chỉ: " + e.getMessage()));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi tải địa chỉ: " + e.getMessage(), e);
+                    Toast.makeText(this, "Lỗi tải danh sách địa chỉ", Toast.LENGTH_SHORT).show();
+                });
     }
 
     // --------------------------------------------------------------------------------
@@ -136,21 +180,29 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
     @Override
     public void onAddressSelected(ShippingAddress selectedAddress) {
+        Log.d(TAG, "onAddressSelected called - isSelectionMode: " + isSelectionMode);
+        Log.d(TAG, "Selected address: " + (selectedAddress != null ? selectedAddress.getFullName() : "null"));
+
         if (isSelectionMode) {
             // CHẾ ĐỘ 1: CHỌN VÀ TRẢ VỀ CARTACTIVITY
             Gson gson = new Gson();
             Intent resultIntent = new Intent();
 
-            resultIntent.putExtra(SELECTED_ADDRESS_JSON, gson.toJson(selectedAddress));
+            String addressJson = gson.toJson(selectedAddress);
+            Log.d(TAG, "Returning address JSON: " + addressJson);
+
+            resultIntent.putExtra(SELECTED_ADDRESS_JSON, addressJson);
             setResult(RESULT_OK, resultIntent);
+
+            Log.d(TAG, "Finishing activity with RESULT_OK");
             finish();
 
         } else {
             // CHẾ ĐỘ 2: QUẢN LÝ TÀI KHOẢN (ĐẶT MẶC ĐỊNH LÂU DÀI)
+            Log.d(TAG, "Management mode - setting default address");
 
-            // *** ĐÃ SỬA: Gọi getIsDefault() ***
-            if (selectedAddress.getIsDefault()) {
-                Toast.makeText(this, "Vui lòng chọn một địa chỉ khác làm mặc định để hủy địa chỉ này.", Toast.LENGTH_LONG).show();
+            if (Boolean.TRUE.equals(selectedAddress.getIsDefault())) {
+                Toast.makeText(this, "Địa chỉ này đã là mặc định.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -161,6 +213,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
 
     @Override
     public void onEditClicked(ShippingAddress address) {
+        Log.d(TAG, "onEditClicked - Address: " + address.getDocumentId());
         Intent intent = new Intent(this, EditAddressActivity.class);
         intent.putExtra("ADDRESS_DOC_ID", address.getDocumentId());
         startActivity(intent);
@@ -170,7 +223,12 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
      * Logic sử dụng WriteBatch để đảm bảo chỉ có 1 địa chỉ mặc định (Chế độ Quản lý).
      */
     private void setNewDefaultAddress(ShippingAddress addressToSetDefault) {
-        if (userId == null || addressToSetDefault.getDocumentId() == null) return;
+        if (userId == null || addressToSetDefault.getDocumentId() == null) {
+            Log.w(TAG, "Cannot set default - userId or documentId is null");
+            return;
+        }
+
+        Log.d(TAG, "Setting new default address: " + addressToSetDefault.getDocumentId());
 
         db.collection("users").document(userId).collection("addresses")
                 .whereEqualTo("isDefault", true)
@@ -182,6 +240,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
                         DocumentSnapshot oldDefaultDoc = null;
                         if (!task.getResult().isEmpty()) {
                             oldDefaultDoc = task.getResult().getDocuments().get(0);
+                            Log.d(TAG, "Found old default address: " + oldDefaultDoc.getId());
                         }
 
                         WriteBatch batch = db.batch();
@@ -189,6 +248,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
                         // A. Vô hiệu hóa địa chỉ mặc định cũ
                         if (oldDefaultDoc != null && !oldDefaultDoc.getId().equals(addressToSetDefault.getDocumentId())) {
                             batch.update(oldDefaultDoc.getReference(), "isDefault", false);
+                            Log.d(TAG, "Disabling old default: " + oldDefaultDoc.getId());
                         }
 
                         // B. Kích hoạt địa chỉ mới được chọn
@@ -196,21 +256,32 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
                                 db.collection("users").document(userId).collection("addresses").document(addressToSetDefault.getDocumentId()),
                                 "isDefault", true
                         );
+                        Log.d(TAG, "Enabling new default: " + addressToSetDefault.getDocumentId());
 
                         // 3. Thực hiện Batch Write
                         batch.commit()
                                 .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Default address updated successfully");
                                     Toast.makeText(this, "Đã đặt địa chỉ mặc định thành công!", Toast.LENGTH_SHORT).show();
                                     loadAddresses(); // Tải lại để cập nhật UI
                                 })
                                 .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Lỗi cập nhật batch mặc định: " + e.getMessage());
+                                    Log.e(TAG, "Lỗi cập nhật batch mặc định: " + e.getMessage(), e);
                                     Toast.makeText(this, "Lỗi cập nhật địa chỉ mặc định.", Toast.LENGTH_SHORT).show();
                                 });
 
                     } else {
-                        Log.e(TAG, "Lỗi tìm kiếm địa chỉ mặc định cũ: " + task.getException());
+                        Log.e(TAG, "Lỗi tìm kiếm địa chỉ mặc định cũ", task.getException());
                     }
                 });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed called - isSelectionMode: " + isSelectionMode);
+        if (isSelectionMode) {
+            setResult(RESULT_CANCELED);
+        }
+        super.onBackPressed();
     }
 }

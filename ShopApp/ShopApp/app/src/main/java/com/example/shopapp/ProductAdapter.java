@@ -190,7 +190,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private void updateFavoriteIcon(boolean isFavorited, ImageView favoriteImageView) {
         if (isFavorited) {
             favoriteImageView.setImageResource(R.drawable.ic_favorite_filled);
-            favoriteImageView.setColorFilter(ContextCompat.getColor(context, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
+            favoriteImageView.setColorFilter(ContextCompat.getColor(context, R.color.colorPrimaryDark), android.graphics.PorterDuff.Mode.SRC_IN);
         } else {
             favoriteImageView.setImageResource(R.drawable.ic_favorite_outline);
             favoriteImageView.clearColorFilter();

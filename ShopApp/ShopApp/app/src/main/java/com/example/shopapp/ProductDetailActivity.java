@@ -692,7 +692,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
         // 2. Lọc và hiển thị Sizes (Variants) cho màu này
         if (currentProduct.variants != null) {
             List<ProductVariant> variantsForColor = currentProduct.variants.stream()
-                    .filter(v -> v.color.equalsIgnoreCase(colorName))
+                    .filter(v -> v.color != null && v.color.equalsIgnoreCase(colorName))
                     .collect(Collectors.toList());
 
             // TẠO SIZE ADAPTER VỚI LISTENER MỚI

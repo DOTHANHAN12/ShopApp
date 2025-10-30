@@ -39,6 +39,7 @@ public class ShippingAddress {
         this.addressType = addressType;
     }
 
+
     // =======================================================
     // GETTERS VÀ SETTERS
     // =======================================================

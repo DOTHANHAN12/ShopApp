@@ -28,8 +28,16 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\xml\\data_extraction_rules.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_info.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_info.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_discount.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_discount.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_clock.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_clock.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
@@ -48,24 +56,20 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_main2.xml"
     },
     {
-        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_recommendation.xml.flat",
-        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_recommendation.xml"
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_color_selector.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_color_selector.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_gradient_overlay.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\gradient_overlay.xml"
     },
     {
-        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_color_selector.xml.flat",
-        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_color_selector.xml"
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_recommendation.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_recommendation.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_red_border_label.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_red_border_label.xml"
-    },
-    {
-        "merged": "com.example.shopapp-debug-52:/layout_activity_order_history.xml.flat",
-        "source": "com.example.shopapp-main-54:/layout/activity_order_history.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_user.xml.flat",
@@ -74,6 +78,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_placeholder.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_placeholder.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_gray_bg_light.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_gray_bg_light.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-xhdpi_ic_launcher.webp.flat",
@@ -140,12 +148,16 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_favorite_item.xml"
     },
     {
-        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_order_summary_row.xml.flat",
-        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_order_summary_row.xml"
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_person.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_person.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_strikethrough_text_black.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\strikethrough_text_black.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_order_summary_row.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_order_summary_row.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
@@ -180,12 +192,24 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_color_selector_adapter.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_badge_orange.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_badge_orange.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_bg_rounded_shopee_green_border.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\bg_rounded_shopee_green_border.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_receipt.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_receipt.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_sub_category.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_sub_category.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_border_light_red.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_border_light_red.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_home_outline.xml.flat",
@@ -204,6 +228,14 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\mipmap-xxhdpi\\ic_launcher.webp"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_gradient_review_bg.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\gradient_review_bg.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_location_empty.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_location_empty.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_shopping_bag.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_shopping_bag.xml"
     },
@@ -214,6 +246,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_product_image_slide.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_product_image_slide.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_calendar.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_calendar.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_favorite_filled.xml.flat",
@@ -234,6 +270,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_custom_checkbox.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\custom_checkbox.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\color_switch_thumb_color.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\color\\switch_thumb_color.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_activity_category_search.xml.flat",
@@ -274,6 +314,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_circle_background_white.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\circle_background_white.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_bg_info.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_bg_info.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_size_unselected.xml.flat",
@@ -332,6 +376,10 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_edit_address.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_review_empty.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_review_empty.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_broken_image.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_broken_image.xml"
     },
@@ -342,6 +390,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_chevron_right.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_chevron_right.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_dialog_review_details.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\dialog_review_details.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_arrow_back.xml.flat",
@@ -360,12 +412,20 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_gray_border.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\color_switch_track_color.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\color\\switch_track_color.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_size_selector.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_size_selector.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_image_bg.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_image_bg.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
@@ -396,6 +456,10 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_launcher_foreground.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_shopping_bag_empty.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_shopping_bag_empty.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_order_history.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_order_history.xml"
     },
@@ -406,6 +470,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_product_detail.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_product_detail.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_gray_bg.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_gray_bg.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\mipmap-mdpi_ic_launcher_round.webp.flat",
@@ -420,8 +488,16 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_close.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_red_bg.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_red_bg.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_red_bg_light.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_red_bg_light.xml"
+    },
+    {
+        "merged": "com.example.shopapp-debug-52:/layout_activity_my_reviews.xml.flat",
+        "source": "com.example.shopapp-main-54:/layout/activity_my_reviews.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_map_placeholder.xml.flat",
@@ -440,8 +516,16 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_order.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_star.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_star.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_favorite_outline.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_favorite_outline.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_status_bg.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_status_bg.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_cart_item.xml.flat",
@@ -454,6 +538,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_order_success.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_order_success.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_delete.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_delete.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_vnpay.xml.flat",
@@ -470,6 +558,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_add_circle.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_add_circle.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_location.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_location.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_review.xml.flat",
@@ -492,16 +584,20 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_shipping_address.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_edit.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_edit.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_review_list.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_review_list.xml"
     },
     {
-        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_location_on.xml.flat",
-        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_location_on.xml"
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_home.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_home.xml"
     },
     {
-        "merged": "com.example.shopapp-debug-52:/layout_activity_address_selection.xml.flat",
-        "source": "com.example.shopapp-main-54:/layout/activity_address_selection.xml"
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_location_on.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_location_on.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_arrow_right.xml.flat",
@@ -524,6 +620,10 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\mipmap-mdpi\\ic_launcher.webp"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_my_review.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_my_review.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_product_recommendation.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_product_recommendation.xml"
     },
@@ -540,15 +640,15 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\xml\\backup_rules.xml"
     },
     {
-        "merged": "com.example.shopapp-debug-52:/layout_activity_edit_profile.xml.flat",
-        "source": "com.example.shopapp-main-54:/layout/activity_edit_profile.xml"
-    },
-    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_rounded_size_selected.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_size_selected.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_cart.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_cart.xml"
+    },
+    {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_phone.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_phone.xml"
     }
 ]

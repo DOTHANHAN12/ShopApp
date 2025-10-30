@@ -50,6 +50,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private Button btnCheckout;
     private TextView textShippingNamePhone, textShippingAddressLine, btnChangeAddress;
     private RadioGroup radioGroupPayment;
+    private LinearLayout layoutShippingAddress; // ✅ THÊM BIẾN NÀY
 
     // State
     private String appliedVoucherCode = null;
@@ -97,18 +98,28 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         textShippingAddressLine = findViewById(R.id.text_shipping_address_line);
         btnChangeAddress = findViewById(R.id.btn_change_address);
         radioGroupPayment = findViewById(R.id.radio_group_payment);
+        layoutShippingAddress = findViewById(R.id.layout_shipping_address); // ✅ THÊM DÒNG NÀY
 
         btnCheckout.setOnClickListener(v -> handleCheckout());
-        btnChangeAddress.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AddressSelectionActivity.class);
-            intent.putExtra(AddressSelectionActivity.MODE_SELECT, true);
-            if (selectedShippingAddress != null && selectedShippingAddress.getDocumentId() != null) {
-                intent.putExtra("CURRENT_ADDRESS_ID", selectedShippingAddress.getDocumentId());
-            }
-            startActivityForResult(intent, REQUEST_CODE_SELECT_ADDRESS);
-        });
+
+        // ✅ THAY ĐỔI: Set listener cho cả LinearLayout thay vì chỉ TextView
+        layoutShippingAddress.setOnClickListener(v -> openAddressSelection());
+
+        // ✅ GIỮ NGUYÊN listener cho TextView (để đảm bảo tương thích)
+        btnChangeAddress.setOnClickListener(v -> openAddressSelection());
+
         layoutVoucherSelector.setOnClickListener(v -> openVoucherSelection());
         imgBack.setOnClickListener(v -> finish());
+    }
+
+    // ✅ THÊM METHOD MỚI để tránh lặp code
+    private void openAddressSelection() {
+        Intent intent = new Intent(this, AddressSelectionActivity.class);
+        intent.putExtra(AddressSelectionActivity.MODE_SELECT, true);
+        if (selectedShippingAddress != null && selectedShippingAddress.getDocumentId() != null) {
+            intent.putExtra("CURRENT_ADDRESS_ID", selectedShippingAddress.getDocumentId());
+        }
+        startActivityForResult(intent, REQUEST_CODE_SELECT_ADDRESS);
     }
 
     @Override
@@ -183,6 +194,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     private void updateAddressUI(ShippingAddress address) {
         if (address != null) {
             String namePhone = String.format("%s | (+84) %s", address.getFullName(), address.getPhoneNumber());
+            // Sử dụng method getFullLocation() để lấy địa chỉ đầy đủ
             String addressLine = String.format("%s, %s", address.getStreetAddress(), address.getFullLocation());
             textShippingNamePhone.setText(namePhone);
             textShippingAddressLine.setText(addressLine);

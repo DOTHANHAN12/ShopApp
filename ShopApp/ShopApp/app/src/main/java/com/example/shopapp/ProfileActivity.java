@@ -29,7 +29,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private CircleImageView profileImage;
     private TextView textUserName, textUserEmail;
-    private ImageView btnEditProfile;
+    private ImageView btnEditProfile, imgBack;
     private Button btnLogout;
     private LinearLayout layoutMyOrders, layoutShippingAddresses, layoutWishlist, layoutMyReviews;
     private LinearLayout layoutChangePassword;
@@ -45,6 +45,8 @@ public class ProfileActivity extends AppCompatActivity {
         mapViews();
         setupNavigation();
         loadUserProfile();
+
+        imgBack.setOnClickListener(v -> finish());
 
         btnEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
@@ -115,6 +117,7 @@ public class ProfileActivity extends AppCompatActivity {
         textUserName = findViewById(R.id.text_user_name);
         textUserEmail = findViewById(R.id.text_user_email);
         btnEditProfile = findViewById(R.id.btn_edit_profile);
+        imgBack = findViewById(R.id.img_back);
         btnLogout = findViewById(R.id.btn_logout);
         layoutMyOrders = findViewById(R.id.layout_my_orders);
         layoutShippingAddresses = findViewById(R.id.layout_shipping_addresses);

@@ -141,7 +141,7 @@ public class CategorySearchActivity extends AppCompatActivity {
 
         // ÁNH XẠ FOOTER
         navHome = findViewById(R.id.nav_home_cs);
-//        navProfile = findViewById(R.id.nav_profile_detail);
+        navProfile = findViewById(R.id.nav_user_cs);
     }
 
     // --------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ public class CategorySearchActivity extends AppCompatActivity {
         // NÚT PROFILE
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
-                Intent intent = new Intent(CategorySearchActivity.this, LoginActivity.class);
+                Intent intent = new Intent(CategorySearchActivity.this, ProfileActivity.class);
                 startActivity(intent);
             });
         }

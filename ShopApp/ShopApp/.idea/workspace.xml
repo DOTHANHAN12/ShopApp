@@ -140,6 +140,11 @@
           <theme>@style/Theme.ShopApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_category_search.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_edit_address.xml">
         <config>
           <theme>@style/Theme.ShopApp</theme>
@@ -235,6 +240,21 @@
           <theme>@style/Theme.ShopApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_recommendation.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_recommendation_adapter.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_register.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_review_list.xml">
         <config>
           <theme>@style/Theme.ShopApp</theme>
@@ -320,12 +340,22 @@
           <theme>@style/Theme.ShopApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_product.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_shipping_address.xml">
         <config>
           <theme>@style/Theme.ShopApp</theme>
         </config>
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_sub_category.xml">
+        <config>
+          <theme>@style/Theme.ShopApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/layout_floating_bottom_nav.xml">
         <config>
           <theme>@style/Theme.ShopApp</theme>
         </config>

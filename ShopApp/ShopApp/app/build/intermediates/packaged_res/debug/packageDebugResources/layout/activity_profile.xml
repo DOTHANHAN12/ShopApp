@@ -584,10 +584,10 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Enhanced Bottom Navigation -->
-    <include
-        layout="@layout/layout_floating_bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
+<!--    <include-->
+<!--        layout="@layout/layout_floating_bottom_nav"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="bottom"/>-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

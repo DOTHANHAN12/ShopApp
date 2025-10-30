@@ -288,6 +288,10 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_check.xml"
     },
     {
+        "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_change_password.xml.flat",
+        "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_change_password.xml"
+    },
+    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_check_circle.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_check_circle.xml"
     },
@@ -334,6 +338,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_activity_home.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\activity_home.xml"
+    },
+    {
+        "merged": "com.example.shopapp-debug-52:/drawable_ic_email.xml.flat",
+        "source": "com.example.shopapp-main-54:/drawable/ic_email.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_layout_top_icons_simple.xml.flat",
@@ -496,10 +504,6 @@
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\rounded_red_bg_light.xml"
     },
     {
-        "merged": "com.example.shopapp-debug-52:/layout_activity_my_reviews.xml.flat",
-        "source": "com.example.shopapp-main-54:/layout/activity_my_reviews.xml"
-    },
-    {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\drawable_ic_map_placeholder.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\drawable\\ic_map_placeholder.xml"
     },
@@ -622,6 +626,10 @@
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_my_review.xml.flat",
         "source": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-main-54:\\layout\\item_my_review.xml"
+    },
+    {
+        "merged": "com.example.shopapp-debug-52:/drawable_ic_forgot_password.xml.flat",
+        "source": "com.example.shopapp-main-54:/drawable/ic_forgot_password.xml"
     },
     {
         "merged": "C:\\Users\\maid2\\.gradle\\daemon\\8.13\\com.example.shopapp-debug-52:\\layout_item_product_recommendation.xml.flat",

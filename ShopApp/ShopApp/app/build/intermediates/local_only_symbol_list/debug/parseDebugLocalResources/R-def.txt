@@ -76,10 +76,12 @@ drawable ic_delete
 drawable ic_discount
 drawable ic_document
 drawable ic_edit
+drawable ic_email
 drawable ic_favorite
 drawable ic_favorite_filled
 drawable ic_favorite_outline
 drawable ic_filter
+drawable ic_forgot_password
 drawable ic_freeship
 drawable ic_home
 drawable ic_home_filled
@@ -129,6 +131,7 @@ drawable rounded_status_bg
 drawable shopee_vip_banner
 drawable strikethrough_text
 drawable strikethrough_text_black
+id activity_change_password
 id app_bar_layout
 id appbar_cart
 id appbar_vnpay
@@ -182,10 +185,13 @@ id color_circle_border
 id divider
 id edit_address
 id edit_city_district
+id edit_confirm_password
+id edit_current_password
 id edit_date_of_birth
 id edit_district
 id edit_email
 id edit_full_name
+id edit_new_password
 id edit_phone_number
 id edit_quick_fill
 id edit_street_address
@@ -204,6 +210,9 @@ id header_layout
 id ic_cart
 id ic_favorite
 id ic_notification
+id icon_length
+id icon_number
+id icon_uppercase
 id image_product
 id img_back
 id img_back_arrow
@@ -230,10 +239,15 @@ id img_sub_category
 id img_voucher_check
 id img_voucher_icon
 id inner_layout_container
+id input_layout_confirm_password
+id input_layout_current_password
+id input_layout_email
+id input_layout_new_password
 id label_address_type_home
 id label_address_type_office
 id label_default
 id layout_actions
+id layout_back_to_login
 id layout_bottom_buttons
 id layout_bottom_nav
 id layout_bottom_nav_cs
@@ -274,6 +288,7 @@ id profile_email
 id profile_image
 id profile_name
 id progressBar
+id progress_bar
 id progress_loading
 id progressbar_vnpay
 id radio_cod
@@ -346,6 +361,7 @@ id text_edit_time_remaining
 id text_editable_count
 id text_edited_status
 id text_empty_subtitle
+id text_forgot_password
 id text_image_indicator
 id text_inventory_count
 id text_item_count
@@ -429,6 +445,7 @@ layout activity_base
 layout activity_cart
 layout activity_cart_item
 layout activity_category_search
+layout activity_change_password
 layout activity_color_selector_adapter
 layout activity_edit_address
 layout activity_edit_profile

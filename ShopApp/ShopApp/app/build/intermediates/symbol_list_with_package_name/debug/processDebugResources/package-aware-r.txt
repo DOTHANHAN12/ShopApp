@@ -3684,12 +3684,14 @@ drawable ic_delete
 drawable ic_discount
 drawable ic_document
 drawable ic_edit
+drawable ic_email
 drawable ic_expand_less_22px
 drawable ic_expand_more_22px
 drawable ic_favorite
 drawable ic_favorite_filled
 drawable ic_favorite_outline
 drawable ic_filter
+drawable ic_forgot_password
 drawable ic_freeship
 drawable ic_home
 drawable ic_home_filled
@@ -3898,6 +3900,7 @@ id action_mode_bar_stub
 id action_mode_close_button
 id action_text
 id actions
+id activity_change_password
 id activity_chooser_view_content
 id add
 id adjust_height
@@ -4067,10 +4070,13 @@ id east
 id edge
 id edit_address
 id edit_city_district
+id edit_confirm_password
+id edit_current_password
 id edit_date_of_birth
 id edit_district
 id edit_email
 id edit_full_name
+id edit_new_password
 id edit_phone_number
 id edit_query
 id edit_quick_fill
@@ -4138,7 +4144,10 @@ id ic_favorite
 id ic_notification
 id icon
 id icon_group
+id icon_length
+id icon_number
 id icon_only
+id icon_uppercase
 id ifRoom
 id ignore
 id ignoreRequest
@@ -4173,6 +4182,10 @@ id included
 id indeterminate
 id info
 id inner_layout_container
+id input_layout_confirm_password
+id input_layout_current_password
+id input_layout_email
+id input_layout_new_password
 id invisible
 id inward
 id is_pooling_container_tag
@@ -4186,6 +4199,7 @@ id label_default
 id labeled
 id layout
 id layout_actions
+id layout_back_to_login
 id layout_bottom_buttons
 id layout_bottom_nav
 id layout_bottom_nav_cs
@@ -4354,6 +4368,7 @@ id profile_email
 id profile_image
 id profile_name
 id progressBar
+id progress_bar
 id progress_circular
 id progress_horizontal
 id progress_loading
@@ -4523,6 +4538,7 @@ id text_edit_time_remaining
 id text_editable_count
 id text_edited_status
 id text_empty_subtitle
+id text_forgot_password
 id text_image_indicator
 id text_input_end_icon
 id text_input_error_icon
@@ -4778,6 +4794,7 @@ layout activity_base
 layout activity_cart
 layout activity_cart_item
 layout activity_category_search
+layout activity_change_password
 layout activity_color_selector_adapter
 layout activity_edit_address
 layout activity_edit_profile

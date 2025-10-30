@@ -77,6 +77,9 @@
             android:name="com.example.shopapp.ForgotPasswordActivity"
             android:exported="false" />
         <activity
+            android:name="com.example.shopapp.ChangePasswordActivity"
+            android:exported="false" />
+        <activity
             android:name="com.example.shopapp.EditProfileActivity"
             android:exported="false" />
         <activity

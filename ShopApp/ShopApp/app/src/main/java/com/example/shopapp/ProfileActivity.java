@@ -32,6 +32,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView btnEditProfile;
     private Button btnLogout;
     private LinearLayout layoutMyOrders, layoutShippingAddresses, layoutWishlist, layoutMyReviews;
+    private LinearLayout layoutChangePassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,11 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(ProfileActivity.this, MyReviewsActivity.class);
             startActivity(intent);
         });
+
+        layoutChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void setupNavigation() {
@@ -114,6 +120,7 @@ public class ProfileActivity extends AppCompatActivity {
         layoutShippingAddresses = findViewById(R.id.layout_shipping_addresses);
         layoutWishlist = findViewById(R.id.layout_wishlist);
         layoutMyReviews = findViewById(R.id.layout_my_reviews);
+        layoutChangePassword = findViewById(R.id.layout_change_password);
     }
 
     private void loadUserProfile() {

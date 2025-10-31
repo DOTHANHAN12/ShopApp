@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    tools:context=".EditAddressActivity">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:id="@+id/layout_header_edit"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:paddingHorizontal="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/img_back_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@android:color/black"
+            android:contentDescription="Quay lại"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chỉnh sửa địa chỉ"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@id/img_back_arrow"/>
+    </RelativeLayout>
+
+    <!-- Scrollable Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/layout_header_edit"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_buttons">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Quick Fill Card (Optional Feature) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_quick_fill"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="#FFF3E0">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_document"
+                            app:tint="#FF9800"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Tính năng nhập nhanh"
+                            android:textSize="15sp"
+                            android:textColor="#E65100"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Dán hoặc nhập thông tin liên hệ và địa chỉ, nhấn 'Tự động điền' để hệ thống tự động phân tích và điền vào các trường."
+                        android:textSize="13sp"
+                        android:textColor="#E65100"/>
+
+                    <EditText
+                        android:id="@+id/edit_quick_fill"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/rounded_border_gray"
+                        android:hint="Ví dụ: Nguyễn Văn A\n0912345678\nSố 10, Đường ABC, Phường XYZ..."
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:minLines="3"
+                        android:gravity="start"/>
+
+                    <Button
+                        android:id="@+id/btn_auto_fill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:text="Tự động điền"
+                        android:textColor="@android:color/white"
+                        android:backgroundTint="#FF9800"
+                        android:textSize="13sp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Main Form Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Section Title -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thông tin liên hệ"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Full Name Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_person"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_full_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Họ và tên *"
+                            android:inputType="textPersonName"
+                            tools:text="Đỗ Thành An"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Phone Number Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_phone"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark"
+                        app:prefixText="+84 ">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_phone_number"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Số điện thoại *"
+                            android:inputType="phone"
+                            android:maxLength="10"
+                            tools:text="967851513"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Address Details Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Section Title -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Địa chỉ chi tiết"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- City/District/Ward Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_location"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark"
+                        app:endIconMode="dropdown_menu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/edit_city_district"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Chọn Tỉnh/Thành phố *"
+                            android:inputType="none"
+                            android:focusable="false"
+                            tools:text="Hà Nội"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- District Dropdown (Hidden initially) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_district"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone"
+                        app:startIconDrawable="@drawable/ic_location"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark"
+                        app:endIconMode="dropdown_menu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/edit_district"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Chọn Quận/Huyện *"
+                            android:inputType="none"
+                            android:focusable="false"
+                            tools:text="Đống Đa"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Ward Input (Free text) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_location"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_ward"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Phường/Xã *"
+                            android:inputType="textPostalAddress"
+                            tools:text="Phường Khương Thượng"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Street Address Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_home"
+                        app:boxStrokeColor="@android:color/holo_red_dark"
+                        app:hintTextColor="@android:color/holo_red_dark">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_street_address"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Tên đường, Tòa nhà, Số nhà *"
+                            android:minLines="2"
+                            tools:text="Cổng sau nhà trẻ Xóm Trong"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Map Preview (Optional) -->
+                    <ImageView
+                        android:id="@+id/img_map_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#EFEFEF"
+                        android:src="@drawable/ic_map_placeholder"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="Xem trên bản đồ"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Settings Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Section Title -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cài đặt"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Default Address Switch -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="8dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Đặt làm địa chỉ mặc định"
+                                android:textSize="15sp"
+                                android:textColor="#333"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Địa chỉ này sẽ được chọn tự động khi đặt hàng"
+                                android:textSize="12sp"
+                                android:textColor="#757575"/>
+                        </LinearLayout>
+
+                        <Switch
+                            android:id="@+id/switch_set_default"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:thumbTint="@color/switch_thumb_color"
+                            android:trackTint="@color/switch_track_color"
+                            tools:checked="true"/>
+                    </LinearLayout>
+
+                    <!-- Address Type Selection -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#EEEEEE"
+                        android:layout_marginVertical="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Loại địa chỉ:"
+                        android:textSize="15sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/label_address_type_home"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="🏠 Nhà Riêng"
+                            android:background="@drawable/rounded_red_border"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="8dp"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                        <TextView
+                            android:id="@+id/label_address_type_office"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="🏢 Văn Phòng"
+                            android:background="@drawable/rounded_gray_border"
+                            android:textColor="@android:color/darker_gray"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:layout_marginStart="8dp"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Note Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="1dp"
+                app:cardBackgroundColor="#E3F2FD">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_info"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="2dp"
+                        app:tint="#1976D2"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Vui lòng điền đầy đủ và chính xác thông tin để đảm bảo giao hàng thành công."
+                        android:textSize="12sp"
+                        android:textColor="#1565C0"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Buttons -->
+    <LinearLayout
+        android:id="@+id/layout_bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btn_delete_address"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="XÓA"
+            android:textColor="@android:color/holo_red_dark"
+            android:backgroundTint="#FFF5F5"
+            android:layout_marginEnd="8dp"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:visibility="visible"/>
+
+        <Button
+            android:id="@+id/btn_save_address"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="LƯU ĐỊA CHỈ"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginStart="8dp"
+            android:textStyle="bold"
+            android:textSize="15sp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

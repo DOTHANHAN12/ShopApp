@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ShopApp">
+
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- THÊM NOTIFICATION ACTIVITY -->
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false"
+            android:label="Thông báo"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".VNPayActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="app" android:host="shopapp" android:pathPrefix="/vnpay-return" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MyReviewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WriteReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReviewListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".VoucherSelectionActivity"
+            android:exported="false" />
+        <activity android:name=".OrderSuccessActivity"
+            android:exported="false"
+            android:label="Đặt hàng thành công" />
+        <activity
+            android:name=".AddressSelectionActivity"
+            android:exported="false"
+            android:label="Chọn địa chỉ"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".EditAddressActivity"
+            android:exported="false"
+            android:label="Sửa địa chỉ"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".FavoriteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CartActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ProductDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CategorySearchActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity android:name="com.example.shopapp.ProductListActivity" />
+    </application>
+
+</manifest>

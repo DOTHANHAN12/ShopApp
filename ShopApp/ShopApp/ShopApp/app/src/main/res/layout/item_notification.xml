@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_notification"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Unread Indicator -->
+        <View
+            android:id="@+id/view_unread_indicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/circle_unread_indicator"
+            android:visibility="visible"/>
+
+        <!-- Icon -->
+        <ImageView
+            android:id="@+id/iv_notification_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_toEndOf="@id/view_unread_indicator"
+            android:background="@drawable/circle_notification_icon_bg"
+            android:padding="10dp"
+            android:src="@drawable/ic_notification"
+            app:tint="@color/colorPrimary"/>
+
+        <!-- Content Container -->
+        <LinearLayout
+            android:id="@+id/layout_notification_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/iv_notification_icon"
+            android:layout_toStartOf="@id/btn_delete_notification"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tv_notification_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đơn hàng đã được xác nhận"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+
+            <!-- Body -->
+            <TextView
+                android:id="@+id/tv_notification_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Đơn hàng #123456 của bạn đã được xác nhận và đang được chuẩn bị"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:maxLines="3"
+                android:ellipsize="end"/>
+
+            <!-- Image (optional) -->
+            <ImageView
+                android:id="@+id/iv_notification_image"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/rounded_corner_bg"
+                android:visibility="gone"/>
+
+            <!-- Time -->
+            <TextView
+                android:id="@+id/tv_notification_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="2 giờ trước"
+                android:textSize="12sp"
+                android:textColor="#999999"/>
+        </LinearLayout>
+
+        <!-- Delete Button -->
+        <ImageView
+            android:id="@+id/btn_delete_notification"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="6dp"
+            android:src="@drawable/ic_close"
+            android:contentDescription="Xóa"
+            app:tint="#999999"/>
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Product Name -->
+    <TextView
+        android:id="@+id/text_product_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        tools:text="Nike Air Max 270 React"/>
+
+    <!-- Rating -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đánh giá:"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/text_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#FFD700"
+            android:textStyle="bold"
+            tools:text="4.5 ⭐"/>
+    </LinearLayout>
+
+    <!-- Date -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ngày đánh giá:"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/text_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            tools:text="30/10/2025 14:30"/>
+    </LinearLayout>
+
+    <!-- Edited Status -->
+    <TextView
+        android:id="@+id/text_edited_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="#FF9800"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="Đã chỉnh sửa: 30/10/2025 16:00"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        android:layout_marginVertical="12dp"/>
+
+    <!-- Comment Label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nội dung đánh giá:"
+        android:textSize="14sp"
+        android:textColor="#757575"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Comment -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="200dp">
+
+        <TextView
+            android:id="@+id/text_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:lineSpacingExtra="4dp"
+            tools:text="Sản phẩm rất tốt, chất lượng vượt mong đợi. Giao hàng nhanh, đóng gói cẩn thận. Tôi rất hài lòng với lần mua hàng này! Sẽ tiếp tục ủng hộ shop."/>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

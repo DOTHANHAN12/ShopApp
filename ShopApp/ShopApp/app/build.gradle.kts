@@ -58,27 +58,26 @@ dependencies {
     // 2. ANDROIDX CORE & UI COMPONENTS
     // -----------------------------------------------------------------
 
-    // Core libs (libs.xxx giữ nguyên)
+    // Core libs (from version catalog)
     implementation(libs.appcompat)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.material) // Material Design
 
     // UI/Widgets
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-    // Material Design (Rất quan trọng cho AppBarLayout/CoordinatorLayout)
-    implementation(libs.material) // Dùng cái libs này nếu nó là phiên bản mới
-    // HOẶC dùng version cố định để chắc chắn: implementation("com.google.android.material:material:1.12.0")
-
-    // Component BẮT BUỘC cho HomeActivity và ProductDetailActivity
+    // Required for HomeActivity and ProductDetailActivity
     implementation("androidx.viewpager2:viewpager2:1.0.0")
 
-    // Thư viện Picasso (tải ảnh)
+    // Image Loading
     implementation("com.squareup.picasso:picasso:2.8")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
     // -----------------------------------------------------------------
     // 3. TESTING

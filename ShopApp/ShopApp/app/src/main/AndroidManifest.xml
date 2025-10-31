@@ -23,6 +23,13 @@
             </intent-filter>
         </service>
 
+        <!-- THÊM NOTIFICATION ACTIVITY -->
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false"
+            android:label="Thông báo"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".VNPayActivity"
             android:exported="true">

@@ -15,6 +15,27 @@
     <color name="colorSecondaryDark">#3CBCB4</color>
     <color name="colorSecondaryLight">#6EDDD4</color>
 
+
+    <!-- Notification colors -->
+    <color name="notification_unread_bg">#F0F7FF</color>
+    <color name="notification_read_bg">#FFFFFF</color>
+    <color name="notification_icon_bg">#F5F5F5</color>
+
+    <!-- Status colors -->
+    <color name="status_success">#4CAF50</color>
+    <color name="status_warning">#FF9800</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_info">#2196F3</color>
+
+    <!-- Text colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_hint">#999999</color>
+
+    <!-- Background colors -->
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_light_gray">#F5F5F5</color>
+    <color name="divider_color">#E0E0E0</color>
     <!-- Grey Scale -->
     <color name="grey_lightest">#F5F5F5</color>
     <color name="grey_light">#E0E0E0</color>

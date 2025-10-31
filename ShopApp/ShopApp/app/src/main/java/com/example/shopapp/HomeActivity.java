@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,6 +62,8 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView iconNotification;
     private ImageView iconFavorite;
     private ImageView iconCart;
+    private FrameLayout notificationBadgeContainer;
+    private TextView tvNotificationBadge;
 
     // --- Trình khởi chạy yêu cầu quyền thông báo ---
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
@@ -68,7 +71,6 @@ public class HomeActivity extends AppCompatActivity {
             isGranted -> {
                 if (isGranted) {
                     Toast.makeText(this, "Đã cấp quyền gửi thông báo!", Toast.LENGTH_SHORT).show();
-                    // Subscribe ngay sau khi được cấp quyền
                     subscribeToAllUsersTopic();
                 } else {
                     Toast.makeText(this, "Bạn đã từ chối quyền gửi thông báo.", Toast.LENGTH_SHORT).show();
@@ -86,7 +88,6 @@ public class HomeActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
-        // Status Bar
         getWindow().setStatusBarColor(Color.TRANSPARENT);
 
         setContentView(R.layout.activity_home);
@@ -105,7 +106,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // 1. Ánh xạ Views và Icons Header
         mapViews();
-        setupHeaderIcons(); // <--- THIẾT LẬP LISTENER ICONS
+        setupHeaderIcons();
 
         // Thêm listener cho nút test
         btnTestNotification.setOnClickListener(v -> sendTestNotification());
@@ -126,26 +127,26 @@ public class HomeActivity extends AppCompatActivity {
         loadFeaturedProductsList(initialCategory);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update notification badge when returning to home
+        updateNotificationBadge();
+    }
+
     private void askNotificationPermission() {
-        // This is only necessary for API level 33 and higher.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                     PackageManager.PERMISSION_GRANTED) {
-                // Yêu cầu quyền
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                // Đã có quyền, subscribe luôn
                 subscribeToAllUsersTopic();
             }
         } else {
-            // Android < 13 không cần quyền, subscribe luôn
             subscribeToAllUsersTopic();
         }
     }
 
-    /**
-     * Subscribe vào topic "all_users" để nhận thông báo broadcast
-     */
     private void subscribeToAllUsersTopic() {
         FirebaseMessaging.getInstance().subscribeToTopic("all_users")
                 .addOnCompleteListener(task -> {
@@ -159,20 +160,18 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 
-    private void getAndCopyFCMToken(){
+    private void getAndCopyFCMToken() {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isSuccessful() && task.getResult() != null){
+            if (task.isSuccessful() && task.getResult() != null) {
                 String token = task.getResult();
                 Log.d("FCM_TOKEN", "FCM Token: " + token);
 
-                // Sao chép token vào clipboard
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("FCM Token", token);
                 clipboard.setPrimaryClip(clip);
 
-                // Hiển thị Toast thông báo đã sao chép
                 Toast.makeText(HomeActivity.this, "FCM Token đã được sao chép vào clipboard!", Toast.LENGTH_LONG).show();
-            }else{
+            } else {
                 Log.w("FCM_TOKEN", "Fetching FCM registration token failed", task.getException());
                 Toast.makeText(HomeActivity.this, "Không thể lấy FCM token.", Toast.LENGTH_SHORT).show();
             }
@@ -182,13 +181,13 @@ public class HomeActivity extends AppCompatActivity {
     private void sendTestNotification() {
         Intent intent = new Intent(this, HomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         String channelId = "fcm_default_channel";
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_notification) // QUAN TRỌNG: Đảm bảo icon này tồn tại!
+                        .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("Thông báo kiểm tra (Local)")
                         .setContentText("Nếu bạn thấy thông báo này, nghĩa là quyền và icon đã đúng.")
                         .setAutoCancel(true)
@@ -205,17 +204,15 @@ public class HomeActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
 
-        // Kiểm tra lại quyền trước khi gửi
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(1 /* ID of notification */, notificationBuilder.build());
+            notificationManager.notify(1, notificationBuilder.build());
             Toast.makeText(this, "Đã gửi thông báo local!", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Chưa được cấp quyền gửi thông báo.", Toast.LENGTH_LONG).show();
         }
     }
 
-    // ------------------- MAPPING VIEWS -------------------
     private void mapViews() {
         viewPagerFeaturedProducts = findViewById(R.id.view_pager_featured_products);
 
@@ -225,21 +222,17 @@ public class HomeActivity extends AppCompatActivity {
         tabBaby = findViewById(R.id.tab_baby);
         btnTestNotification = findViewById(R.id.btn_test_notification);
 
-        searchButton = findViewById(R.id.btn_search_footer); // Nút Search lớn ở Footer
+        searchButton = findViewById(R.id.btn_search_footer);
 
-        // ÁNH XẠ ICONS HEADER
         iconNotification = findViewById(R.id.ic_notification);
         iconFavorite = findViewById(R.id.ic_favorite);
         iconCart = findViewById(R.id.ic_cart);
-        iconProfile = findViewById(R.id.nav_profile); // Make sure this ID exists in your layout
+        iconProfile = findViewById(R.id.nav_profile);
 
         currentSelectedTab = tabMen;
     }
 
-    // ------------------- LOGIC KÍCH HOẠT ICONS HEADER -------------------
     private void setupHeaderIcons() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
         // NÚT YÊU THÍCH (Favorite)
         if (iconFavorite != null) {
             iconFavorite.setOnClickListener(v -> {
@@ -264,11 +257,20 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
-        // NÚT THÔNG BÁO (Notification)
+        // NÚT THÔNG BÁO (Notification) - CẬP NHẬT
         if (iconNotification != null) {
             iconNotification.setOnClickListener(v -> {
-                Toast.makeText(this, "Chức năng Thông báo đang phát triển.", Toast.LENGTH_SHORT).show();
+                if (mAuth.getCurrentUser() != null) {
+                    Intent intent = new Intent(this, NotificationActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem thông báo.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
             });
+
+            // Update badge initially
+            updateNotificationBadge();
         }
 
         // NÚT PROFILE
@@ -284,16 +286,31 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void updateNotificationBadge() {
+        if (mAuth.getCurrentUser() == null) return;
 
-    // ------------------- LOGIC XỬ LÝ TAB -------------------
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("notifications")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isRead", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int unreadCount = queryDocumentSnapshots.size();
+
+                    // Bạn có thể thêm badge UI vào layout nếu muốn
+                    // Ví dụ: hiển thị số lượng thông báo chưa đọc
+                    Log.d(TAG, "Unread notifications: " + unreadCount);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting unread count", e);
+                });
+    }
+
     private void setupCategoryTabs() {
         View.OnClickListener tabClickListener = view -> {
             String category = ((TextView) view).getText().toString();
-
-            // 1. Cập nhật UI (Gạch chân/In đậm)
             updateCategoryUI(category);
-
-            // 2. Tải danh sách Featured Products mới cho Category đó
             loadFeaturedProductsList(category);
         };
 
@@ -303,7 +320,6 @@ public class HomeActivity extends AppCompatActivity {
         tabBaby.setOnClickListener(tabClickListener);
     }
 
-    // ------------------- LOGIC XỬ LÝ NÚT SEARCH -------------------
     private void setupSearchButton() {
         if (searchButton != null) {
             searchButton.setOnClickListener(v -> {
@@ -315,9 +331,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Cập nhật UI cho Tab Category: Gạch chân, In đậm (Tăng Alpha/Size).
-     */
     private void updateCategoryUI(String newCategory) {
         if (currentSelectedTab != null) {
             currentSelectedTab.setAlpha(0.7f);
@@ -354,11 +367,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    // ------------------- TẢI DANH SÁCH SẢN PHẨM NỔI BẬT THEO CATEGORY -------------------
-
-    /**
-     * Tải danh sách các sản phẩm có thuộc tính isFeatured=true từ Firestore VÀ lọc theo Category.
-     */
     private void loadFeaturedProductsList(String category) {
         db.collection("products")
                 .whereEqualTo("isFeatured", true)

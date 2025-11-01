@@ -1,9 +1,14 @@
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 
 // --- KHỞI TẠO CHÍNH (Chỉ cần 1 lần) ---
 admin.initializeApp();
 const db = admin.firestore();
+const messaging = admin.messaging();
+
+// Constants
+const USER_NOTIFICATIONS_COLLECTION = 'notifications'; // Update this to your collection name
 
 // -----------------------------------------------------------
 // CLOUD FUNCTION: XỬ LÝ ĐẶT HÀNG (TRỪ TỒN KHO & VOUCHER)
@@ -135,3 +140,184 @@ exports.handleNewOrder = onDocumentCreated('orders/{orderId}', async (event) => 
         });
     }
 });
+
+// ============================================================================
+// 🔔 TRIGGER - When Order Status Changes, Send Notification
+// ============================================================================
+exports.onOrderStatusChanged = onDocumentUpdated(
+    {
+        document: 'orders/{orderId}',
+        region: 'asia-east1',
+    },
+    async (event) => {
+        const before = event.data.before.data();
+        const after = event.data.after.data();
+        const orderId = event.params.orderId;
+
+        // Check if status actually changed
+        if (before.orderStatus === after.orderStatus) {
+            logger.info('Status not changed, skipping notification');
+            return null;
+        }
+
+        const oldStatus = before.orderStatus;
+        const newStatus = after.orderStatus;
+        const userId = after.userId;
+
+        logger.info(`Order ${orderId} status changed: ${oldStatus} -> ${newStatus}`);
+
+        // Get notification content based on status
+        const notificationContent = getOrderStatusNotification(newStatus, orderId);
+
+        if (!notificationContent) {
+            logger.info(`No notification needed for status: ${newStatus}`);
+            return null;
+        }
+
+        try {
+            // Build FCM message
+            const message = {
+                topic: `user_${userId}`, // Or use direct token
+                notification: {
+                    title: notificationContent.title,
+                    body: notificationContent.body,
+                },
+                data: {
+                    title: String(notificationContent.title),
+                    body: String(notificationContent.body),
+                    type: 'ORDER',
+                    actionType: 'OPEN_ORDER',
+                    actionData: String(orderId),
+                    icon: 'cart',
+                    priority: String(notificationContent.priority),
+                    imageUrl: '',
+                },
+                android: {
+                    priority: 'high',
+                    notification: {
+                        sound: 'default',
+                        channelId: 'fcm_default_channel',
+                        icon: 'ic_notification',
+                        color: notificationContent.color,
+                    },
+                },
+            };
+
+            // Send FCM
+            const response = await messaging.send(message);
+            logger.info(`Sent order status notification: ${response}`);
+
+            // Save to user's notification collection
+            await saveOrderNotificationToUser(userId, orderId, notificationContent);
+
+            return { success: true, messageId: response };
+        } catch (error) {
+            logger.error('Error sending order notification:', error);
+            return { success: false, error: error.message };
+        }
+    }
+);
+
+// ============================================================================
+// 📝 HELPER - Get notification content based on order status
+// ============================================================================
+function getOrderStatusNotification(status, orderId) {
+    const orderShortId = orderId.substring(0, 8).toUpperCase();
+
+    switch (status) {
+        case 'CONFIRMED':
+            return {
+                title: '✅ Đơn hàng đã được xác nhận',
+                body: `Đơn hàng #${orderShortId} đã được xác nhận và đang được chuẩn bị`,
+                priority: 2,
+                color: '#2196F3',
+            };
+
+        case 'PROCESSING':
+            return {
+                title: '📦 Đơn hàng đang xử lý',
+                body: `Đơn hàng #${orderShortId} đang được đóng gói`,
+                priority: 1,
+                color: '#9C27B0',
+            };
+
+        case 'SHIPPING':
+            return {
+                title: '🚚 Đơn hàng đang giao',
+                body: `Đơn hàng #${orderShortId} đang trên đường giao đến bạn`,
+                priority: 2,
+                color: '#00BCD4',
+            };
+
+        case 'DELIVERED':
+            return {
+                title: '✓ Đơn hàng đã giao thành công',
+                body: `Đơn hàng #${orderShortId} đã được giao đến bạn. Cảm ơn bạn đã mua hàng!`,
+                priority: 2,
+                color: '#4CAF50',
+            };
+
+        case 'COMPLETED':
+            return {
+                title: '🎉 Đơn hàng hoàn tất',
+                body: `Đơn hàng #${orderShortId} đã hoàn tất. Hãy đánh giá sản phẩm nhé!`,
+                priority: 1,
+                color: '#4CAF50',
+            };
+
+        case 'CANCELLED':
+            return {
+                title: '❌ Đơn hàng đã bị hủy',
+                body: `Đơn hàng #${orderShortId} đã bị hủy`,
+                priority: 2,
+                color: '#F44336',
+            };
+
+        case 'REFUNDED':
+            return {
+                title: '💰 Đơn hàng đã hoàn tiền',
+                body: `Đơn hàng #${orderShortId} đã được hoàn tiền`,
+                priority: 2,
+                color: '#607D8B',
+            };
+
+        case 'PAID':
+            return {
+                title: '💳 Thanh toán thành công',
+                body: `Đơn hàng #${orderShortId} đã được thanh toán thành công`,
+                priority: 2,
+                color: '#4CAF50',
+            };
+
+        default:
+            return null; // Don't send notification for other statuses
+    }
+}
+
+// ============================================================================
+// 💾 HELPER - Save order notification to user collection
+// ============================================================================
+async function saveOrderNotificationToUser(userId, orderId, content) {
+    const notificationRef = db.collection(USER_NOTIFICATIONS_COLLECTION).doc();
+
+    await notificationRef.set({
+        notificationId: notificationRef.id,
+        userId: userId,
+        title: content.title,
+        body: content.body,
+        imageUrl: '',
+        type: 'ORDER',
+        actionType: 'OPEN_ORDER',
+        actionData: orderId,
+        icon: 'cart',
+        priority: content.priority,
+        isRead: false,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        senderName: 'Hệ thống',
+        extraData: {
+            orderId: orderId,
+        },
+    });
+
+    logger.info(`Saved order notification to user ${userId}`);
+}

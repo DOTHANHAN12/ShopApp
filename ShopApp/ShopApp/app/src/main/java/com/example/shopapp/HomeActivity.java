@@ -71,9 +71,9 @@ public class HomeActivity extends AppCompatActivity {
             isGranted -> {
                 if (isGranted) {
                     Toast.makeText(this, "Đã cấp quyền gửi thông báo!", Toast.LENGTH_SHORT).show();
-                    subscribeToAllUsersTopic();
+                    subscribeToNotificationTopics(); // Đăng ký topic sau khi có quyền
                 } else {
-                    Toast.makeText(this, "Bạn đã từ chối quyền gửi thông báo.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Bạn đã từ chối quyền, sẽ không nhận được thông báo.", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -95,14 +95,8 @@ public class HomeActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Yêu cầu quyền gửi thông báo
-        askNotificationPermission();
-
-        // Subscribe vào topic all_users
-        subscribeToAllUsersTopic();
-
-        // Lấy và sao chép FCM Token
-        getAndCopyFCMToken();
+        // Bắt đầu quy trình yêu cầu quyền và đăng ký topic
+        askNotificationPermissionAndSubscribe();
 
         // 1. Ánh xạ Views và Icons Header
         mapViews();
@@ -134,49 +128,49 @@ public class HomeActivity extends AppCompatActivity {
         updateNotificationBadge();
     }
 
-    private void askNotificationPermission() {
+    private void askNotificationPermissionAndSubscribe() {
+        // Chỉ áp dụng cho Android 13 (API 33) trở lên
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                     PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                subscribeToAllUsersTopic();
+                subscribeToNotificationTopics();
             }
         } else {
-            subscribeToAllUsersTopic();
+            subscribeToNotificationTopics();
         }
     }
 
-    private void subscribeToAllUsersTopic() {
+    private void subscribeToNotificationTopics() {
+        // 1. Đăng ký nhận thông báo CHUNG (từ web)
         FirebaseMessaging.getInstance().subscribeToTopic("all_users")
                 .addOnCompleteListener(task -> {
-                    String msg = "Đã subscribe topic all_users thành công!";
-                    if (!task.isSuccessful()) {
-                        msg = "Subscribe topic all_users thất bại!";
-                        Log.e(TAG, "Subscribe failed", task.getException());
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Subscribed to 'all_users' topic successfully.");
+                    } else {
+                        Log.e(TAG, "Failed to subscribe to 'all_users' topic.", task.getException());
                     }
-                    Log.d(TAG, msg);
-                    Toast.makeText(HomeActivity.this, msg, Toast.LENGTH_SHORT).show();
                 });
+
+        // 2. Đăng ký nhận thông báo RIÊNG (cập nhật đơn hàng, etc.)
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            String topic = "user_" + userId;
+            FirebaseMessaging.getInstance().subscribeToTopic(topic)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Subscribed to user-specific topic: " + topic);
+                        } else {
+                            Log.e(TAG, "Failed to subscribe to user-specific topic: " + topic, task.getException());
+                        }
+                    });
+        } else {
+            Log.w(TAG, "User not logged in, cannot subscribe to user-specific topic.");
+        }
     }
 
-    private void getAndCopyFCMToken() {
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                String token = task.getResult();
-                Log.d("FCM_TOKEN", "FCM Token: " + token);
-
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("FCM Token", token);
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(HomeActivity.this, "FCM Token đã được sao chép vào clipboard!", Toast.LENGTH_LONG).show();
-            } else {
-                Log.w("FCM_TOKEN", "Fetching FCM registration token failed", task.getException());
-                Toast.makeText(HomeActivity.this, "Không thể lấy FCM token.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private void sendTestNotification() {
         Intent intent = new Intent(this, HomeActivity.class);

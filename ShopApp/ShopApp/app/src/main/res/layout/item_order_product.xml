@@ -1,50 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:gravity="center_vertical">
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/image_product"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:scaleType="centerCrop"
-        tools:src="@tools:sample/avatars" />
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="12dp"
+        android:scaleType="centerCrop"/>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text_product_name"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_product_name"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="2"
-            android:ellipsize="end"
+            android:text="Áo Thun Nam"
+            android:textSize="15sp"
             android:textStyle="bold"
-            tools:text="Product Name" />
+            android:textColor="@android:color/black"
+            android:maxLines="2"
+            android:ellipsize="end"/>
 
         <TextView
-            android:id="@+id/text_product_quantity"
+            android:id="@+id/tv_product_variant"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Quantity: 1" />
+            android:layout_marginTop="4dp"
+            android:text="Đỏ / XL"
+            android:textSize="13sp"
+            android:textColor="#666666"/>
+
+        <TextView
+            android:id="@+id/tv_product_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="x2"
+            android:textSize="13sp"
+            android:textColor="#666666"/>
+
+        <Button
+            android:id="@+id/btn_write_review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Đánh giá"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_write_review"
+    <TextView
+        android:id="@+id/tv_product_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Viết đánh giá"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        android:text="250,000₫"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#FF5722"
+        android:layout_gravity="center_vertical"/>
 
 </LinearLayout>

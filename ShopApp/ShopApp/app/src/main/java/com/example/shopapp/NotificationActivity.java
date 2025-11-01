@@ -2,6 +2,7 @@ package com.example.shopapp;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -160,30 +161,39 @@ public class NotificationActivity extends AppCompatActivity {
 
         switch (actionType) {
             case "OPEN_ORDER":
-                // Open order detail
-                if (actionData != null) {
-                    Toast.makeText(this, "Mở đơn hàng: " + actionData, Toast.LENGTH_SHORT).show();
-                    // Intent intent = new Intent(this, OrderDetailActivity.class);
-                    // intent.putExtra("ORDER_ID", actionData);
-                    // startActivity(intent);
+                // Mở OrderDetailActivity
+                if (actionData != null && !actionData.isEmpty()) {
+                    Intent intent = new Intent(this, OrderDetailActivity.class);
+                    intent.putExtra("ORDER_ID", actionData);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Không tìm thấy thông tin đơn hàng", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case "OPEN_PRODUCT":
-                // Open product detail
-                if (actionData != null) {
+                // Mở ProductDetailActivity
+                if (actionData != null && !actionData.isEmpty()) {
                     Intent intent = new Intent(this, ProductDetailActivity.class);
                     intent.putExtra("PRODUCT_ID", actionData);
                     startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Không tìm thấy thông tin sản phẩm", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case "OPEN_URL":
-                // Open web URL
-                if (actionData != null) {
-                    Toast.makeText(this, "Mở URL: " + actionData, Toast.LENGTH_SHORT).show();
-                    // Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(actionData));
-                    // startActivity(intent);
+                // Mở URL trong browser
+                if (actionData != null && !actionData.isEmpty()) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(actionData));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error opening URL", e);
+                        Toast.makeText(this, "Không thể mở link", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(this, "Link không hợp lệ", Toast.LENGTH_SHORT).show();
                 }
                 break;
 

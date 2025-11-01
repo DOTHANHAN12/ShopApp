@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class OrderProductAdapter extends RecyclerView.Adapter<OrderProductAdapter.ProductViewHolder> {
@@ -53,25 +55,46 @@ public class OrderProductAdapter extends RecyclerView.Adapter<OrderProductAdapte
         private final ImageView productImage;
         private final TextView productName;
         private final TextView productQuantity;
+        private final TextView productVariant;
+        private final TextView productPrice;
         private final Button btnWriteReview;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             productImage = itemView.findViewById(R.id.image_product);
-            productName = itemView.findViewById(R.id.text_product_name);
-            productQuantity = itemView.findViewById(R.id.text_product_quantity);
+            productName = itemView.findViewById(R.id.tv_product_name);
+            productQuantity = itemView.findViewById(R.id.tv_product_quantity);
+            productVariant = itemView.findViewById(R.id.tv_product_variant);
+            productPrice = itemView.findViewById(R.id.tv_product_price);
             btnWriteReview = itemView.findViewById(R.id.btn_write_review);
         }
 
         public void bind(Map<String, Object> product) {
             productName.setText((String) product.get("name"));
+
+            Object variant = product.get("variant");
+            if (variant != null) {
+                productVariant.setText((String) variant);
+                productVariant.setVisibility(View.VISIBLE);
+            } else {
+                productVariant.setVisibility(View.GONE);
+            }
+
             Object quantity = product.get("quantity");
             if (quantity instanceof Long) {
-                productQuantity.setText("Số lượng: " + quantity);
+                productQuantity.setText("x" + quantity);
             } else if (quantity instanceof Double) {
-                productQuantity.setText("Số lượng: " + ((Double) quantity).intValue());
+                productQuantity.setText("x" + ((Double) quantity).intValue());
             } else {
-                productQuantity.setText("Số lượng: N/A");
+                productQuantity.setText("x1");
+            }
+            
+            Object price = product.get("price");
+            if (price instanceof Number) {
+                NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                productPrice.setText(format.format(((Number) price).doubleValue()));
+            } else {
+                productPrice.setText("");
             }
 
             String imageUrl = (String) product.get("imageUrl");

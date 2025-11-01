@@ -89,6 +89,9 @@
             android:name=".CartActivity"
             android:exported="false" />
         <activity
+            android:name=".OrderDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".UserProfileActivity"
             android:exported="false" />
         <activity

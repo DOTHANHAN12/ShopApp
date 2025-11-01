@@ -143,31 +143,35 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void subscribeToNotificationTopics() {
-        // 1. Đăng ký nhận thông báo CHUNG (từ web)
-        FirebaseMessaging.getInstance().subscribeToTopic("all_users")
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "Subscribed to 'all_users' topic successfully.");
-                    } else {
-                        Log.e(TAG, "Failed to subscribe to 'all_users' topic.", task.getException());
-                    }
-                });
-
-        // 2. Đăng ký nhận thông báo RIÊNG (cập nhật đơn hàng, etc.)
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
         if (currentUser != null) {
             String userId = currentUser.getUid();
-            String topic = "user_" + userId;
-            FirebaseMessaging.getInstance().subscribeToTopic(topic)
+
+            // ⭐️ Subscribe topic RIÊNG của user (để nhận thông báo đơn hàng)
+            String userTopic = "user_" + userId;
+            FirebaseMessaging.getInstance().subscribeToTopic(userTopic)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Subscribed to user-specific topic: " + topic);
+                            Log.d(TAG, "✅ Subscribed to user-specific topic: " + userTopic);
                         } else {
-                            Log.e(TAG, "Failed to subscribe to user-specific topic: " + topic, task.getException());
+                            Log.e(TAG, "❌ Failed to subscribe to user-specific topic: " + userTopic, task.getException());
                         }
                     });
+
+            // ⭐️ Subscribe topic BROADCAST (để nhận giảm giá, khuyến mại)
+            // MyFirebaseMessagingService sẽ kiểm tra type để quyết định hiển thị push hay không
+            FirebaseMessaging.getInstance().subscribeToTopic("all_users")
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "✅ Subscribed to 'all_users' broadcast topic");
+                        } else {
+                            Log.e(TAG, "❌ Failed to subscribe to 'all_users' topic", task.getException());
+                        }
+                    });
+
         } else {
-            Log.w(TAG, "User not logged in, cannot subscribe to user-specific topic.");
+            Log.w(TAG, "⚠️ User not logged in, cannot subscribe to notification topics.");
         }
     }
 

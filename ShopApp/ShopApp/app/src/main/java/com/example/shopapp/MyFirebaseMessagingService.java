@@ -46,9 +46,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String body = "";
         String imageUrl = "";
         String type = "SYSTEM";
-        String actionType = "NONE";
-        String actionData = "";
-        String icon = "bell";
         int priority = 1;
 
         // Lấy từ notification payload
@@ -66,7 +63,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Notification Body: " + body);
         }
 
-        // Lấy từ data payload (quan trọng cho app xử lý)
+        // Lấy từ data payload (quan trọng hơn)
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> data = remoteMessage.getData();
 
@@ -78,12 +75,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 imageUrl = data.get("imageUrl");
             if (data.containsKey("type") && data.get("type") != null)
                 type = data.get("type");
-            if (data.containsKey("actionType") && data.get("actionType") != null)
-                actionType = data.get("actionType");
-            if (data.containsKey("actionData") && data.get("actionData") != null)
-                actionData = data.get("actionData");
-            if (data.containsKey("icon") && data.get("icon") != null)
-                icon = data.get("icon");
             if (data.containsKey("priority") && data.get("priority") != null) {
                 try {
                     priority = Integer.parseInt(data.get("priority"));
@@ -91,16 +82,51 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     priority = 1;
                 }
             }
-
             Log.d(TAG, "Data payload: " + data.toString());
-            Log.d(TAG, "Image URL: " + imageUrl);
         }
 
-        // Lưu vào Firestore
-        saveNotificationToFirestore(title, body, imageUrl, type, actionType, actionData, icon, priority, remoteMessage.getData());
+        // ⭐️ FIX: Kiểm tra xem user hiện tại có được phép nhận thông báo này không
+        if (!shouldShowNotification(remoteMessage.getData(), type)) {
+            return; // Nếu không phải người nhận, không làm gì cả
+        }
 
-        // Hiển thị system notification với hình ảnh
+        // ✅ CHỈ hiển thị thông báo đẩy. Không lưu vào DB nữa vì backend đã làm.
         sendNotification(title, body, imageUrl, priority);
+    }
+
+    /**
+     * Kiểm tra xem người dùng hiện tại có được phép nhận thông báo này không.
+     */
+    private boolean shouldShowNotification(Map<String, String> data, String type) {
+        // Thông báo chung (SYSTEM) luôn hiển thị
+        if (!"ORDER".equals(type)) {
+            Log.d(TAG, "Notification is not type ORDER, showing to user.");
+            return true;
+        }
+
+        // Thông báo đơn hàng (ORDER) cần kiểm tra userId
+        String payloadUserId = data.get("userId");
+        if (payloadUserId == null || payloadUserId.isEmpty()) {
+            Log.w(TAG, "ORDER notification is missing userId in data payload. Not showing.");
+            return false; // Không có userId, không hiển thị
+        }
+
+        if (mAuth.getCurrentUser() == null) {
+            Log.w(TAG, "No user is logged in. Not showing notification.");
+            return false; // Người dùng chưa đăng nhập
+        }
+
+        String currentUserId = mAuth.getCurrentUser().getUid();
+
+        // So sánh userId trong thông báo với người dùng hiện tại
+        boolean isOwner = payloadUserId.equals(currentUserId);
+        if (isOwner) {
+            Log.d(TAG, "User is the owner of the order. Showing notification.");
+        } else {
+            Log.w(TAG, "User (" + currentUserId + ") is not the owner of the order (" + payloadUserId + "). Not showing notification.");
+        }
+
+        return isOwner;
     }
 
     @Override
@@ -119,59 +145,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             db.collection("users")
                     .document(userId)
                     .update(updates)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token saved to Firestore"))
-                    .addOnFailureListener(e -> Log.e(TAG, "Error saving FCM token", e));
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token updated in Firestore"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating FCM token", e));
         }
-    }
-
-    private void saveNotificationToFirestore(String title, String body, String imageUrl,
-                                             String type, String actionType, String actionData,
-                                             String icon, int priority, Map<String, String> extraData) {
-        if (mAuth.getCurrentUser() == null) {
-            Log.w(TAG, "User not logged in, notification not saved");
-            return;
-        }
-
-        String userId = mAuth.getCurrentUser().getUid();
-        String notificationId = db.collection("notifications").document().getId();
-
-        Map<String, Object> notificationData = new HashMap<>();
-        notificationData.put("notificationId", notificationId);
-        notificationData.put("userId", userId);
-        notificationData.put("title", title != null ? title : "");
-        notificationData.put("body", body != null ? body : "");
-        notificationData.put("imageUrl", imageUrl != null && !imageUrl.isEmpty() ? imageUrl : "");
-        notificationData.put("type", type != null ? type : "SYSTEM");
-        notificationData.put("actionType", actionType != null ? actionType : "NONE");
-        notificationData.put("actionData", actionData != null && !actionData.isEmpty() ? actionData : "");
-        notificationData.put("icon", icon != null ? icon : "bell");
-        notificationData.put("priority", priority);
-        notificationData.put("isRead", false);
-        notificationData.put("timestamp", FieldValue.serverTimestamp());
-        notificationData.put("senderName", "Hệ thống");
-
-        Map<String, Object> extra = new HashMap<>();
-        if (extraData != null && !extraData.isEmpty()) {
-            for (Map.Entry<String, String> entry : extraData.entrySet()) {
-                if (entry.getValue() != null) {
-                    extra.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        notificationData.put("extraData", extra);
-
-        db.collection("notifications")
-                .document(notificationId)
-                .set(notificationData)
-                .addOnSuccessListener(aVoid ->
-                        Log.d(TAG, "Notification saved to Firestore: " + notificationId))
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error saving notification to Firestore", e));
     }
 
     private void sendNotification(String messageTitle, String messageBody, String imageUrl, int priority) {
-        if (messageTitle == null || messageBody == null) {
-            Log.d(TAG, "Cannot send notification, title or body is null");
+        if (messageTitle == null || messageBody == null || messageTitle.isEmpty() || messageBody.isEmpty()) {
+            Log.d(TAG, "Cannot send notification, title or body is empty");
             return;
         }
 
@@ -195,7 +176,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setPriority(notifPriority)
                         .setContentIntent(pendingIntent);
 
-        // Nếu có imageUrl, download và hiển thị với BigPictureStyle
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Tạo channel nếu cần (cho Android 8.0+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = priority >= 2 ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelId, "Thông báo chung", importance);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        // Xử lý tải ảnh nền
         if (imageUrl != null && !imageUrl.isEmpty()) {
             new Thread(() -> {
                 try {
@@ -204,64 +194,28 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         notificationBuilder.setLargeIcon(bitmap);
                         notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()
                                 .bigPicture(bitmap)
-                                .bigLargeIcon((Bitmap) null) // Hide large icon when expanded
-                                .setSummaryText(messageBody));
-
-                        showNotification(notificationBuilder.build(), channelId, priority);
-                    } else {
-                        // Nếu không download được ảnh, hiện notification không có ảnh
-                        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody));
-                        showNotification(notificationBuilder.build(), channelId, priority);
+                                .bigLargeIcon((Bitmap) null));
                     }
+                    notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());
                 } catch (Exception e) {
                     Log.e(TAG, "Error loading image for notification", e);
-                    // Fallback: Hiện notification không có ảnh
-                    notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody));
-                    showNotification(notificationBuilder.build(), channelId, priority);
+                    notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());
                 }
             }).start();
         } else {
-            // Không có ảnh, dùng BigTextStyle
-            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody));
-            showNotification(notificationBuilder.build(), channelId, priority);
+            notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());
         }
     }
 
-    private void showNotification(android.app.Notification notification, String channelId, int priority) {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = priority >= 2 ? NotificationManager.IMPORTANCE_HIGH :
-                    NotificationManager.IMPORTANCE_DEFAULT;
-
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "Thông báo chung",
-                    importance);
-            channel.setDescription("Kênh thông báo cho các thông báo quan trọng");
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        notificationManager.notify((int) System.currentTimeMillis(), notification);
-    }
-
-    /**
-     * Download bitmap từ URL
-     */
     private Bitmap getBitmapFromURL(String strURL) {
         try {
             URL url = new URL(strURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoInput(true);
-            connection.setConnectTimeout(10000); // 10 seconds timeout
-            connection.setReadTimeout(10000);
             connection.connect();
-
             InputStream input = connection.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(input);
             input.close();
-            connection.disconnect();
-
             return bitmap;
         } catch (Exception e) {
             Log.e(TAG, "Error downloading image: " + strURL, e);

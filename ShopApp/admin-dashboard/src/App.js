@@ -7,6 +7,8 @@ import OrderList from './components/OrderList';
 import LoginScreen from './components/LoginScreen'; 
 import UserList from './components/UserList'; 
 import NotificationManager from './components/NotificationManager'; 
+import AdminReviewControl from './components/AdminReviewControlFirebase';
+import AdminVoucherManagement from './components/AdminVoucherManagement';
 
 // --- DARK/MINIMALIST STYLES ---
 const styles = {
@@ -96,6 +98,8 @@ const navItems = [
     { key: 'orders', name: '📋 ĐƠN HÀNG', component: OrderList },
     { key: 'users', name: '👥 NGƯỜI DÙNG', component: UserList },
     { key: 'notifications', name: '🔔 THÔNG BÁO', component: NotificationManager },
+    { key: 'reviews', name: '🔔 REVIEWS', component: AdminReviewControl },
+    { key: 'voucher', name: '🔔 VOUCHER', component: AdminVoucherManagement },
 ];
 
 

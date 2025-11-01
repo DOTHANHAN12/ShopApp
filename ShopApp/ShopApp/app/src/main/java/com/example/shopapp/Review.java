@@ -10,6 +10,13 @@ public class Review {
     private String orderId;
     private boolean isEdited;
     private long updatedAt;
+    private String status;
+
+    public enum Status {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
 
     public Review() {
         // Default constructor required for calls to DataSnapshot.getValue(Review.class)
@@ -25,6 +32,7 @@ public class Review {
         this.orderId = orderId;
         this.isEdited = false;
         this.updatedAt = 0;
+        this.status = Status.PENDING.name(); // Default status
     }
 
     // Getters and Setters
@@ -99,5 +107,13 @@ public class Review {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

@@ -2,217 +2,159 @@ package com.example.shopapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
+/**
+ * RecyclerView Adapter for displaying products
+ */
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    private final Context context;
-    private final List<Product> productList;
-    private final FirebaseFirestore db;
-    private final FirebaseAuth mAuth;
+    private static final String TAG = "ProductAdapter";
 
-    public ProductAdapter(Context context, List<Product> productList) {
+    private List<Product> products;
+    private Context context;
+
+    public ProductAdapter(List<Product> products, Context context) {
+        this.products = products;
         this.context = context;
-        this.productList = productList;
-        this.db = FirebaseFirestore.getInstance();
-        this.mAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_product, parent, false);
         return new ProductViewHolder(view);
-    }
-
-    private boolean isOfferValid(OfferDetails offer) {
-        if (offer == null || offer.getStartDate() == null || offer.getEndDate() == null) {
-            return false;
-        }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date startDate = sdf.parse(offer.getStartDate());
-            Date endDate = sdf.parse(offer.getEndDate());
-            Date currentDate = new Date();
-            return !currentDate.before(startDate) && !currentDate.after(endDate);
-        } catch (ParseException e) {
-            Log.e("ProductAdapter", "Error parsing offer dates", e);
-            return false;
-        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Product product = productList.get(position);
+        try {
+            Product product = products.get(position);
 
-        // 1. Gán dữ liệu văn bản
-        holder.nameTextView.setText(product.getName());
-        holder.typeTextView.setText(product.getType());
+            if (product == null) {
+                return;
+            }
 
-        // -----------------------------------------------------------
-        // LOGIC TÍNH TOÁN VÀ GÁN GIÁ MỚI
-        // -----------------------------------------------------------
+            // Set product name
+            if (holder.productName != null) {
+                holder.productName.setText(product.name != null ? product.name : "");
+            }
 
-        double basePrice = product.getBasePrice();
-        double displayPrice = basePrice;
-        boolean isDiscounted = false;
+            // Set product price
+            if (holder.productPrice != null) {
+                holder.productPrice.setText(formatPrice(product.basePrice));
+            }
 
-        // Kiểm tra xem khuyến mãi có hợp lệ không
-        if (product.getIsOfferStatus() && isOfferValid(product.getOffer())) {
-            double discount = product.getOffer().getOfferValue() / 100.0;
-            displayPrice = basePrice * (1.0 - discount);
-            isDiscounted = true;
+            // Set rating
+            if (holder.productRating != null) {
+                String ratingText = product.averageRating != null
+                        ? String.format("%.1f⭐", product.averageRating)
+                        : "No rating";
+                holder.productRating.setText(ratingText);
+            }
+
+            // Set review count
+            if (holder.reviewCount != null) {
+                String reviewText = product.totalReviews != null
+                        ? "(" + product.totalReviews + " reviews)"
+                        : "(No reviews)";
+                holder.reviewCount.setText(reviewText);
+            }
+
+            // Load product image
+            if (holder.productImage != null) {
+                if (product.mainImage != null && !product.mainImage.isEmpty()) {
+                    Picasso.get()
+                            .load(product.mainImage)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .error(R.drawable.ic_launcher_foreground)
+                            .fit()
+                            .centerCrop()
+                            .into(holder.productImage);
+                } else {
+                    holder.productImage.setImageResource(R.drawable.ic_launcher_foreground);
+                }
+            }
+
+            // Set click listener
+            holder.itemView.setOnClickListener(v -> {
+                // Navigate to product detail
+                Intent intent = new Intent(context, ProductDetailActivity.class);
+                intent.putExtra("PRODUCT_ID", product.productId);
+                context.startActivity(intent);
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        // Định dạng và gán Giá Hiển thị (Giá sau giảm hoặc Giá gốc)
-        String currentPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", displayPrice);
-        holder.currentPriceTextView.setText(currentPriceFormatted);
-
-        // Gán giá gốc và gạch ngang
-        if (isDiscounted) {
-            String originalPriceFormatted = String.format(Locale.getDefault(), "%,.0f VND", basePrice);
-
-            holder.originalPriceTextView.setText(originalPriceFormatted);
-            // Thêm hiệu ứng gạch ngang
-            holder.originalPriceTextView.setPaintFlags(
-                    holder.originalPriceTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
-            );
-        } else {
-            // Xóa giá gốc nếu không có khuyến mãi hợp lệ
-            holder.originalPriceTextView.setText("");
-            holder.originalPriceTextView.setPaintFlags(0);
-        }
-
-        // -----------------------------------------------------------
-
-        // 2. Tải ảnh bằng Picasso - SỬ DỤNG TRƯỜNG mainImage
-        if (product.getMainImage() != null && !product.getMainImage().isEmpty()) {
-            Picasso.get()
-                    .load(product.getMainImage())
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .into(holder.thumbnailImageView);
-        }
-
-        // 3. XỬ LÝ CLICK: Mở màn hình chi tiết sản phẩm và truyền ID
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ProductDetailActivity.class);
-            // Truyền Product ID của sản phẩm được click
-            intent.putExtra("PRODUCT_ID", product.getProductId());
-            context.startActivity(intent);
-        });
-
-        // 4. XỬ LÝ NÚT YÊU THÍCH
-        checkFavoriteStatus(product.getProductId(), holder.favoriteImageView);
-
-        holder.favoriteImageView.setOnClickListener(v -> {
-            toggleFavorite(product.getProductId(), holder.favoriteImageView);
-        });
     }
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return products != null ? products.size() : 0;
     }
 
-    private void toggleFavorite(String productId, ImageView favoriteImageView) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(context, "Vui lòng đăng nhập để thêm vào Yêu thích.", Toast.LENGTH_SHORT).show();
-            context.startActivity(new Intent(context, LoginActivity.class));
-            return;
+    /**
+     * Update product list with new data
+     */
+    public void updateData(List<Product> newProducts) {
+        this.products = newProducts;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Format price to display string
+     */
+    private String formatPrice(double price) {
+        if (price >= 1000000) {
+            return String.format("%.1fM đ", price / 1000000);
+        } else if (price >= 1000) {
+            return String.format("%.0fK đ", price / 1000);
         }
-
-        db.collection("users").document(user.getUid()).collection("favorites").document(productId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document != null && document.exists()) {
-                            // Bỏ yêu thích
-                            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        updateFavoriteIcon(false, favoriteImageView);
-                                    });
-                        } else {
-                            // Thêm vào yêu thích
-                            db.collection("users").document(user.getUid()).collection("favorites").document(productId)
-                                    .set(new FavoriteItem(System.currentTimeMillis()))
-                                    .addOnSuccessListener(aVoid -> {
-                                        updateFavoriteIcon(true, favoriteImageView);
-                                    });
-                        }
-                    }
-                });
+        return String.format("%.0f đ", price);
     }
 
-    private void checkFavoriteStatus(String productId, ImageView favoriteImageView) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            updateFavoriteIcon(false, favoriteImageView);
-            return;
-        }
-
-        db.collection("users").document(user.getUid()).collection("favorites").document(productId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        updateFavoriteIcon(document != null && document.exists(), favoriteImageView);
-                    }
-                });
-    }
-
-    private void updateFavoriteIcon(boolean isFavorited, ImageView favoriteImageView) {
-        if (isFavorited) {
-            favoriteImageView.setImageResource(R.drawable.ic_favorite_filled);
-            favoriteImageView.setColorFilter(ContextCompat.getColor(context, R.color.colorPrimaryDark), android.graphics.PorterDuff.Mode.SRC_IN);
-        } else {
-            favoriteImageView.setImageResource(R.drawable.ic_favorite_outline);
-            favoriteImageView.clearColorFilter();
-        }
-    }
-
+    /**
+     * ViewHolder for product items
+     */
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
-        ImageView thumbnailImageView;
-        ImageView favoriteImageView;
-        TextView nameTextView;
-        TextView typeTextView;
-        TextView currentPriceTextView;
-        TextView originalPriceTextView;
+        ImageView productImage;
+        TextView productName;
+        TextView productPrice;
+        TextView productRating;
+        TextView reviewCount;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            thumbnailImageView = itemView.findViewById(R.id.img_product_thumb);
-            favoriteImageView = itemView.findViewById(R.id.img_favorite_list);
-            nameTextView = itemView.findViewById(R.id.text_product_name_list);
-            typeTextView = itemView.findViewById(R.id.text_product_type_list);
-            currentPriceTextView = itemView.findViewById(R.id.text_current_price_list);
-            originalPriceTextView = itemView.findViewById(R.id.text_original_price_list);
+
+            productImage = itemView.findViewById(R.id.img_product);
+            productName = itemView.findViewById(R.id.txt_product_name);
+            productPrice = itemView.findViewById(R.id.txt_product_price);
+            productRating = itemView.findViewById(R.id.txt_product_rating);
+            reviewCount = itemView.findViewById(R.id.txt_review_count);
+
+            // Log if views not found
+            if (productImage == null) {
+                android.util.Log.e("ProductAdapter", "img_product not found in item_product.xml");
+            }
+            if (productName == null) {
+                android.util.Log.e("ProductAdapter", "txt_product_name not found in item_product.xml");
+            }
+            if (productPrice == null) {
+                android.util.Log.e("ProductAdapter", "txt_product_price not found in item_product.xml");
+            }
         }
     }
 }

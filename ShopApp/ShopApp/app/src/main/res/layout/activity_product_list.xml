@@ -42,6 +42,7 @@
                 android:layout_height="1dp"
                 android:background="#e0e0e0"/>
 
+            <!-- Category Header -->
             <LinearLayout
                 android:id="@+id/layout_sub_category_title"
                 android:layout_width="match_parent"
@@ -61,15 +62,18 @@
 
                 <TextView
                     android:id="@+id/text_category_header"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:layout_marginStart="8dp"
                     tools:text="OUTERWEAR"/>
+
             </LinearLayout>
 
+            <!-- Search Bar -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -90,17 +94,19 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:imeOptions="actionSearch"
-                    android:inputType="text"/> <ImageView
-                android:id="@+id/img_search_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_search"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                app:tint="#666"
-                android:clickable="true"
-                android:focusable="true"/>
+                    android:inputType="text"/>
+
+                <ImageView
+                    android:id="@+id/img_search_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    app:tint="#666"
+                    android:clickable="true"
+                    android:focusable="true"/>
 
                 <ImageView
                     android:id="@+id/img_search_filter"
@@ -113,11 +119,53 @@
                     app:tint="#666"
                     android:clickable="true"
                     android:focusable="true"/>
+
             </RelativeLayout>
 
+            <!-- Active Filters Display -->
+            <LinearLayout
+                android:id="@+id/layout_active_filters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="#FFF3E0"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_filter"
+                    android:layout_marginEnd="8dp"
+                    app:tint="#FF9800"/>
+
+                <TextView
+                    android:id="@+id/txt_active_filters_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="1 Bộ lọc đang hoạt động"
+                    android:textSize="12sp"
+                    android:textColor="#E65100"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xóa"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF6F00"
+                    android:paddingHorizontal="8dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
+        <!-- Products RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_product_list"
             android:layout_width="0dp"
@@ -132,6 +180,7 @@
             app:layout_constraintTop_toBottomOf="@id/layout_top_header_list"
             tools:listitem="@layout/item_product" />
 
+        <!-- Floating Bottom Nav -->
         <include
             android:id="@+id/layout_bottom_nav_float"
             layout="@layout/layout_floating_bottom_nav"
@@ -142,4 +191,5 @@
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,92 +2,117 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:background="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"  android:paddingBottom="8dp">
+        android:orientation="vertical"
+        android:background="@android:color/white">
 
-        <FrameLayout
+        <!-- Product Image -->
+        <ImageView
+            android:id="@+id/img_product"
             android:layout_width="match_parent"
-            android:layout_height="180dp">
+            android:layout_height="180dp"
+            android:contentDescription="@string/product_image"
+            android:scaleType="centerCrop"
+            android:background="#F5F5F5"/>
 
-            <ImageView
-                android:id="@+id/img_product_thumb"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:background="#f0f0f0"
-                tools:src="@tools:sample/avatars"
-                android:contentDescription="Product Thumbnail" />
-
-            <ImageView
-                android:id="@+id/img_favorite_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_favorite_outline"
-                android:layout_gravity="top|end"
-                android:padding="8dp"
-                app:tint="#666"/>
-
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/text_product_name_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingHorizontal="8dp"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:text="Airism T-Shirt Mùa Hè"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"/>
-
-        <TextView
-            android:id="@+id/text_product_type_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="T-SHIRTS, SWEAT  FLEECE"
-            android:textSize="12sp"
-            android:textColor="#555"/>
-
+        <!-- Product Info Container -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:layout_marginTop="4dp">
+            android:orientation="vertical"
+            android:padding="12dp">
 
+            <!-- Product Name -->
             <TextView
-                android:id="@+id/text_current_price_list"
-                android:layout_width="wrap_content"
+                android:id="@+id/txt_product_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="499.000 VND"
+                android:text="Product Name"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Price -->
+            <TextView
+                android:id="@+id/txt_product_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="250,000 đ"
                 android:textSize="16sp"
-                android:textColor="#FF0000"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="#E74C3C"
+                android:layout_marginBottom="6dp"/>
 
-            <TextView
-                android:id="@+id/text_original_price_list"
-                android:layout_width="wrap_content"
+            <!-- Rating and Review Count -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="699.000 VND"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/txt_product_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4.5⭐"
+                    android:textSize="12sp"
+                    android:textColor="#FF9800"
+                    android:layout_marginEnd="6dp"/>
+
+                <TextView
+                    android:id="@+id/txt_review_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(120 reviews)"
+                    android:textSize="11sp"
+                    android:textColor="#999999"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <!-- Stock Status -->
+                <TextView
+                    android:id="@+id/txt_stock_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="In Stock"
+                    android:textSize="10sp"
+                    android:textColor="#4CAF50"
+                    android:background="#E8F5E9"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"/>
+
+            </LinearLayout>
+
+            <!-- Action Button -->
+            <Button
+                android:id="@+id/btn_add_to_cart"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="Add to Cart"
                 android:textSize="12sp"
-                android:textColor="#888"
-                tools:ignore="SmallSp"
-                android:textStyle="italic"
-                />
+                android:textColor="@android:color/white"
+                android:background="@android:color/black"
+                android:textAllCaps="false"
+                android:layout_marginTop="6dp"/>
 
         </LinearLayout>
+
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>

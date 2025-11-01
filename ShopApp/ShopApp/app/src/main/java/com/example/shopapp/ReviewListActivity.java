@@ -53,6 +53,7 @@ public class ReviewListActivity extends AppCompatActivity {
 
     private void loadAllReviews() {
         db.collection("products").document(productId).collection("reviews")
+                .whereEqualTo("status", "APPROVED")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {

@@ -1,65 +1,59 @@
 package com.example.shopapp;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
-public class ProductListActivity extends AppCompatActivity {
+public class ProductListActivity extends AppCompatActivity implements FilterSortBottomSheet.FilterApplyListener {
 
-    private static final String TAG = "ProductListAct";
-    private static final String PRODUCTS_COLLECTION = "products";
+    private static final String TAG = "ProductListActivity";
     private FirebaseFirestore db;
 
-    private TextView categoryHeader;
+    // UI Components
     private RecyclerView recyclerView;
-    private ProductAdapter adapter;
-    private List<Product> productList;
-
-    private String currentCategory;
-    private String currentSubCategory;
-
-    private TextView tabWomen, tabMen, tabKids, tabBaby;
-    private ImageView imgBackList;
-    private TextView currentSelectedTab;
-
     private EditText edtSearchKeyword;
-    private ImageView imgSearchFilter;
-    private ImageView imgSearchIcon; // *** ĐÃ THÊM: Icon kính lúp (search icon) ***
+    private ImageView imgSearchIcon, imgSearchFilter, imgBack;
+    private TextView textCategoryHeader;
+    private LinearLayout layoutActiveFilters;
+    private TextView txtActiveFiltersCount;
 
-    private ImageView navHomeFloat;
-    private View searchButtonFloat;
-    private ImageView navProfileFloat;
+    // Current filters and search
+    private String currentCategory;
+    private String currentType;
+    private String searchKeyword;
+    private int minPrice = 0;
+    private int maxPrice = 10000000;
+    private int minRating = 0;
+    private String sortBy = "NEWEST";
+
+    private List<Product> productList = new ArrayList<>();
+    private ProductAdapter productAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // SETUP UI CƠ BẢN VÀ FIX STATUS BAR
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -70,282 +64,347 @@ public class ProductListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_product_list);
 
-        // 1. Khởi tạo Firebase
         db = FirebaseFirestore.getInstance();
 
-        // 2. Lấy Category VÀ Sub-category từ Intent
+        // Get intent extras
         currentCategory = getIntent().getStringExtra("CATEGORY_KEY");
-        currentSubCategory = getIntent().getStringExtra("TYPE_KEY");
-
-        // --- XỬ LÝ SHOW ALL ---
-        if (currentSubCategory != null && currentSubCategory.equals(SubCategory.SHOW_ALL_TYPE)) {
-            currentSubCategory = null;
-        }
+        currentType = getIntent().getStringExtra("TYPE_KEY");
+        searchKeyword = getIntent().getStringExtra("SEARCH_KEYWORD");
 
         if (currentCategory == null) {
-            currentCategory = "MEN";
+            currentCategory = "WOMEN";
         }
 
-        // 3. Khởi tạo UI và Ánh xạ Views
         mapViews();
-        setupCategoryTabs();
-        setupSearchListener();
-        setupFooterNavigation();
-
-        // 4. Thiết lập nút Back
-        if (imgBackList != null) {
-            imgBackList.setOnClickListener(v -> finish());
-        }
-
-        // Cập nhật tiêu đề hiển thị cả Sub-category
-        updateHeaderAndData(currentCategory, currentSubCategory);
-
-        // Cập nhật UI Tab để làm nổi bật tab đã chọn
-        updateCategoryUI(currentCategory);
-
-        // 5. Thiết lập RecyclerView
-        productList = new ArrayList<>();
-        adapter = new ProductAdapter(this, productList);
-
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        recyclerView.setAdapter(adapter);
-
-        // 6. Tải dữ liệu đã được gọi trong updateHeaderAndData
+        setupListeners();
+        loadProducts();
     }
 
     private void mapViews() {
-        categoryHeader = findViewById(R.id.text_category_header);
         recyclerView = findViewById(R.id.recycler_product_list);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
-        // Ánh xạ Tabs và nút Back
-        tabWomen = findViewById(R.id.tab_women_list);
-        tabMen = findViewById(R.id.tab_men_list);
-        tabKids = findViewById(R.id.tab_kids_list);
-        tabBaby = findViewById(R.id.tab_baby_list);
-        imgBackList = findViewById(R.id.img_back_list);
-
-        // ÁNH XẠ SEARCH BAR
         edtSearchKeyword = findViewById(R.id.edt_search_keyword);
+        imgSearchIcon = findViewById(R.id.img_search_icon);
         imgSearchFilter = findViewById(R.id.img_search_filter);
-        imgSearchIcon = findViewById(R.id.img_search_icon); // *** ĐÃ THÊM ***
+        imgBack = findViewById(R.id.img_back_list);
+        textCategoryHeader = findViewById(R.id.text_category_header);
+        layoutActiveFilters = findViewById(R.id.layout_active_filters);
+        txtActiveFiltersCount = findViewById(R.id.txt_active_filters_count);
 
-        // ÁNH XẠ CÁC NÚT TỪ FOOTER
-        navHomeFloat = findViewById(R.id.nav_home_cs);
-        searchButtonFloat = findViewById(R.id.btn_search_footer);
-//        navProfileFloat = findViewById(R.id.nav_profile_detail);
+        // Set header text
+        if (currentType != null && !currentType.isEmpty()) {
+            textCategoryHeader.setText(currentType);
+        } else if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            textCategoryHeader.setText("Kết quả tìm kiếm: " + searchKeyword);
+        } else {
+            textCategoryHeader.setText(currentCategory);
+        }
+
+        if (edtSearchKeyword != null && searchKeyword != null) {
+            edtSearchKeyword.setText(searchKeyword);
+        }
     }
 
-    // --------------------------------------------------------------------------------
-    // LOGIC TÌM KIẾM
-    // --------------------------------------------------------------------------------
-    private void setupSearchListener() {
+    private void setupListeners() {
+        // Back button
+        if (imgBack != null) {
+            imgBack.setOnClickListener(v -> finish());
+        }
 
+        // Search
         if (edtSearchKeyword != null) {
-            // Lắng nghe sự kiện ENTER/SEARCH trên bàn phím
             edtSearchKeyword.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
-                    performSearch();
+                    performSearch(v.getText().toString().trim());
                     return true;
                 }
                 return false;
             });
         }
 
-        // *** ĐÃ SỬA: Lắng nghe sự kiện click vào ICON KÍNH LÚP (BÊN TRÁI) ***
         if (imgSearchIcon != null) {
             imgSearchIcon.setOnClickListener(v -> {
-                performSearch();
+                String keyword = edtSearchKeyword.getText().toString().trim();
+                performSearch(keyword);
             });
         }
 
+        // Filter
         if (imgSearchFilter != null) {
-            imgSearchFilter.setOnClickListener(v -> {
-                // Ta coi việc bấm Filter là trigger Search với từ khóa hiện tại
-                performSearch();
-            });
+            imgSearchFilter.setOnClickListener(v -> openFilterBottomSheet());
+        }
+
+        // Clear filters
+        if (layoutActiveFilters != null) {
+            layoutActiveFilters.setOnClickListener(v -> clearAllFilters());
         }
     }
 
-    private void performSearch() {
-        String keyword = edtSearchKeyword.getText().toString().trim();
-
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(edtSearchKeyword.getWindowToken(), 0);
-
-        // Tải dữ liệu với từ khóa (tìm kiếm chung trong category đó)
-        loadProductsFromFirestore(currentCategory, null, keyword);
-    }
-
-    // --------------------------------------------------------------------------------
-    // LOGIC NAVIGATION
-    // --------------------------------------------------------------------------------
-
-    private void setupFooterNavigation() {
-        // NÚT HOME: Chuyển về HomeActivity (clear stack)
-        if (navHomeFloat != null) {
-            navHomeFloat.setOnClickListener(v -> {
-                Intent intent = new Intent(this, HomeActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            });
+    private void performSearch(String keyword) {
+        if (!SearchValidator.isValidKeyword(keyword)) {
+            Toast.makeText(this, SearchValidator.getErrorMessage(keyword), Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // NÚT SEARCH: Chuyển về CategorySearchActivity
-        if (searchButtonFloat != null) {
-            searchButtonFloat.setOnClickListener(v -> {
-                Intent intent = new Intent(this, CategorySearchActivity.class);
-                intent.putExtra("CATEGORY_KEY", currentCategory);
-                startActivity(intent);
-            });
+        if (edtSearchKeyword != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(edtSearchKeyword.getWindowToken(), 0);
         }
 
-        // NÚT PROFILE: Chuyển về MainActivity (Login/Register)
-        if (navProfileFloat != null) {
-            navProfileFloat.setOnClickListener(v -> {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            });
+        searchKeyword = keyword;
+        textCategoryHeader.setText("Kết quả tìm kiếm: " + keyword);
+        currentType = null;
+        loadProducts();
+    }
+
+    private void openFilterBottomSheet() {
+        FilterSortBottomSheet bottomSheet = new FilterSortBottomSheet();
+        bottomSheet.setFilterApplyListener(this);
+        bottomSheet.show(getSupportFragmentManager(), "FilterSort");
+    }
+
+    @Override
+    public void onFiltersApplied(int minPrice, int maxPrice, int minRating, String sortBy) {
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
+        this.minRating = minRating;
+        this.sortBy = sortBy;
+
+        updateActiveFiltersDisplay();
+        loadProducts();
+    }
+
+    @Override
+    public void onFiltersReset() {
+        minPrice = 0;
+        maxPrice = 10000000;
+        minRating = 0;
+        sortBy = "NEWEST";
+
+        clearActiveFiltersDisplay();
+        loadProducts();
+    }
+
+    private void clearAllFilters() {
+        minPrice = 0;
+        maxPrice = 10000000;
+        minRating = 0;
+        sortBy = "NEWEST";
+        searchKeyword = null;
+        currentType = null;
+
+        if (edtSearchKeyword != null) {
+            edtSearchKeyword.setText("");
         }
+
+        textCategoryHeader.setText(currentCategory);
+        clearActiveFiltersDisplay();
+        loadProducts();
     }
 
+    private void updateActiveFiltersDisplay() {
+        int activeFiltersCount = 0;
+        StringBuilder filterText = new StringBuilder();
 
-    private void setupCategoryTabs() {
-        View.OnClickListener tabClickListener = view -> {
-            String newCategory = ((TextView) view).getText().toString();
+        if (minPrice > 0 || maxPrice < 10000000) {
+            activeFiltersCount++;
+            filterText.append("Giá: ").append(formatPrice(minPrice)).append(" - ").append(formatPrice(maxPrice)).append("\n");
+        }
 
-            updateCategoryUI(newCategory);
+        if (minRating > 0) {
+            activeFiltersCount++;
+            filterText.append("Đánh giá ≥ ").append(minRating).append(" sao\n");
+        }
 
-            // Gửi Intent để chuyển về CategorySearchActivity với Category mới (và kết thúc Activity hiện tại)
-            Intent intent = new Intent(this, CategorySearchActivity.class);
-            intent.putExtra("CATEGORY_KEY", newCategory);
-            startActivity(intent);
-            finish();
-        };
+        if (!sortBy.equals("NEWEST")) {
+            activeFiltersCount++;
+            filterText.append("Sắp xếp: ").append(getSortLabel(sortBy));
+        }
 
-        tabWomen.setOnClickListener(tabClickListener);
-        tabMen.setOnClickListener(tabClickListener);
-        tabKids.setOnClickListener(tabClickListener);
-        tabBaby.setOnClickListener(tabClickListener);
-    }
-
-    // --------------------------------------------------------------------------------
-    // DATA LOADING & UI UPDATES
-    // --------------------------------------------------------------------------------
-
-    private void updateHeaderAndData(String category, String subCategory) {
-        String headerText;
-
-        if (subCategory != null && !subCategory.isEmpty()) {
-            headerText = subCategory.toUpperCase(Locale.ROOT);
+        if (activeFiltersCount > 0) {
+            if (layoutActiveFilters != null) {
+                layoutActiveFilters.setVisibility(View.VISIBLE);
+            }
+            if (txtActiveFiltersCount != null) {
+                txtActiveFiltersCount.setText(activeFiltersCount + " Bộ lọc đang hoạt động");
+            }
         } else {
-            headerText = category.toUpperCase(Locale.ROOT) + " Collection";
+            clearActiveFiltersDisplay();
         }
-
-        categoryHeader.setText(headerText);
-
-        // Load data ban đầu (không có keyword)
-        loadProductsFromFirestore(category, subCategory, null);
     }
 
-
-    private void updateCategoryUI(String newCategory) {
-        if (currentSelectedTab != null) {
-            currentSelectedTab.setAlpha(0.7f);
-            currentSelectedTab.setPaintFlags(currentSelectedTab.getPaintFlags() & (~Paint.UNDERLINE_TEXT_FLAG));
-            currentSelectedTab.setTextSize(16);
+    private void clearActiveFiltersDisplay() {
+        if (layoutActiveFilters != null) {
+            layoutActiveFilters.setVisibility(View.GONE);
         }
-
-        switch (newCategory) {
-            case "WOMEN": currentSelectedTab = tabWomen; break;
-            case "MEN": currentSelectedTab = tabMen; break;
-            case "KIDS": currentSelectedTab = tabKids; break;
-            case "BABY": currentSelectedTab = tabBaby; break;
-            default: return;
-        }
-
-        // Thiết lập trạng thái mới: Gạch chân và In đậm
-        currentSelectedTab.setAlpha(1.0f);
-        currentSelectedTab.setPaintFlags(currentSelectedTab.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        currentSelectedTab.setTextSize(18);
     }
 
-    /** * Tải danh sách sản phẩm từ Firestore dựa trên Category, Sub-Category và Keyword
+    private String formatPrice(int price) {
+        if (price >= 1000000) {
+            return String.format("%.1fM", price / 1000000.0);
+        } else if (price >= 1000) {
+            return String.format("%.0fK", price / 1000.0);
+        }
+        return String.valueOf(price);
+    }
+
+    private String getSortLabel(String sortBy) {
+        switch (sortBy) {
+            case "PRICE_LOW_TO_HIGH":
+                return "Giá thấp đến cao";
+            case "PRICE_HIGH_TO_LOW":
+                return "Giá cao đến thấp";
+            case "RATING":
+                return "Đánh giá cao nhất";
+            case "POPULAR":
+                return "Phổ biến nhất";
+            default:
+                return "Mới nhất";
+        }
+    }
+
+    /**
+     * Load products from Firestore with applied filters and search
      */
-    private void loadProductsFromFirestore(String category, String subCategory, String keyword) {
+    private void loadProducts() {
+        Query query = db.collection("products")
+                .whereEqualTo("category", currentCategory);
 
-        String finalCategory = category.toUpperCase(Locale.ROOT);
-        String finalSubCategory = (subCategory != null && !subCategory.isEmpty()) ? subCategory.toUpperCase(Locale.ROOT) : null;
-
-        Log.d(TAG, "--- BẮT ĐẦU TRUY VẤN SẢN PHẨM ---");
-
-        // BƯỚC 1: BẮT ĐẦU VỚI LỌC CATEGORY
-        Query query = db.collection(PRODUCTS_COLLECTION)
-                .whereEqualTo("category", finalCategory);
-
-        // BƯỚC 2: BỔ SUNG LỌC THEO TYPE
-        if (finalSubCategory != null && !finalSubCategory.isEmpty()) {
-            query = query.whereEqualTo("type", finalSubCategory);
+        // Filter by type if specified
+        if (currentType != null && !currentType.isEmpty() && !currentType.equals("SHOW_ALL")) {
+            query = query.whereEqualTo("type", currentType);
         }
 
-        // BƯỚC 3: XỬ LÝ LỌC VÀ SẮP XẾP DỰA TRÊN KEYWORD
-        if (keyword != null && !keyword.isEmpty()) {
-            String endKeyword = keyword + "";
+        // Execute query
+        query.limit(500).get().addOnCompleteListener(task -> {
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
 
-            // Khi có KEYWORD, ta buộc phải sắp xếp theo 'name' để tìm kiếm tiền tố
-            // CẦN INDEX TỔNG HỢP: (category, type, name) hoặc (category, name)
-            query = query.orderBy("name")
-                    .whereGreaterThanOrEqualTo("name", keyword)
-                    .whereLessThan("name", endKeyword);
+            if (task.isSuccessful()) {
+                List<Product> allProducts = new ArrayList<>();
 
-        } else {
-            // TRƯỜNG HỢP MẶC ĐỊNH (SHOW ALL / LỌC TYPE):
-            query = query.orderBy("basePrice", Query.Direction.ASCENDING);
-        }
-
-        query.limit(50)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        Log.d(TAG, "--- KẾT THÚC TRUY VẤN SẢN PHẨM ---");
-                        if (task.isSuccessful()) {
-                            productList.clear();
-                            int count = 0;
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                try {
-                                    Product product = document.toObject(Product.class);
-                                    productList.add(product);
-                                    count++;
-
-                                    Log.d(TAG, "DOC FOUND: " + document.getId() + ", CATE: " + product.getCategory() + ", TYPE: " + product.getType());
-
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Lỗi khi chuyển đổi Document ID: " + document.getId(), e);
-                                    Toast.makeText(ProductListActivity.this, "Lỗi định dạng dữ liệu (Debug log)", Toast.LENGTH_SHORT).show();
-                                }
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    try {
+                        Product product = document.toObject(Product.class);
+                        if (product != null) {
+                            // Apply filters
+                            if (applyFilters(product)) {
+                                allProducts.add(product);
                             }
-
-                            adapter.notifyDataSetChanged();
-
-                            if (count == 0) {
-                                Log.w(TAG, "RỖNG: Không tìm thấy sản phẩm nào khớp với điều kiện lọc.");
-                                Toast.makeText(ProductListActivity.this,
-                                        "Không tìm thấy sản phẩm nào.",
-                                        Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(ProductListActivity.this,
-                                        "Đã tải thành công " + count + " sản phẩm.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-
-                        } else {
-                            Log.e(TAG, "Lỗi truy vấn Firestore: ", task.getException());
-                            Toast.makeText(ProductListActivity.this,
-                                    "❌ Lỗi tải dữ liệu: " + task.getException().getMessage(),
-                                    Toast.LENGTH_LONG).show();
                         }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing product", e);
                     }
+                }
+
+                // Apply sorting
+                sortProducts(allProducts);
+
+                // Update UI
+                productList = allProducts;
+                if (productAdapter == null) {
+                    productAdapter = new ProductAdapter(allProducts, this);
+                    recyclerView.setAdapter(productAdapter);
+                } else {
+                    productAdapter.updateData(allProducts);
+                }
+
+                if (allProducts.isEmpty()) {
+                    Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
+                }
+
+            } else {
+                Log.e(TAG, "Error loading products", task.getException());
+                Toast.makeText(this, "Lỗi tải sản phẩm", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Apply all filters to a product
+     */
+    private boolean applyFilters(Product product) {
+        if (product == null) {
+            return false;
+        }
+
+        // Price filter
+        double price = product.basePrice > 0 ? product.basePrice : 0;
+        if (price < minPrice || price > maxPrice) {
+            return false;
+        }
+
+        // Rating filter
+        double rating = product.averageRating != null ? product.averageRating : 0;
+        if (rating < minRating) {
+            return false;
+        }
+
+        // Search keyword filter
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            String sanitizedKeyword = SearchValidator.sanitizeKeyword(searchKeyword).toLowerCase();
+            String productName = product.name != null ? product.name.toLowerCase() : "";
+            String productDesc = product.desc != null ? product.desc.toLowerCase() : "";
+
+            if (!productName.contains(sanitizedKeyword) && !productDesc.contains(sanitizedKeyword)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Sort products based on selected sort option
+     */
+    private void sortProducts(List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            return;
+        }
+
+        switch (sortBy) {
+            case "PRICE_LOW_TO_HIGH":
+                Collections.sort(products, (p1, p2) -> {
+                    double price1 = p1.basePrice > 0 ? p1.basePrice : 0;
+                    double price2 = p2.basePrice > 0 ? p2.basePrice : 0;
+                    return Double.compare(price1, price2);
                 });
+                break;
+
+            case "PRICE_HIGH_TO_LOW":
+                Collections.sort(products, (p1, p2) -> {
+                    double price1 = p1.basePrice > 0 ? p1.basePrice : 0;
+                    double price2 = p2.basePrice > 0 ? p2.basePrice : 0;
+                    return Double.compare(price2, price1);
+                });
+                break;
+
+            case "RATING":
+                Collections.sort(products, (p1, p2) -> {
+                    double rating1 = p1.averageRating != null ? p1.averageRating : 0;
+                    double rating2 = p2.averageRating != null ? p2.averageRating : 0;
+                    return Double.compare(rating2, rating1);
+                });
+                break;
+
+            case "POPULAR":
+                Collections.sort(products, (p1, p2) -> {
+                    long views1 = p1.totalReviews != null ? p1.totalReviews : 0;
+                    long views2 = p2.totalReviews != null ? p2.totalReviews : 0;
+                    return Long.compare(views2, views1);
+                });
+                break;
+
+            case "NEWEST":
+            default:
+                Collections.sort(products, (p1, p2) -> {
+                    long timestamp1 = p1.updatedAt != null ? p1.updatedAt : 0;
+                    long timestamp2 = p2.updatedAt != null ? p2.updatedAt : 0;
+                    return Long.compare(timestamp2, timestamp1);
+                });
+                break;
+        }
     }
 }

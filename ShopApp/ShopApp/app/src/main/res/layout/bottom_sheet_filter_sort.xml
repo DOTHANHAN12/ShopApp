@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@android:color/white">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bộ Lọc &amp; Sắp Xếp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Scroll content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- PRICE FILTER SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#F5F5F5"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lọc Theo Giá"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- Min Price -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Giá Tối Thiểu:"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"/>
+
+                        <TextView
+                            android:id="@+id/txt_min_price"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0 đ"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#E74C3C"
+                            android:gravity="end"/>
+
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/seekbar_min_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="5000000"
+                        android:progress="0"/>
+
+                </LinearLayout>
+
+                <!-- Max Price -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Giá Tối Đa:"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"/>
+
+                        <TextView
+                            android:id="@+id/txt_max_price"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="10M đ"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#E74C3C"
+                            android:gravity="end"/>
+
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/seekbar_max_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="10000000"
+                        android:progress="10000000"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- RATING FILTER SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#F5F5F5"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lọc Theo Đánh Giá"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radio_group_rating"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radio_all_ratings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tất Cả Đánh Giá"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_5star"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐⭐⭐⭐⭐ Đánh Giá 5 Sao"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_4plus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐⭐⭐⭐+ Đánh Giá 4 Sao Trở Lên"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_3plus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐⭐⭐+ Đánh Giá 3 Sao Trở Lên"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_2plus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐⭐+ Đánh Giá 2 Sao Trở Lên"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_1plus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐+ Đánh Giá 1 Sao Trở Lên"/>
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <!-- SORT SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#F5F5F5"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sắp Xếp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radio_group_sort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radio_newest"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mới Nhất"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_popular"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Phổ Biến Nhất"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Đánh Giá Cao Nhất"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_price_low"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giá Thấp Đến Cao"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_price_high"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giá Cao Đến Thấp"/>
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:spacing="8dp">
+
+        <Button
+            android:id="@+id/btn_reset_filters"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Đặt Lại"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_outline_style"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btn_apply_filters"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Áp Dụng"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_dark_style"
+            android:textColor="@android:color/black"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

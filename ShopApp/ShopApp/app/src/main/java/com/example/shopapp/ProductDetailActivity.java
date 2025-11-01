@@ -537,6 +537,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
     private void loadReviews(String productId) {
         db.collection("products").document(productId).collection("reviews")
+                .whereEqualTo("status", "APPROVED")
                 .limit(3) // Giới hạn ở 3 bài đánh giá gần nhất
                 .get()
                 .addOnCompleteListener(task -> {

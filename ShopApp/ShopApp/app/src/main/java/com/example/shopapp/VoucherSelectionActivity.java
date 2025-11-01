@@ -84,40 +84,30 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
             Log.d(TAG, "Activity khởi tạo thành công.");
 
         } catch (Exception e) {
-            // Ghi lỗi chi tiết ra màn hình bằng Toast
             String errorMessage = "LỖI CRASH! Nguyên nhân: " + (e.getMessage() != null ? e.getMessage() : "Lỗi không xác định");
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-
-            // Vẫn ghi log chi tiết cho Logcat
             Log.e(TAG, "LỖI CRASH KHỞI TẠO VOUCHER ACTIVITY: " + errorMessage, e);
-
-            // Ném lỗi để đảm bảo Logcat hiển thị Stack Trace đầy đủ
             throw new RuntimeException("Voucher Activity failed to start: " + e.getMessage());
         }
     }
 
     private void mapViews() {
         try {
-            // Header
             ImageView imgBack = findViewById(R.id.img_back_voucher);
             imgBack.setOnClickListener(v -> finish());
 
-            // Input Voucher Manual
             editVoucherCodeInput = findViewById(R.id.edit_voucher_code_input);
             btnApplyManualVoucher = findViewById(R.id.btn_apply_manual_voucher);
             btnApplyManualVoucher.setOnClickListener(v -> handleApplyManualVoucher());
 
-            // Headers cho các phần RecyclerView
             textShippingVoucherHeader = findViewById(R.id.text_shipping_voucher_header);
             textAvailableVoucherHeader = findViewById(R.id.text_available_voucher_header);
             textUnavailableVoucherHeader = findViewById(R.id.text_unavailable_voucher_header);
 
-            // RecyclerViews
             recyclerShippingVouchers = findViewById(R.id.recycler_shipping_vouchers);
             recyclerAvailableVouchers = findViewById(R.id.recycler_available_vouchers);
             recyclerUnavailableVouchers = findViewById(R.id.recycler_unavailable_vouchers);
 
-            // Footer
             textVoucherSelectedSummary = findViewById(R.id.text_voucher_selected_summary);
             textVoucherActionMessage = findViewById(R.id.text_voucher_action_message);
             btnConfirmVoucherSelection = findViewById(R.id.btn_confirm_voucher_selection);
@@ -125,7 +115,6 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
 
         } catch (Exception e) {
             Log.e(TAG, "LỖI FINDVIEWBYID: Thiếu ID trong activity_voucher_selection.xml", e);
-            // Quan trọng: Bắt lỗi và Ném lại để hiển thị Stack Trace chi tiết nhất
             throw new RuntimeException("UI Initialization Failed: " + e.getMessage());
         }
     }
@@ -148,11 +137,10 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
 
     private void loadVouchers() {
         Log.d(TAG, "Bắt đầu tải vouchers từ Firestore.");
-        // Logic tải vouchers giữ nguyên
+
         db.collection("vouchers")
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    // ... (Logic phân loại voucher)
                     shippingVoucherList.clear();
                     availableVoucherList.clear();
                     unavailableVoucherList.clear();
@@ -163,10 +151,12 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
                         Voucher voucher = document.toObject(Voucher.class);
                         voucher.setDocumentId(document.getId());
 
-                        if (VoucherType.PUBLIC.getValue().equals(voucher.getVoucherTypeString())) {
+                        // ✅ KIỂM TRA LOẠI VOUCHER: PUBLIC hoặc HIDDEN
+                        String voucherType = voucher.getVoucherTypeString(); // type: "PUBLIC", "HIDDEN", "USER_SPECIFIC"
 
-                            boolean isValidTime = voucher.getStartDate() != null && voucher.getEndDate() != null &&
-                                    !voucher.getStartDate().after(now) && !voucher.getEndDate().before(now);
+                        if ("PUBLIC".equals(voucherType)) {
+                            // Voucher công khai
+                            boolean isValidTime = isValidTime(voucher, now);
                             boolean isNotUsedUp = voucher.getTimesUsed() < voucher.getMaxUsageLimit();
 
                             if (isValidTime && isNotUsedUp) {
@@ -174,17 +164,26 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
                             } else {
                                 unavailableVoucherList.add(voucher);
                             }
+                        } else if ("HIDDEN".equals(voucherType)) {
+                            // Voucher ẩn (chỉ hiển thị khi nhập mã)
+                            // Không thêm vào danh sách công khai
+                            Log.d(TAG, "Voucher ẩn: " + voucher.getCode());
+                        } else if ("USER_SPECIFIC".equals(voucherType)) {
+                            // Voucher riêng từng user
+                            // Bỏ qua khi hiển thị công khai
+                            Log.d(TAG, "Voucher user_specific: " + voucher.getCode());
                         }
                     }
 
                     availableVoucherAdapter.notifyDataSetChanged();
                     unavailableVoucherAdapter.notifyDataSetChanged();
+                    shippingVoucherAdapter.notifyDataSetChanged();
 
                     textShippingVoucherHeader.setVisibility(shippingVoucherList.isEmpty() ? View.GONE : View.VISIBLE);
                     textAvailableVoucherHeader.setVisibility(availableVoucherList.isEmpty() ? View.GONE : View.VISIBLE);
                     textUnavailableVoucherHeader.setVisibility(unavailableVoucherList.isEmpty() ? View.GONE : View.VISIBLE);
-                    Log.d(TAG, "Tải vouchers thành công: " + availableVoucherList.size() + " khả dụng.");
 
+                    Log.d(TAG, "Tải vouchers thành công: " + availableVoucherList.size() + " khả dụng.");
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "LỖI FIRESTORE: Không thể tải danh sách voucher.", e);
@@ -192,14 +191,28 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
                 });
     }
 
+    // ✅ HÀM KIỂM TRA THỜI GIAN HỢPLỆ
+    private boolean isValidTime(Voucher voucher, Date now) {
+        if (voucher.getStartDate() == null || voucher.getEndDate() == null) {
+            return false;
+        }
+
+        boolean isStarted = !voucher.getStartDate().after(now);
+        boolean isNotEnded = !voucher.getEndDate().before(now);
+
+        return isStarted && isNotEnded;
+    }
+
     private void handleApplyManualVoucher() {
-        final String inputCode = editVoucherCodeInput.getText().toString().trim();
+        final String inputCode = editVoucherCodeInput.getText().toString().trim().toUpperCase();
         Log.d(TAG, "Mã thủ công nhập vào: " + inputCode);
+
         if (inputCode.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập mã voucher.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // ✅ TÌM VOUCHER BẰNG MÃ
         db.collection("vouchers")
                 .whereEqualTo("code", inputCode)
                 .limit(1)
@@ -207,16 +220,47 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
                         Voucher voucher = querySnapshot.getDocuments().get(0).toObject(Voucher.class);
+                        voucher.setDocumentId(querySnapshot.getDocuments().get(0).getId());
 
-                        if (voucher.getVoucherType().equals(VoucherType.HIDDEN) || voucher.getVoucherType().equals(VoucherType.PUBLIC)) {
-                            // Giả định logic kiểm tra thời gian/lượt dùng đã được thực hiện
-                            // NẾU HỢP LỆ:
+                        // ✅ KIỂM TRA LOẠI VOUCHER VÀ ĐIỀU KIỆN
+                        String voucherType = voucher.getVoucherTypeString();
+                        Date now = new Date();
+
+                        // Chỉ cho phép PUBLIC hoặc HIDDEN
+                        if ("PUBLIC".equals(voucherType) || "HIDDEN".equals(voucherType)) {
+
+                            // Kiểm tra thời gian
+                            if (!isValidTime(voucher, now)) {
+                                Toast.makeText(this, "Mã voucher đã hết hạn.", Toast.LENGTH_SHORT).show();
+                                selectedVoucher = null;
+                                return;
+                            }
+
+                            // Kiểm tra lượt dùng
+                            if (voucher.getTimesUsed() >= voucher.getMaxUsageLimit()) {
+                                Toast.makeText(this, "Mã voucher đã hết lượt sử dụng.", Toast.LENGTH_SHORT).show();
+                                selectedVoucher = null;
+                                return;
+                            }
+
+                            // Kiểm tra giá trị đơn hàng tối thiểu
+                            if (currentCartSubtotal < voucher.getMinOrderValue()) {
+                                Toast.makeText(this,
+                                        "Đơn hàng chưa đạt giá trị tối thiểu " +
+                                                String.format(Locale.getDefault(), "%,.0f₫", voucher.getMinOrderValue()),
+                                        Toast.LENGTH_LONG).show();
+                                selectedVoucher = null;
+                                return;
+                            }
+
+                            // ✅ TẤT CẢ ĐIỀU KIỆN HỢP LỆ
                             selectedVoucher = voucher;
                             updateFooterUI();
-                            Toast.makeText(this, "Đã áp dụng mã " + inputCode, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "✅ Đã áp dụng mã: " + inputCode, Toast.LENGTH_SHORT).show();
                             editVoucherCodeInput.setText("");
+
                         } else {
-                            Toast.makeText(this, "Mã voucher không phải loại nhập tay hợp lệ.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Mã voucher không hợp lệ.", Toast.LENGTH_LONG).show();
                             selectedVoucher = null;
                         }
                     } else {
@@ -247,13 +291,17 @@ public class VoucherSelectionActivity extends AppCompatActivity implements Vouch
             if (currentCartSubtotal >= voucher.getMinOrderValue()) {
                 selectedVoucher = voucher;
             } else {
-                Toast.makeText(this, "Đơn hàng chưa đạt giá trị tối thiểu " + String.format(Locale.getDefault(), "%,.0f₫", voucher.getMinOrderValue()), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Đơn hàng chưa đạt giá trị tối thiểu " +
+                                String.format(Locale.getDefault(), "%,.0f₫", voucher.getMinOrderValue()),
+                        Toast.LENGTH_LONG).show();
                 selectedVoucher = null;
             }
         }
 
+        // ✅ CẬP NHẬT TẤT CẢ ADAPTER
         availableVoucherAdapter.setSelectedVoucher(selectedVoucher);
         shippingVoucherAdapter.setSelectedVoucher(selectedVoucher);
+        unavailableVoucherAdapter.setSelectedVoucher(selectedVoucher);
 
         updateFooterUI();
     }

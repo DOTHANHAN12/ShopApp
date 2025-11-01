@@ -1,7 +1,8 @@
 package com.example.shopapp;
 
-import android.content.Context; // <--- THÊM IMPORT NÀY
+import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,18 +17,18 @@ import java.util.Locale;
 
 public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.SubCategoryViewHolder> {
 
+    private static final String TAG = "SubCategoryAdapter"; // Tag for logging
+
     private final List<SubCategory> subCategoryList;
     private final String currentCategory;
-    private final Context context; // KHAI BÁO CONTEXT
+    private final Context context;
 
-    // Lấy giá trị SHOW_ALL_TYPE từ Model
     private static final String SHOW_ALL_TYPE = SubCategory.SHOW_ALL_TYPE;
 
-    // SỬA LỖI: Constructor phải nhận Context
     public SubCategoryAdapter(List<SubCategory> subCategoryList, String currentCategory, Context context) {
         this.subCategoryList = subCategoryList;
         this.currentCategory = currentCategory;
-        this.context = context; // Gán Context
+        this.context = context;
     }
 
     @NonNull
@@ -39,33 +40,44 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull SubCategoryViewHolder holder, int position) {
-        SubCategory subCategory = subCategoryList.get(position);
+        try {
+            SubCategory subCategory = subCategoryList.get(position);
 
-        holder.nameTextView.setText(subCategory.name);
+            Log.d(TAG, "Binding position: " + position + ", Name: " + subCategory.name);
 
-        // Tải ảnh từ URL
-        if (subCategory.imageUrl != null && !subCategory.imageUrl.isEmpty()) {
-            Picasso.get()
-                    .load(subCategory.imageUrl)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .into(holder.iconImageView);
-        } else {
-            holder.iconImageView.setImageResource(R.drawable.ic_launcher_foreground);
-        }
-
-        // 3. Xử lý click item
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ProductListActivity.class);
-            // Category đã là chữ hoa từ Activity trước đó (ví dụ: WOMEN)
-            intent.putExtra("CATEGORY_KEY", currentCategory);
-
-            if (!subCategory.name.equals(SHOW_ALL_TYPE)) {
-                // TRUYỀN TYPE SANG CHỮ HOA ĐỂ KHỚP VỚI LOGIC LỌC
-                intent.putExtra("TYPE_KEY", subCategory.name.toUpperCase(Locale.ROOT));
+            if (holder.nameTextView == null) {
+                Log.e(TAG, "FATAL: nameTextView is null at position " + position + ". Check R.id.text_sub_category_name in item_sub_category.xml");
+            } else {
+                holder.nameTextView.setText(subCategory.name);
             }
 
-            context.startActivity(intent);
-        });
+            if (holder.iconImageView == null) {
+                Log.e(TAG, "FATAL: iconImageView is null at position " + position + ". Check R.id.img_sub_category in item_sub_category.xml");
+            } else {
+                if (subCategory.imageUrl != null && !subCategory.imageUrl.isEmpty()) {
+                    Picasso.get()
+                            .load(subCategory.imageUrl)
+                            .error(R.drawable.ic_launcher_foreground)
+                            .into(holder.iconImageView);
+                } else {
+                    holder.iconImageView.setImageResource(R.drawable.ic_launcher_foreground);
+                }
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, ProductListActivity.class);
+                intent.putExtra("CATEGORY_KEY", currentCategory);
+
+                if (!subCategory.name.equals(SHOW_ALL_TYPE)) {
+                    intent.putExtra("TYPE_KEY", subCategory.name.toUpperCase(Locale.ROOT));
+                }
+
+                context.startActivity(intent);
+            });
+        } catch (Exception e) {
+            // Catch any unexpected crash and log it
+            Log.e(TAG, "CRASH in onBindViewHolder at position " + position, e);
+        }
     }
 
     @Override
@@ -81,6 +93,14 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
             super(itemView);
             iconImageView = itemView.findViewById(R.id.img_sub_category);
             nameTextView = itemView.findViewById(R.id.text_sub_category_name);
+
+            // Log results of findViewById right away
+            if (iconImageView == null) {
+                Log.e(TAG, "ViewHolder Error: img_sub_category not found in layout!");
+            }
+            if (nameTextView == null) {
+                Log.e(TAG, "ViewHolder Error: text_sub_category_name not found in layout! This will cause a crash.");
+            }
         }
     }
 }

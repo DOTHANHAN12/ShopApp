@@ -64,6 +64,9 @@
     <color name="colorInfo">#4ECDC4</color>
     <color name="shopee_green">#4CAF50</color>
     <color name="red_warning">#FF6B6B</color>
+    <color name="color_status_pending">#FF9800</color>
+    <color name="color_status_completed">#4CAF50</color>
+    <color name="color_status_rejected">#F44336</color>
 
     <!-- Border & Divider Colors -->
     <color name="borderColor">#E0E0E0</color>

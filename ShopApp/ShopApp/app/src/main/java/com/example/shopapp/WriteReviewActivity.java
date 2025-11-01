@@ -134,21 +134,29 @@ public class WriteReviewActivity extends AppCompatActivity {
         db.runTransaction((Transaction.Function<Void>) transaction -> {
             DocumentSnapshot productSnapshot = transaction.get(productRef);
 
-            long totalReviews = productSnapshot.getLong("totalReviews");
-            double averageRating = productSnapshot.getDouble("averageRating");
+            // Only adjust average rating if the review was previously approved
+            if (Review.Status.APPROVED.name().equals(existingReview.getStatus())) {
+                long totalReviews = productSnapshot.getLong("totalReviews");
+                double averageRating = productSnapshot.getDouble("averageRating");
 
-            // Adjust average rating: remove old rating, add new rating
-            double newAverageRating = ((averageRating * totalReviews) - oldRating + newRating) / totalReviews;
+                // If there's only one review, the new average is 0, otherwise remove old rating
+                double newAverageRating = (totalReviews <= 1) ? 0 : ((averageRating * totalReviews) - oldRating) / (totalReviews - 1);
+                long newTotalReviews = totalReviews - 1;
 
-            transaction.update(productRef, "averageRating", newAverageRating);
+                transaction.update(productRef, "averageRating", newAverageRating);
+                transaction.update(productRef, "totalReviews", newTotalReviews);
+            }
+
+            // Update the review
             transaction.update(reviewRef, "rating", newRating);
             transaction.update(reviewRef, "comment", newComment);
             transaction.update(reviewRef, "edited", true);
             transaction.update(reviewRef, "updatedAt", System.currentTimeMillis());
+            transaction.update(reviewRef, "status", Review.Status.PENDING.name()); // Reset status to PENDING
 
             return null;
         }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(WriteReviewActivity.this, "Review updated successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(WriteReviewActivity.this, "Review updated and is pending approval.", Toast.LENGTH_SHORT).show();
             finish();
         }).addOnFailureListener(e -> {
             Log.e(TAG, "Error updating review: ", e);
@@ -215,31 +223,19 @@ public class WriteReviewActivity extends AppCompatActivity {
             return;
         }
 
+        // The constructor already sets the status to PENDING
         Review review = new Review(userId, userName, rating, comment, System.currentTimeMillis(), productId, orderId);
 
-        DocumentReference productRef = db.collection("products").document(productId);
-        DocumentReference reviewRef = productRef.collection("reviews").document();
-
-        db.runTransaction((Transaction.Function<Void>) transaction -> {
-            DocumentSnapshot productSnapshot = transaction.get(productRef);
-
-            long totalReviews = productSnapshot.contains("totalReviews") ? productSnapshot.getLong("totalReviews") : 0;
-            double averageRating = productSnapshot.contains("averageRating") ? productSnapshot.getDouble("averageRating") : 0.0;
-
-            double newAverageRating = ((averageRating * totalReviews) + rating) / (totalReviews + 1);
-            long newTotalReviews = totalReviews + 1;
-
-            transaction.update(productRef, "averageRating", newAverageRating);
-            transaction.update(productRef, "totalReviews", newTotalReviews);
-            transaction.set(reviewRef, review);
-
-            return null;
-        }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(WriteReviewActivity.this, "Review submitted successfully!", Toast.LENGTH_SHORT).show();
-            finish();
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Error submitting review: ", e);
-            Toast.makeText(WriteReviewActivity.this, "Failed to submit review.", Toast.LENGTH_SHORT).show();
-        });
+        db.collection("products").document(productId)
+                .collection("reviews")
+                .add(review)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(WriteReviewActivity.this, "Review submitted and is pending approval.", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error submitting review: ", e);
+                    Toast.makeText(WriteReviewActivity.this, "Failed to submit review.", Toast.LENGTH_SHORT).show();
+                });
     }
 }

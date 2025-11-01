@@ -11,6 +11,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -76,6 +77,8 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
         private final LinearLayout btnDeleteReview;
         private final LinearLayout layoutEditTime;
         private final TextView textEditTimeRemaining;
+        private final TextView textReviewStatus;
+        private final View statusIndicator;
 
         private boolean isExpanded = false;
 
@@ -96,10 +99,21 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
             btnDeleteReview = itemView.findViewById(R.id.btn_delete_review);
             layoutEditTime = itemView.findViewById(R.id.layout_edit_time);
             textEditTimeRemaining = itemView.findViewById(R.id.text_edit_time_remaining);
+            textReviewStatus = itemView.findViewById(R.id.text_review_status);
+            statusIndicator = itemView.findViewById(R.id.status_indicator);
         }
 
         public void bind(Review review) {
             Context context = itemView.getContext();
+
+            // Set status
+            String status = review.getStatus() != null ? review.getStatus() : Review.Status.PENDING.name();
+            textReviewStatus.setText("Trạng thái: " + getStatusLabel(status));
+            int statusColor = getStatusColor(context, status);
+            textReviewStatus.setTextColor(statusColor);
+            if (statusIndicator != null) {
+                statusIndicator.getBackground().setTint(statusColor);
+            }
 
             // Set rating
             ratingBar.setRating(review.getRating());
@@ -176,6 +190,32 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
                     listener.onDeleteReview(reviewList.get(pos));
                 }
             });
+        }
+
+        private String getStatusLabel(String status) {
+            if (status == null) return "Chờ duyệt";
+            switch (status) {
+                case "APPROVED":
+                    return "Đã phê duyệt";
+                case "REJECTED":
+                    return "Bị từ chối";
+                case "PENDING":
+                default:
+                    return "Chờ duyệt";
+            }
+        }
+
+        private int getStatusColor(Context context, String status) {
+            if (status == null) return ContextCompat.getColor(context, R.color.color_status_pending);
+            switch (status) {
+                case "APPROVED":
+                    return ContextCompat.getColor(context, R.color.color_status_completed);
+                case "REJECTED":
+                    return ContextCompat.getColor(context, R.color.color_status_rejected);
+                case "PENDING":
+                default:
+                    return ContextCompat.getColor(context, R.color.color_status_pending);
+            }
         }
 
         private void loadProductInfo(String productId) {

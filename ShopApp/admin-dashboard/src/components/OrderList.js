@@ -6,27 +6,58 @@ import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format'; 
 import OrderDetailModal from './OrderDetailModal'; 
 
-// Định nghĩa trạng thái cho bộ lọc
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'PAID'];
-const ORDERS_PER_PAGE = 10; 
+const ORDERS_PER_PAGE = 10;
 
-// ----------------------------------------------------------------------
-// THIẾT KẾ STYLES (DARK/MINIMALIST)
-// ----------------------------------------------------------------------
+const statsStyles = {
+    container: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '15px',
+        marginBottom: '30px',
+    },
+    card: {
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        border: '1px solid #2196F3',
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: '0 4px 15px rgba(33, 150, 243, 0.2)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: 'pointer',
+    },
+    cardHover: {
+        transform: 'translateY(-5px)',
+        boxShadow: '0 8px 25px rgba(33, 150, 243, 0.4)',
+    },
+    value: {
+        fontSize: '32px',
+        fontWeight: 'bold',
+        color: '#2196F3',
+        marginBottom: '8px',
+    },
+    label: {
+        fontSize: '13px',
+        color: '#A0A0A0',
+        textTransform: 'uppercase',
+        letterSpacing: '1px',
+    },
+    description: {
+        fontSize: '12px',
+        color: '#888',
+        marginTop: '8px',
+    },
+};
+
 const styles = {
-    // container: { padding: '20px', backgroundColor: '#FFFFFF', minHeight: '80vh' }, 
-    title: { color: '#E0E0E0', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
+    title: { color: '#E0E0E0', borderBottom: '3px solid #2196F3', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' },
     
-    // Tối ưu hóa Table
     table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px', color: '#E0E0E0' },
     th: { backgroundColor: '#C40000', color: '#FFFFFF', padding: '12px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600 },
     td: { padding: '10px 15px', borderBottom: '1px solid #444', verticalAlign: 'middle' },
     
-    // Tối ưu hóa Filter Bar
     filterBar: { display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' },
     filterInput: { padding: '8px 10px', border: '1px solid #555', borderRadius: '4px', backgroundColor: '#333', color: '#E0E0E0' },
     
-    // Status Tags (Logic màu giữ nguyên)
     statusTag: (status) => {
         let color = '#666';
         if (status === 'PAID') color = '#8A2BE2'; 
@@ -64,11 +95,15 @@ const OrderList = () => {
     const [filterEndDate, setFilterEndDate] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [stats, setStats] = useState({
+        total: 0,
+        totalRevenue: 0,
+        averageOrderValue: 0,
+        pending: 0,
+        delivered: 0,
+        cancelled: 0,
+    });
 
-
-    // ----------------------------------------------------------------------
-    // HÀM FETCH DỮ LIỆU CHÍNH (Logic giữ nguyên)
-    // ----------------------------------------------------------------------
     const fetchOrders = async () => {
         setLoading(true);
         try {
@@ -95,6 +130,18 @@ const OrderList = () => {
             ordersList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
             setOrders(ordersList);
+            
+            // Tính stats
+            const totalRevenue = ordersList.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            const statsData = {
+                total: ordersList.length,
+                totalRevenue: totalRevenue,
+                averageOrderValue: ordersList.length > 0 ? totalRevenue / ordersList.length : 0,
+                pending: ordersList.filter(o => o.orderStatus === 'PENDING').length,
+                delivered: ordersList.filter(o => o.orderStatus === 'DELIVERED').length,
+                cancelled: ordersList.filter(o => o.orderStatus === 'CANCELLED').length,
+            };
+            setStats(statsData);
 
         } catch (err) {
             console.error("Lỗi khi tải đơn hàng:", err);
@@ -107,9 +154,6 @@ const OrderList = () => {
         fetchOrders();
     }, []);
 
-    // ----------------------------------------------------------------------
-    // HÀM TÍNH TOÁN DỮ LIỆU ĐÃ LỌC VÀ PHÂN TRANG (Logic giữ nguyên)
-    // ----------------------------------------------------------------------
     const filteredAndPaginatedOrders = useMemo(() => {
         let currentOrders = orders;
 
@@ -141,15 +185,12 @@ const OrderList = () => {
         if (filterStartDate || filterEndDate) {
             currentOrders = currentOrders.filter(o => {
                 const orderTimestamp = Number(o.createdAt);
-                
                 const isAfterStart = startTimestamp === 0 || orderTimestamp >= startTimestamp;
-                const isBeforeEnd = endTimestamp === Infinity || orderTimestamp < endTimestamp + (24 * 60 * 60 * 1000); 
-
+                const isBeforeEnd = endTimestamp === Infinity || orderTimestamp < endTimestamp + (24 * 60 * 60 * 1000);
                 return isAfterStart && isBeforeEnd;
             });
         }
         
-        // --- PHÂN TRANG ---
         const totalItems = currentOrders.length;
         const totalPages = Math.ceil(totalItems / ORDERS_PER_PAGE);
 
@@ -169,22 +210,42 @@ const OrderList = () => {
         setCurrentPage(1);
     }, [searchTerm, filterStatus, filterMinPrice, filterMaxPrice, filterStartDate, filterEndDate]);
 
-
-    // ----------------------------------------------------------------------
-    // RENDER
-    // ----------------------------------------------------------------------
-
-    if (loading) return <div>Đang tải dữ liệu đơn hàng...</div>;
+    if (loading) return <div style={{ color: '#E0E0E0', padding: '20px' }}>Đang tải dữ liệu đơn hàng...</div>;
     
     const { paginatedOrders, totalItems, totalPages } = filteredAndPaginatedOrders;
 
     return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>Quản Lý Đơn Hàng ({totalItems} items)</h1>
+        <div style={{ padding: '20px', backgroundColor: '#1A1A1A', minHeight: '100vh', color: '#E0E0E0' }}>
+            <h1 style={styles.title}>🛒 Quản Lý Đơn Hàng</h1>
             
-            {/* Thanh Bộ lọc */}
+            {/* STATS CARDS */}
+            <div style={statsStyles.container}>
+                <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
+                    <div style={statsStyles.value}>{stats.total}</div>
+                    <div style={statsStyles.label}>📊 Tổng Đơn Hàng</div>
+                    <div style={statsStyles.description}>{totalItems} hiển thị</div>
+                </div>
+                
+                <div style={{...statsStyles.card, border: '1px solid #FFD700', boxShadow: '0 4px 15px rgba(255, 215, 0, 0.2)', ...statsStyles.cardHover}}>
+                    <div style={{...statsStyles.value, color: '#FFD700'}}>{formatCurrency(stats.totalRevenue)}</div>
+                    <div style={statsStyles.label}>💰 Tổng Doanh Thu</div>
+                    <div style={statsStyles.description}>Across all orders</div>
+                </div>
+                
+                <div style={{...statsStyles.card, border: '1px solid #00BCD4', boxShadow: '0 4px 15px rgba(0, 188, 212, 0.2)', ...statsStyles.cardHover}}>
+                    <div style={{...statsStyles.value, color: '#00BCD4'}}>{formatCurrency(stats.averageOrderValue)}</div>
+                    <div style={statsStyles.label}>📈 Giá Trung Bình</div>
+                    <div style={statsStyles.description}>Per order value</div>
+                </div>
+                
+                <div style={{...statsStyles.card, border: '1px solid #28a745', boxShadow: '0 4px 15px rgba(40, 167, 69, 0.2)', ...statsStyles.cardHover}}>
+                    <div style={{...statsStyles.value, color: '#28a745'}}>{stats.delivered}</div>
+                    <div style={statsStyles.label}>✅ Đã Giao</div>
+                    <div style={statsStyles.description}>{((stats.delivered / stats.total) * 100).toFixed(0)}% tổng số</div>
+                </div>
+            </div>
+
             <div style={styles.filterBar}>
-                {/* 1. Tìm kiếm và Trạng thái */}
                 <input
                     type="text"
                     placeholder="Tìm kiếm ID Đơn hàng / Khách hàng..."
@@ -201,7 +262,6 @@ const OrderList = () => {
                     {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
                 
-                {/* 2. Lọc theo Giá */}
                 <input
                     type="number"
                     placeholder="Giá Min"
@@ -217,11 +277,9 @@ const OrderList = () => {
                     style={{...styles.filterInput, width: '100px'}}
                 />
 
-                {/* 3. Lọc theo Ngày */}
                 <span style={{color: '#E0E0E0'}}>Từ:</span>
                 <input
                     type="date"
-                    title="Ngày Bắt đầu"
                     value={filterStartDate}
                     onChange={(e) => setFilterStartDate(e.target.value)}
                     style={styles.filterInput}
@@ -229,7 +287,6 @@ const OrderList = () => {
                 <span style={{color: '#E0E0E0'}}>Đến:</span>
                 <input
                     type="date"
-                    title="Ngày Kết thúc"
                     value={filterEndDate}
                     onChange={(e) => setFilterEndDate(e.target.value)}
                     style={styles.filterInput}
@@ -258,7 +315,7 @@ const OrderList = () => {
                             </td>
                             <td style={styles.td}>{order.userId || 'Guest'}</td>
                             <td style={styles.td}>
-                                **{formatCurrency(order.totalAmount)}**
+                                <strong>{formatCurrency(order.totalAmount)}</strong>
                             </td>
                             <td style={styles.td}>
                                 {order.shippingName} ({order.shippingCity})
@@ -282,7 +339,6 @@ const OrderList = () => {
                 </tbody>
             </table>
             
-            {/* Phân trang */}
             <div style={styles.pagination}>
                 <span>
                     Hiển thị {paginatedOrders.length} trên {totalItems} đơn hàng
@@ -306,7 +362,6 @@ const OrderList = () => {
                 </div>
             </div>
 
-            {/* Modal chi tiết đơn hàng */}
             {detailModalOrder && (
                 <OrderDetailModal 
                     order={detailModalOrder} 

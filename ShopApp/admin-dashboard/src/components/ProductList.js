@@ -3,11 +3,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs, doc, deleteDoc, writeBatch } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
-// import VariantManagementModal from './VariantManagementModal'; // LOẠI BỎ
-// import ProductDetailModal from './ProductDetailModal'; // LOẠI BỎ
-import ProductManagementModal from './ProductManagementModal'; // THAY THẾ BẰNG MODAL MỚI
+import ProductManagementModal from './ProductManagementModal';
 
-// Hàm tính toán giá khuyến mãi (Logic giữ nguyên)
+// Hàm tính toán giá khuyến mãi
 const calculateFinalPrice = (basePrice, offer) => {
     if (!offer || !offer.isOffer || !basePrice || basePrice <= 0) return basePrice;
     
@@ -27,10 +25,46 @@ const calculateFinalPrice = (basePrice, offer) => {
     return Math.max(0, finalPrice);
 };
 
+// === STATS STYLES ===
+const statsStyles = {
+    container: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '15px',
+        marginBottom: '30px',
+    },
+    card: {
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        border: '1px solid #C40000',
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: '0 4px 15px rgba(196, 0, 0, 0.2)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: 'pointer',
+    },
+    cardHover: {
+        transform: 'translateY(-5px)',
+        boxShadow: '0 8px 25px rgba(196, 0, 0, 0.4)',
+    },
+    value: {
+        fontSize: '32px',
+        fontWeight: 'bold',
+        color: '#C40000',
+        marginBottom: '8px',
+    },
+    label: {
+        fontSize: '13px',
+        color: '#A0A0A0',
+        textTransform: 'uppercase',
+        letterSpacing: '1px',
+    },
+    description: {
+        fontSize: '12px',
+        color: '#888',
+        marginTop: '8px',
+    },
+};
 
-// ----------------------------------------------------------------------
-// THIẾT KẾ STYLES (DARK/MINIMALIST)
-// ----------------------------------------------------------------------
 const styles = {
     title: { color: '#E0E0E0', borderBottom: '3px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontWeight: 300, fontSize: '28px' }, 
     table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px', color: '#E0E0E0' },
@@ -59,21 +93,27 @@ const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [stats, setStats] = useState({
+        total: 0,
+        active: 0,
+        draft: 0,
+        archived: 0,
+        withOffer: 0,
+        totalRevenue: 0,
+        averagePrice: 0,
+    });
 
-    // const [variantModalProduct, setVariantModalProduct] = useState(null); // LOẠI BỎ
-    const [managementModalProduct, setManagementModalProduct] = useState(null); // MODAL GỘP
-
+    const [managementModalProduct, setManagementModalProduct] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [filterOffer, setFilterOffer] = useState(false);
 
     const availableStatuses = ['All', 'Active', 'Draft', 'Archived'];
 
-    // --- HÀM TỔNG QUÁT XÓA TẤT CẢ THÔNG TIN KHUYẾN MÃI (Giữ nguyên) ---
     const clearAllOffers = async () => {
         const BATCH_SIZE = 400;
         const productsCollectionRef = collection(db, "products");
-        let confirm = window.confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ thông tin khuyến mãi (Offer) khỏi database không? Thao tác này không thể hoàn tác!");
+        let confirm = window.confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ thông tin khuyến mãi (Offer) khỏi database không?");
         if (!confirm) return;
 
         try {
@@ -85,14 +125,11 @@ const ProductList = () => {
 
             productSnapshot.docs.forEach((productDoc) => {
                 const productRef = doc(db, 'products', productDoc.id);
-                
-                const updateData = {
+                batch.update(productRef, {
                     isOffer: false,
                     offer: null, 
                     updatedAt: Date.now()
-                };
-                
-                batch.update(productRef, updateData);
+                });
                 count++;
 
                 if (count % BATCH_SIZE === 0) {
@@ -111,12 +148,10 @@ const ProductList = () => {
 
         } catch (err) {
             console.error("LỖI LỚN khi xóa Offer hàng loạt:", err);
-            alert(`LỖI: Không thể xóa thông tin Offer. Kiểm tra console và Firestore Rules.`);
+            alert(`LỖI: Không thể xóa thông tin Offer.`);
             return 0;
         }
     };
-    // ----------------------------------------------------------------------
-
 
     const fetchProducts = async () => {
         try {
@@ -146,10 +181,22 @@ const ProductList = () => {
             });
 
             setProducts(productsList);
+            
+            // Tính stats
+            const statsData = {
+                total: productsList.length,
+                active: productsList.filter(p => p.status === 'Active').length,
+                draft: productsList.filter(p => p.status === 'Draft').length,
+                archived: productsList.filter(p => p.status === 'Archived').length,
+                withOffer: productsList.filter(p => p.isOffer === true).length,
+                totalRevenue: productsList.reduce((sum, p) => sum + (p.finalPrice * (p.totalStock || 0)), 0),
+                averagePrice: productsList.length > 0 ? (productsList.reduce((sum, p) => sum + p.basePrice, 0) / productsList.length) : 0,
+            };
+            setStats(statsData);
 
         } catch (err) {
             console.error("Lỗi khi tải sản phẩm:", err);
-            setError("Không thể tải dữ liệu sản phẩm. Kiểm tra quy tắc Firestore.");
+            setError("Không thể tải dữ liệu sản phẩm.");
         } finally {
             setLoading(false);
         }
@@ -181,14 +228,14 @@ const ProductList = () => {
     }, [products, searchTerm, filterStatus, filterOffer]);
 
     const handleDelete = async (productId) => {
-        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm ID: ${productId}? Thao tác này không thể hoàn tác.`)) {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm ID: ${productId}?`)) {
             try {
                 await deleteDoc(doc(db, 'products', productId));
                 setProducts(products.filter(p => p.id !== productId));
                 alert("Đã xóa sản phẩm thành công!");
             } catch (err) {
                 console.error("Lỗi khi xóa:", err);
-                alert("LỖI: Không thể xóa sản phẩm. Kiểm tra quyền ghi/xóa.");
+                alert("LỖI: Không thể xóa sản phẩm.");
             }
         }
     };
@@ -208,19 +255,45 @@ const ProductList = () => {
         });
     };
 
-
-    if (loading) return <div>Đang tải dữ liệu...</div>;
-    if (error) return <div style={{ color: styles.deleteButton.backgroundColor }}>LỖI: {error}</div>;
+    if (loading) return <div style={{ color: '#E0E0E0', padding: '20px' }}>Đang tải dữ liệu...</div>;
+    if (error) return <div style={{ color: '#FF4D4D', padding: '20px' }}>LỖI: {error}</div>;
 
     return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>Quản Lý Sản Phẩm ({filteredProducts.length} items)</h1>
+        <div style={{ padding: '20px', backgroundColor: '#1A1A1A', minHeight: '100vh', color: '#E0E0E0' }}>
+            <h1 style={styles.title}>📦 Quản Lý Sản Phẩm</h1>
             
+            {/* STATS CARDS */}
+            <div style={statsStyles.container}>
+                <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
+                    <div style={statsStyles.value}>{stats.total}</div>
+                    <div style={statsStyles.label}>📊 Tổng Sản Phẩm</div>
+                    <div style={statsStyles.description}>{filteredProducts.length} hiển thị</div>
+                </div>
+                
+                <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
+                    <div style={statsStyles.value}>{stats.active}</div>
+                    <div style={statsStyles.label}>✅ Hoạt Động</div>
+                    <div style={statsStyles.description}>{((stats.active / stats.total) * 100).toFixed(0)}% tổng số</div>
+                </div>
+                
+                <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
+                    <div style={statsStyles.value}>{stats.withOffer}</div>
+                    <div style={statsStyles.label}>🎁 Đang Khuyến Mãi</div>
+                    <div style={statsStyles.description}>{((stats.withOffer / stats.total) * 100).toFixed(0)}% có offer</div>
+                </div>
+                
+                <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
+                    <div style={statsStyles.value}>{formatCurrency(stats.averagePrice)}</div>
+                    <div style={statsStyles.label}>💰 Giá Trung Bình</div>
+                    <div style={statsStyles.description}>Across all products</div>
+                </div>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <button 
                     onClick={clearAllOffers} 
                     style={styles.adminButton}
-                    title="Xóa toàn bộ thông tin khuyến mãi (isOffer=false, offer=null)"
+                    title="Xóa toàn bộ thông tin khuyến mãi"
                 >
                     ADMIN: CLEAR ALL OFFERS
                 </button>
@@ -285,7 +358,7 @@ const ProductList = () => {
                                 />
                             </td>
                             <td style={styles.td}>
-                                **{product.name || 'Sản phẩm không tên'}**
+                                <strong>{product.name || 'Sản phẩm không tên'}</strong>
                                 <br/><small style={{color: '#888'}}>ID: {product.id}</small>
                             </td>
                             <td style={styles.td}>
@@ -320,7 +393,7 @@ const ProductList = () => {
                                     style={styles.actionButton}
                                     onClick={() => handleOpenManagementModal(product)}
                                 >
-                                    Sửa Chi Tiết & Variants
+                                    Sửa Chi Tiết
                                 </button>
 
                                 <button
@@ -335,7 +408,6 @@ const ProductList = () => {
                 </tbody>
             </table>
 
-            {/* Sử dụng Modal gộp */}
             {managementModalProduct && (
                 <ProductManagementModal
                     product={managementModalProduct}

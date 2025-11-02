@@ -9,6 +9,7 @@ import UserList from './components/UserList';
 import NotificationManager from './components/NotificationManager'; 
 import AdminReviewControl from './components/AdminReviewControlFirebase';
 import AdminVoucherManagement from './components/AdminVoucherManagement';
+import Dashboard from './components/Dashboard';
 
 // --- DARK/MINIMALIST STYLES ---
 const styles = {
@@ -94,6 +95,7 @@ const styles = {
 };
 
 const navItems = [
+    { key: 'dashboard', name: '📦 DASHBOARD', component: Dashboard},
     { key: 'products', name: '📦 SẢN PHẨM', component: ProductList },
     { key: 'orders', name: '📋 ĐƠN HÀNG', component: OrderList },
     { key: 'users', name: '👥 NGƯỜI DÙNG', component: UserList },

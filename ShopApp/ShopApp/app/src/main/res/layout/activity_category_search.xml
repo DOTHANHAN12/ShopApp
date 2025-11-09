@@ -69,6 +69,19 @@
             android:focusable="true"/>
 
             <ImageView
+                android:id="@+id/img_barcode_scanner"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_barcode"
+                android:layout_toStartOf="@id/img_search_filter"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                app:tint="#666"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Quét barcode"/>
+
+            <ImageView
                 android:id="@+id/img_search_filter"
                 android:layout_width="24dp"
                 android:layout_height="24dp"

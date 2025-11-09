@@ -347,8 +347,11 @@ public class ProductListActivity extends AppCompatActivity implements FilterSort
             String sanitizedKeyword = SearchValidator.sanitizeKeyword(searchKeyword).toLowerCase();
             String productName = product.name != null ? product.name.toLowerCase() : "";
             String productDesc = product.desc != null ? product.desc.toLowerCase() : "";
+            String productBarcode = product.barcode != null ? product.barcode.toLowerCase() : "";
 
-            if (!productName.contains(sanitizedKeyword) && !productDesc.contains(sanitizedKeyword)) {
+            if (!productName.contains(sanitizedKeyword) && 
+                !productDesc.contains(sanitizedKeyword) &&
+                !productBarcode.contains(sanitizedKeyword)) {
                 return false;
             }
         }

@@ -3,17 +3,16 @@ import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { doc, updateDoc, collection, setDoc } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig';
 import { uploadFile, deleteFile } from '../firebaseConfig'; 
-import { formatCurrency } from '../utils/format'; // Giả định tồn tại hàm formatCurrency
+import { formatCurrency } from '../utils/format';
+import { generateBarcodeFromId } from '../utils/barcodeUtils';  // ← THÊM IMPORT
 
-// --- CONFIG CỐ ĐỊNH TỪ VARIANT MODAL ---
+// --- CONFIG CỐ ĐỊNH ---
 const FIXED_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const PRESET_COLORS = ['White', 'Black', 'Red', 'Blue', 'Green', 'Yellow', 'Grey', 'Pink', 'Brown', 'Purple']; 
 const statusOptions = ['Active', 'Draft', 'Archived'];
 const offerTypeOptions = ['Percentage', 'FlatAmount'];
 
-// --- HÀM TIỆN ÍCH ID VÀ THỜI GIAN ---
-
-// Hàm tạo ID theo format cũ: ten_san_pham_ngau_nhien
+// --- HÀM TIỆN ÍCH ---
 const createSlugId = (name, firestoreId) => {
     const slug = name
         .toLowerCase()
@@ -43,26 +42,28 @@ const generateNewVariantId = (color, size) => {
     return `SKU-${colorCode}-${size.toUpperCase()}-${timestamp}`;
 };
 
+// --- VALIDATION BARCODE ---
+const validateBarcode = (barcode) => {
+    if (!barcode) return true;
+    return /^\d{12,13}$/.test(barcode);
+};
 
-// --- STYLES GỘP CHUNG (DARK/MINIMALIST) ---
+// --- STYLES ---
 const styles = {
     overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
     modalContent: { backgroundColor: '#1A1A1A', padding: '30px', borderRadius: '8px', width: '90%', maxWidth: '1200px', maxHeight: '90vh', overflowY: 'auto', color: '#E0E0E0' },
     
-    // Form & Input Styles
     sectionHeader: { color: '#C40000', borderBottom: '1px solid #C40000', paddingBottom: '10px', marginBottom: '20px', fontSize: '20px', fontWeight: 'bold', marginTop: '30px' },
     subHeader: { color: '#E0E0E0', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px' },
     formGroup: { marginBottom: '15px' },
     label: { display: 'block', fontWeight: 'bold', marginBottom: '5px' },
     input: { width: '100%', padding: '10px', border: '1px solid #444', borderRadius: '4px', boxSizing: 'border-box', backgroundColor: '#333', color: '#E0E0E0' },
     
-    // Image Upload Styles
     uploadBox: { border: '2px dashed #C40000', padding: '20px', textAlign: 'center', cursor: 'pointer', backgroundColor: '#292929', transition: 'background-color 0.2s' },
     imagePreview: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', marginRight: '10px' },
     imageContainer: { position: 'relative', display: 'inline-block', margin: '5px' },
     removeImageButton: { position: 'absolute', top: '-8px', right: '-8px', background: '#FF4D4D', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer' },
     
-    // Variant Table Styles
     table: { width: '100%', borderCollapse: 'collapse', marginTop: '15px', fontSize: '13px', color: '#E0E0E0' },
     th: { backgroundColor: '#C40000', color: '#FFFFFF', padding: '10px 15px', textAlign: 'left', textTransform: 'uppercase', fontWeight: 600, border: '1px solid #C40000' },
     td: { padding: '8px 15px', borderBottom: '1px solid #444', verticalAlign: 'middle', borderRight: '1px solid #444', backgroundColor: '#292929' },
@@ -79,12 +80,17 @@ const styles = {
         width: '100%'
     }),
     
-    // Button Styles
     saveButton: { backgroundColor: '#C40000', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px', marginRight: '10px' },
     autosuggestList: { border: '1px solid #555', maxHeight: '150px', overflowY: 'auto', position: 'absolute', zIndex: 10, backgroundColor: '#333', width: '200px' },
-    suggestItem: { padding: '8px', cursor: 'pointer', color: '#C40000' }
+    suggestItem: { padding: '8px', cursor: 'pointer', color: '#C40000' },
+    barcodeCode: {
+        backgroundColor: '#333',
+        padding: '3px 6px',
+        borderRadius: '3px',
+        color: '#00FF00',
+        fontFamily: 'monospace'
+    }
 };
-
 
 const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) => {
     const [product, setProduct] = useState(initialProduct);
@@ -94,7 +100,6 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
 
     const fileInputRefs = useRef({}); 
     
-    // Variant States
     const initialVariantsWithKeys = useMemo(() => {
         return (product.variants || []).map((v, index) => ({...v, index}));
     }, [product.variants]);
@@ -104,11 +109,10 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
     const [newColorInput, setNewColorInput] = useState('');
     const [suggestedColors, setSuggestedColors] = useState([]);
 
-
     const isAnyUploading = Object.values(uploading).some(Boolean);
     const isFirebaseStorageUrl = (url) => typeof url === 'string' && url.includes('firebasestorage.googleapis.com');
     
-    // --- LOGIC CHUNG (Giữ nguyên) ---
+    // --- LOGIC CHUNG ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setProduct(prev => ({ 
@@ -125,9 +129,8 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
         setProduct(prev => ({ ...prev, offer: { ...prev.offer, [name]: processedValue } }));
     };
     
-    // --- LOGIC IMAGE UPLOAD (Giữ nguyên) ---
+    // --- LOGIC IMAGE UPLOAD ---
     const handleFileUpload = async (e, fieldName, colorKey = null, oldImageUrl = null) => {
-        // ... (Logic upload giữ nguyên)
         const file = e.target.files[0];
         if (!file || !product.id) return;
         
@@ -189,7 +192,7 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
         fileInput.click();
     };
 
-    // --- LOGIC VARIANT MANAGEMENT (Đã tích hợp) ---
+    // --- LOGIC VARIANT MANAGEMENT ---
     const groupedVariants = useMemo(() => {
         const groups = {};
         const existingMap = new Map();
@@ -300,16 +303,22 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
         setSuggestedColors([]);
     };
 
-    // --- LOGIC LƯU (Gộp) ---
+    // --- LOGIC LƯU - TỰ ĐỘNG TẠO BARCODE ---
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
         if (isAnyUploading) { alert("Vui lòng đợi tải ảnh hoàn tất."); setSaving(false); return; }
         if (!product.name) { alert("Vui lòng nhập Tên Sản Phẩm."); setSaving(false); return; }
 
+        // 🔧 VALIDATION BARCODE
+        if (product.barcode && !validateBarcode(product.barcode)) {
+            alert("❌ Barcode phải là 12 hoặc 13 chữ số! (VD: 8901002108560)");
+            setSaving(false);
+            return;
+        }
+
         const offerDataToSave = product.isOffer ? { ...product.offer, startDate: product.offer.startDate || null, endDate: product.offer.endDate || null, } : null;
         
-        // Chuẩn bị variants để lưu: Lọc bỏ cờ UI và các biến thể Inactive/0 quantity (tùy theo logic backend)
         const finalVariants = variants.map(v => {
             const cleaned = { ...v };
             if (typeof cleaned.variantId === 'string' && cleaned.variantId.startsWith('new_temp_')) { delete cleaned.variantId; }
@@ -325,29 +334,46 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
                 // UPDATE
                 const docRef = doc(db, 'products', product.id);
                 await updateDoc(docRef, {
-                    ...product, basePrice: parseFloat(product.basePrice || 0), isOffer: product.isOffer || false,
-                    isFeatured: product.isFeatured || false, offer: offerDataToSave, updatedAt: Date.now(),
-                    variants: finalVariants // LƯU CẢ VARIANT VÀO ĐÂY
+                    ...product, 
+                    basePrice: parseFloat(product.basePrice || 0), 
+                    barcode: product.barcode || null,  // 🔧 LƯU BARCODE
+                    isOffer: product.isOffer || false,
+                    isFeatured: product.isFeatured || false, 
+                    offer: offerDataToSave, 
+                    updatedAt: Date.now(),
+                    variants: finalVariants
                 });
-                alert("Cập nhật thành công!");
+                alert("✅ Cập nhật thành công!");
             } else {
-                // TẠO MỚI (Sử dụng setDoc với Custom ID)
+                // TẠO MỚI - TỰ ĐỘNG GENERATE BARCODE
                 const productsCollectionRef = collection(db, 'products');
                 const newDocRef = doc(productsCollectionRef); 
                 const finalCustomId = createSlugId(product.name, newDocRef.id);
                 const finalDocRef = doc(db, 'products', finalCustomId);
                 currentProductId = finalCustomId;
 
+                // 🆕 TỰ ĐỘNG GENERATE BARCODE NẾU CHƯA CÓ
+                let finalBarcode = product.barcode;
+                if (!finalBarcode) {
+                    finalBarcode = generateBarcodeFromId(finalCustomId);
+                    console.log(`🏷️  Auto-generated barcode: ${finalBarcode}`);
+                }
+
                 await setDoc(finalDocRef, {
                     ...product,
                     productId: finalCustomId, 
-                    basePrice: parseFloat(product.basePrice || 0), status: product.status || 'Draft',
-                    isOffer: product.isOffer || false, isFeatured: product.isFeatured || false,
-                    offer: offerDataToSave, createdAt: Date.now(), updatedAt: Date.now(),
+                    basePrice: parseFloat(product.basePrice || 0), 
+                    barcode: finalBarcode,  // 🆕 LƯU BARCODE
+                    status: product.status || 'Draft',
+                    isOffer: product.isOffer || false, 
+                    isFeatured: product.isFeatured || false,
+                    offer: offerDataToSave, 
+                    createdAt: Date.now(), 
+                    updatedAt: Date.now(),
                     variants: finalVariants
                 }); 
-                setProduct(prev => ({ ...prev, id: finalCustomId, productId: finalCustomId, createdAt: Date.now(), updatedAt: Date.now() })); 
-                alert(`Thêm sản phẩm mới thành công! ID: ${finalCustomId}. Bạn có thể tải ảnh ngay bây giờ.`);
+                setProduct(prev => ({ ...prev, id: finalCustomId, productId: finalCustomId, barcode: finalBarcode, createdAt: Date.now(), updatedAt: Date.now() })); 
+                alert(`✅ Thêm sản phẩm mới thành công!\n\nID: ${finalCustomId}\nBarcode: ${finalBarcode}\n\nBạn có thể tải ảnh ngay bây giờ.`);
             }
 
             onSave();
@@ -361,7 +387,7 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
         }
     };
     
-    // --- RENDER CÁC PHẦN (Sections) ---
+    // --- RENDER ---
     const renderImageSection = () => {
         let colorKeys = new Set(Object.keys(product.colorImages || {}));
         (product.variants || []).forEach(v => { if (v.color) colorKeys.add(v.color); });
@@ -399,6 +425,35 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
                             {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
+                </div>
+
+                {/* 🆕 BARCODE INPUT */}
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Barcode (Mã vạch):</label>
+                    {!isEditing && (
+                        <div style={{
+                            backgroundColor: '#292929',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            marginBottom: '8px',
+                            border: '1px solid #444'
+                        }}>
+                            <small style={{color: '#00FF00'}}>
+                                💡 <strong>Tự động generate</strong> khi lưu sản phẩm mới. Bạn có thể để trống hoặc nhập barcode tùy chỉnh.
+                            </small>
+                        </div>
+                    )}
+                    <input 
+                        type="text" 
+                        name="barcode" 
+                        value={product.barcode || ''} 
+                        onChange={handleChange} 
+                        placeholder={isEditing ? "VD: 8901002108560" : "Để trống → Tự động tạo"}
+                        style={styles.input} 
+                    />
+                    <small style={{color: '#888', marginTop: '5px', display: 'block'}}>
+                        💡 Mã EAN-13 (13 chữ số) hoặc UPC-12 (12 chữ số). {!isEditing && "Nếu để trống sẽ tự động generate khi lưu."}
+                    </small>
                 </div>
                 
                 <div style={styles.formGroup}>
@@ -498,6 +553,7 @@ const ProductManagementModal = ({ product: initialProduct, onClose, onSave }) =>
             
             <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #444', borderRadius: '4px', backgroundColor: '#292929' }}>
                 <p>ID Sản Phẩm: <strong style={{color: '#C40000'}}>{product.id || 'Chưa lưu'}</strong></p>
+                <p>Barcode: <code style={styles.barcodeCode}>{product.barcode || 'Sẽ tự động generate khi lưu'}</code></p>
                 <p>Ngày Tạo: {product.createdAt ? new Date(Number(product.createdAt)).toLocaleString() : 'N/A'}</p>
                 <p>Đánh giá TB: {(product.averageRating || 0).toFixed(1)} (Reviews: {product.totalReviews || 0})</p>
             </div>

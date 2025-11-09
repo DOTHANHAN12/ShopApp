@@ -10,6 +10,7 @@ import NotificationManager from './components/NotificationManager';
 import AdminReviewControl from './components/AdminReviewControlFirebase';
 import AdminVoucherManagement from './components/AdminVoucherManagement';
 import Dashboard from './components/Dashboard';
+import BarcodeInsertPanel from './components/BarcodeInsertPanel';
 
 // --- DARK/MINIMALIST STYLES ---
 const styles = {
@@ -102,6 +103,7 @@ const navItems = [
     { key: 'notifications', name: '🔔 THÔNG BÁO', component: NotificationManager },
     { key: 'reviews', name: '🔔 REVIEWS', component: AdminReviewControl },
     { key: 'voucher', name: '🔔 VOUCHER', component: AdminVoucherManagement },
+    { key: 'barcode', name: '🔔 Bar', component: BarcodeInsertPanel  },
 ];
 
 

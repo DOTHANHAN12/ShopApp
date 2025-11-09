@@ -151,6 +151,14 @@ public class CategorySearchActivity extends AppCompatActivity {
         if (imgSearchFilter != null) {
             imgSearchFilter.setOnClickListener(v -> openFilterBottomSheet());
         }
+
+        // Barcode scanner button
+        ImageView imgBarcode = findViewById(R.id.img_barcode_scanner);
+        if (imgBarcode != null) {
+            imgBarcode.setOnClickListener(v -> {
+                startActivity(new Intent(this, BarcodeScannerActivity.class));
+            });
+        }
     }
 
     /**

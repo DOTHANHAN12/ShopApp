@@ -50,6 +50,16 @@
                 app:tint="@android:color/white"
                 tools:ignore="ContentDescription"/>
 
+            <ImageView
+                android:id="@+id/ic_barcode"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="Quét barcode"
+                android:src="@drawable/ic_barcode"
+                app:tint="@android:color/white"
+                tools:ignore="ContentDescription"/>
+
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">

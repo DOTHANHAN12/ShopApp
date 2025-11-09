@@ -87,6 +87,19 @@ const styles = {
     adminButton: { backgroundColor: '#6c757d', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginRight: '15px' },
     ratingStar: { color: '#ffc107', marginRight: '3px' },
     featuredIcon: { color: '#FFD700', fontSize: '16px', marginLeft: '5px' }, 
+    barcodeCode: {
+        backgroundColor: '#333',
+        padding: '4px 8px',
+        borderRadius: '3px',
+        color: '#00FF00',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        letterSpacing: '1px',
+    },
+    barcodeEmpty: {
+        color: '#888',
+        fontStyle: 'italic',
+    }
 };
 
 const ProductList = () => {
@@ -212,7 +225,8 @@ const ProductList = () => {
         if (searchTerm) {
             currentProducts = currentProducts.filter(p =>
                 p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.id?.toLowerCase().includes(searchTerm.toLowerCase())
+                p.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.barcode?.includes(searchTerm)
             );
         }
 
@@ -250,6 +264,7 @@ const ProductList = () => {
             isFeatured: false,
             basePrice: 0,
             status: 'Draft',
+            barcode: '',
             variants: [],
             colorImages: {}
         });
@@ -302,7 +317,7 @@ const ProductList = () => {
             <div style={styles.filterBar}>
                 <input
                     type="text"
-                    placeholder="Tìm kiếm theo Tên hoặc ID..."
+                    placeholder="Tìm kiếm theo Tên, ID hoặc Barcode..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{...styles.filterInput, flexGrow: 1}}
@@ -338,6 +353,7 @@ const ProductList = () => {
                     <tr>
                         <th style={styles.th}>Ảnh</th>
                         <th style={styles.th}>Tên Sản Phẩm</th>
+                        <th style={styles.th}>Barcode</th>
                         <th style={styles.th}>Danh mục/Loại</th>
                         <th style={styles.th}>Giá Bán Lẻ</th>
                         <th style={styles.th}>Tồn kho</th>
@@ -360,6 +376,11 @@ const ProductList = () => {
                             <td style={styles.td}>
                                 <strong>{product.name || 'Sản phẩm không tên'}</strong>
                                 <br/><small style={{color: '#888'}}>ID: {product.id}</small>
+                            </td>
+                            <td style={styles.td}>
+                                <code style={styles.barcodeCode}>
+                                    {product.barcode ? product.barcode : <span style={styles.barcodeEmpty}>-</span>}
+                                </code>
                             </td>
                             <td style={styles.td}>
                                 {product.category || 'N/A'} ({product.type || 'N/A'})

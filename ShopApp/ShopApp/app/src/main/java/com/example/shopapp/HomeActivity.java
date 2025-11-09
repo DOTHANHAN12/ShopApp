@@ -282,6 +282,14 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
         }
+
+        // NÚT BARCODE SCANNER
+        ImageView iconBarcode = findViewById(R.id.ic_barcode);
+        if (iconBarcode != null) {
+            iconBarcode.setOnClickListener(v -> {
+                startActivity(new Intent(this, BarcodeScannerActivity.class));
+            });
+        }
     }
 
     private void updateNotificationBadge() {

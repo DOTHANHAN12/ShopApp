@@ -1,30 +1,25 @@
 import React, { useState, useRef } from 'react'; 
 import { doc, updateDoc, collection, setDoc } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig';
-import { uploadFile, deleteFile } from '../firebaseConfig'; 
+import { uploadFile, deleteFile } from '../firebaseConfig';
+import { generateBarcodeFromId } from '../utils/barcodeUtils';  // ← THÊM IMPORT
 
 // --- HÀM TIỆN ÍCH MỚI: TẠO SLUG ID ---
-// Giúp tạo ra ID có định dạng: ten_san_pham_ngau_nhien12345
 const createSlugId = (name, firestoreId) => {
-    // 1. Chuẩn hóa tên sản phẩm: chuyển sang chữ thường, bỏ dấu, thay khoảng trắng bằng gạch dưới
     const slug = name
         .toLowerCase()
-        .normalize("NFD") // Chuẩn hóa Unicode (tách dấu)
-        .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
-        .replace(/\s/g, '_') // Thay khoảng trắng bằng gạch dưới
-        .replace(/[^a-z0-9_&,-]/g, '') // Giữ lại chữ, số, gạch dưới, &, dấu phẩy/gạch ngang
-        .substring(0, 40); // Giới hạn độ dài
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s/g, '_')
+        .replace(/[^a-z0-9_&,-]/g, '')
+        .substring(0, 40);
 
-    // 2. Lấy 8 ký tự cuối cùng của Firestore ID (để đảm bảo tính ngẫu nhiên)
     const uniqueSuffix = firestoreId.substring(firestoreId.length - 8);
 
-    // 3. Kết hợp
     return `${slug}_${uniqueSuffix}`;
 };
-// --- END HÀM TIỆN ÍCH ---
 
-
-// --- HÀM TIỆN ÍCH THỜI GIAN (Giữ nguyên) ---
+// --- HÀM TIỆN ÍCH THỜI GIAN ---
 const formatTimestampToDateInput = (timestamp) => {
     if (!timestamp || typeof timestamp !== 'number') return '';
     const date = new Date(timestamp); 
@@ -35,8 +30,6 @@ const dateInputToTimestamp = (dateString) => {
     if (!dateString) return null;
     return new Date(dateString).getTime();
 };
-// --- END HÀM TIỆN ÍCH THỜI GIAN ---
-
 
 const modalStyles = {
     overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' },
@@ -107,7 +100,7 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         }));
     };
 
-    // --- LOGIC UPLOAD VÀ IMAGE MANAGEMENT (Giữ nguyên) ---
+    // --- LOGIC UPLOAD VÀ IMAGE MANAGEMENT ---
     const handleFileUpload = async (e, fieldName, colorKey = null, oldImageUrl = null) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -199,21 +192,41 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
         fileInput.click();
     };
 
+    // --- VALIDATION BARCODE ---
+    const validateBarcode = (barcode) => {
+        if (!barcode) return true;
+        return /^\d{12,13}$/.test(barcode);
+    };
+
+    // --- VALIDATION FUNCTION ---
+    const validateBeforeSave = () => {
+        if (!product.name) {
+            alert("Vui lòng nhập Tên Sản Phẩm.");
+            return false;
+        }
+
+        if (product.barcode && !validateBarcode(product.barcode)) {
+            alert("❌ Barcode phải là 12 hoặc 13 chữ số! (VD: 8901002108560)");
+            return false;
+        }
+
+        return true;
+    };
 
     // ----------------------------------------------------------------------
-    // HÀM LƯU DỮ LIỆU (ĐÃ SỬA ĐỊNH DẠNG ID)
+    // HÀM LƯU DỮ LIỆU - TỰ ĐỘNG TẠO BARCODE CHO SẢN PHẨM MỚI
     // ----------------------------------------------------------------------
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
+
         if (isAnyUploading) {
-             alert("Vui lòng đợi quá trình tải ảnh hoàn tất trước khi lưu.");
-             setSaving(false);
-             return;
+            alert("Vui lòng đợi quá trình tải ảnh hoàn tất trước khi lưu.");
+            setSaving(false);
+            return;
         }
-        
-        if (!product.name) {
-            alert("Vui lòng nhập Tên Sản Phẩm.");
+
+        if (!validateBeforeSave()) {
             setSaving(false);
             return;
         }
@@ -233,31 +246,37 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                 const dataToSave = {
                     ...product,
                     basePrice: parseFloat(product.basePrice || 0),
+                    barcode: product.barcode || null,
                     isOffer: product.isOffer || false,
                     isFeatured: product.isFeatured || false,
                     offer: offerDataToSave, 
                     updatedAt: Date.now() 
                 };
                 await updateDoc(docRef, dataToSave);
-                alert("Cập nhật thành công!");
+                alert("✅ Cập nhật thành công!");
             } else {
-                // Trường hợp THÊM MỚI: TẠO ID MỚI THEO FORMAT CŨ
+                // Trường hợp THÊM MỚI: TẠO ID + BARCODE
                 const productsCollectionRef = collection(db, 'products');
-                const newDocRef = doc(productsCollectionRef); // Lấy Document Reference với ID ngẫu nhiên
+                const newDocRef = doc(productsCollectionRef);
                 
-                // 1. TẠO ID CUỐI CÙNG THEO FORMAT CŨ: [SLUG_SẢN_PHẨM]_[8_KÝ_TỰ_RANDOM]
                 const temporaryFirestoreId = newDocRef.id;
                 const finalCustomId = createSlugId(product.name, temporaryFirestoreId);
                 
-                // 2. TẠO REF MỚI BẰNG CUSTOM ID (Nếu ID này quá dài, nó sẽ tự động bị cắt ngắn, nhưng thường ID Firestore hợp lệ)
+                // 🆕 TỰ ĐỘNG GENERATE BARCODE NẾU CHƯA CÓ
+                let finalBarcode = product.barcode;
+                if (!finalBarcode) {
+                    finalBarcode = generateBarcodeFromId(finalCustomId);
+                    console.log(`🏷️  Auto-generated barcode: ${finalBarcode}`);
+                }
+
                 const finalDocRef = doc(db, 'products', finalCustomId);
                 newProductId = finalCustomId;
 
                 const dataToSave = {
                     ...product,
-                    // ĐỒNG BỘ ID: Gán CUSTOM ID cho trường productId bên trong document
                     productId: finalCustomId, 
                     basePrice: parseFloat(product.basePrice || 0),
+                    barcode: finalBarcode,  // 🆕 LƯU BARCODE TỰ ĐỘNG
                     status: product.status || 'Draft',
                     isOffer: product.isOffer || false,
                     isFeatured: product.isFeatured || false,
@@ -266,12 +285,19 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                     updatedAt: Date.now() 
                 };
                 
-                // 3. LƯU VÀO FIRESTORE DÙNG setDoc VỚI CUSTOM ID
-                await setDoc(finalDocRef, dataToSave); 
+                await setDoc(finalDocRef, dataToSave);
                 
-                // 4. Cập nhật State
-                setProduct(prev => ({ ...prev, id: newProductId, productId: newProductId, createdAt: Date.now(), updatedAt: Date.now() })); 
-                alert(`Thêm sản phẩm mới thành công! ID: ${newProductId}. Bạn có thể tải ảnh ngay bây giờ.`);
+                setProduct(prev => ({ 
+                    ...prev, 
+                    id: newProductId, 
+                    productId: newProductId,
+                    barcode: finalBarcode,  // 🆕 UPDATE STATE
+                    createdAt: Date.now(), 
+                    updatedAt: Date.now() 
+                })); 
+
+                // 🆕 ALERT CHO BIẾT BARCODE ĐÃ ĐƯỢC TẠO
+                alert(`✅ Thêm sản phẩm mới thành công!\n\nID: ${newProductId}\nBarcode: ${finalBarcode}\n\nBạn có thể tải ảnh ngay bây giờ.`);
             }
 
             onSave();
@@ -279,13 +305,13 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
 
         } catch (error) {
             console.error("Lỗi khi lưu sản phẩm:", error);
-            alert("LỖI LƯU DỮ LIỆU: Vui lòng kiểm tra console. (ID đã tồn tại?)");
+            alert("❌ LỖI LƯU DỮ LIỆU: Vui lòng kiểm tra console. (ID đã tồn tại?)");
         } finally {
             setSaving(false);
         }
     };
 
-    // --- LOGIC RENDER CÁC TAB (Giữ nguyên) ---
+    // --- LOGIC RENDER CÁC TAB ---
     const renderCoreTab = () => (
         <div>
             <div style={modalStyles.formGroup}>
@@ -308,6 +334,36 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                 <label style={modalStyles.label}>Loại Sản Phẩm:</label>
                 <input type="text" name="type" value={product.type || ''} onChange={handleChange} style={modalStyles.input} />
             </div>
+
+            {/* BARCODE INPUT */}
+            <div style={modalStyles.formGroup}>
+                <label style={modalStyles.label}>Barcode (Mã vạch):</label>
+                {!isEditing && (
+                    <div style={{
+                        backgroundColor: '#292929',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        marginBottom: '8px',
+                        border: '1px solid #444'
+                    }}>
+                        <small style={{color: '#00FF00'}}>
+                            💡 <strong>Tự động generate</strong> khi lưu sản phẩm mới. Bạn có thể để trống hoặc nhập barcode tùy chỉnh.
+                        </small>
+                    </div>
+                )}
+                <input 
+                    type="text" 
+                    name="barcode" 
+                    value={product.barcode || ''} 
+                    onChange={handleChange} 
+                    placeholder={isEditing ? "VD: 8901002108560" : "Để trống → Tự động tạo"}
+                    style={modalStyles.input} 
+                />
+                <small style={{color: '#888', marginTop: '5px', display: 'block'}}>
+                    💡 Mã EAN-13 (13 chữ số) hoặc UPC-12 (12 chữ số). {!isEditing && "Nếu để trống sẽ tự động generate khi lưu."}
+                </small>
+            </div>
+
             <div style={modalStyles.formGroup}>
                 <label style={modalStyles.label}>Trạng thái:</label>
                 <select name="status" value={product.status || 'Draft'} onChange={handleChange} style={modalStyles.input}>
@@ -420,7 +476,6 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                                 ))}
                             </div>
                             
-                            {/* NÚT THÊM ẢNH MỚI */}
                             <div 
                                 style={{ 
                                     ...modalStyles.uploadBox, 
@@ -516,6 +571,18 @@ const ProductDetailModal = ({ product: initialProduct, onClose, onSave }) => {
                 </label>
             </div>
             <p style={{color: '#C40000'}}>ID Sản Phẩm: **{product.id || 'Chưa lưu'}**</p>
+            <p>
+                Barcode:{' '}
+                <code style={{
+                    backgroundColor: '#333',
+                    padding: '3px 6px',
+                    borderRadius: '3px',
+                    color: '#00FF00',
+                    fontFamily: 'monospace'
+                }}>
+                    {product.barcode || 'Sẽ tự động generate khi lưu'}
+                </code>
+            </p>
             <p>Ngày Tạo: **{product.createdAt ? new Date(Number(product.createdAt)).toLocaleString() : 'N/A'}**</p>
             <p>Ngày Cập nhật: **{product.updatedAt ? new Date(Number(product.updatedAt)).toLocaleString() : 'N/A (Sẽ tự động cập nhật)'}**</p>
             <p>Đánh giá TB: **{(product.averageRating || 0).toFixed(1)}** (Tổng Reviews: **{product.totalReviews || 0}**)</p>

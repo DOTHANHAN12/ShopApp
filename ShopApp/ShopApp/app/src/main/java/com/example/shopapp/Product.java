@@ -15,6 +15,7 @@ public class Product {
     public String category;
     public String type;
     public String status;
+    public String barcode; // Barcode/QR code của sản phẩm
 
     // --- CẤU TRÚC KHUYẾN MÃI MỚI ---
     public boolean isOffer; // Cờ bật/tắt chính
@@ -86,6 +87,9 @@ public class Product {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getBarcode() { return barcode; }
+    public void setBarcode(String barcode) { this.barcode = barcode; }
 
     // Logic Khuyến mãi (ĐÃ ĐỔI TÊN GETTER/SETTER ĐỂ KHÔNG XUNG ĐỘT)
     public boolean getIsOfferStatus() { return isOffer; } // <-- ĐÃ SỬA

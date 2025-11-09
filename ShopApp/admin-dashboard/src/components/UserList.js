@@ -1,4 +1,4 @@
-// src/components/UserList.js
+// src/components/UserList.js - FIXED
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; 
@@ -118,7 +118,20 @@ const UserList = () => {
 
             const usersList = userSnapshot.docs.map(doc => {
                 const data = doc.data();
-                const status = data.disabled ? 'locked' : (data.emailVerified ? 'active' : 'pending'); 
+                
+                // 🔧 FIXED: Sửa logic xác định status
+                // Ưu tiên 1: Kiểm tra field "status" nếu có
+                let status = data.status ? data.status.toLowerCase() : null;
+                
+                // Ưu tiên 2: Nếu không có status, dùng disabled field
+                if (!status) {
+                    status = data.disabled ? 'locked' : 'active';
+                }
+                
+                // Ưu tiên 3: Fallback nếu không có gì
+                if (!status) {
+                    status = 'active';
+                }
                 
                 return { 
                     id: doc.id, 
@@ -192,7 +205,11 @@ const UserList = () => {
         
         if (window.confirm(confirmMsg)) {
             try {
-                await updateDoc(doc(db, 'users', user.id), { disabled: newStatus === 'Locked', status: newStatus });
+                // 🔧 FIXED: Update cả 2 fields để đảm bảo logic hoạt động
+                await updateDoc(doc(db, 'users', user.id), { 
+                    disabled: newStatus === 'locked',
+                    status: newStatus,
+                });
                 alert(`Đã cập nhật trạng thái thành: ${newStatus}`);
                 fetchUsers();
             } catch (error) {
@@ -304,10 +321,10 @@ const UserList = () => {
                             </td>
                             <td style={styles.td}>
                                 <button 
-                                    style={styles.lockButton(user.status === 'Locked')}
+                                    style={styles.lockButton(user.status === 'locked')}
                                     onClick={() => handleLockUnlock(user)}
                                 >
-                                    {user.status === 'Locked' ? 'Mở Khóa' : 'Khóa TK'}
+                                    {user.status === 'locked' ? 'Mở Khóa' : 'Khóa TK'}
                                 </button>
                                 <button 
                                     style={styles.actionButton(false)}

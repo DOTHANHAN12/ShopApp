@@ -12,12 +12,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -79,6 +81,8 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
         private final TextView textEditTimeRemaining;
         private final TextView textReviewStatus;
         private final View statusIndicator;
+        private final RecyclerView recyclerReviewImages;
+        private ReviewImageAdapter imageAdapter;
 
         private boolean isExpanded = false;
 
@@ -101,6 +105,12 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
             textEditTimeRemaining = itemView.findViewById(R.id.text_edit_time_remaining);
             textReviewStatus = itemView.findViewById(R.id.text_review_status);
             statusIndicator = itemView.findViewById(R.id.status_indicator);
+            recyclerReviewImages = itemView.findViewById(R.id.recycler_review_images);
+            
+            // Setup image recycler view
+            recyclerReviewImages.setLayoutManager(new LinearLayoutManager(itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
+            imageAdapter = new ReviewImageAdapter();
+            recyclerReviewImages.setAdapter(imageAdapter);
         }
 
         public void bind(Review review) {
@@ -129,6 +139,14 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
 
             // Set comment
             textComment.setText(review.getComment());
+            
+            // Handle images
+            if (review.getImages() != null && !review.getImages().isEmpty()) {
+                recyclerReviewImages.setVisibility(View.VISIBLE);
+                imageAdapter.setImages(review.getImages());
+            } else {
+                recyclerReviewImages.setVisibility(View.GONE);
+            }
 
             // Setup expand/collapse
             textComment.post(() -> {
@@ -274,6 +292,50 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
                     textEditTimeRemaining.setText(String.format(Locale.getDefault(),
                             "Còn %d phút để chỉnh sửa", minutesRemaining));
                 }
+            }
+        }
+    }
+    
+    // Inner adapter for review images
+    static class ReviewImageAdapter extends RecyclerView.Adapter<ReviewImageAdapter.ImageViewHolder> {
+        private List<String> imageUrls = new ArrayList<>();
+        
+        public void setImages(List<String> images) {
+            this.imageUrls = images != null ? images : new ArrayList<>();
+            notifyDataSetChanged();
+        }
+        
+        @NonNull
+        @Override
+        public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_review_image, parent, false);
+            return new ImageViewHolder(view);
+        }
+        
+        @Override
+        public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
+            String imageUrl = imageUrls.get(position);
+            if (!TextUtils.isEmpty(imageUrl)) {
+                Picasso.get()
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_placeholder)
+                        .error(R.drawable.ic_broken_image)
+                        .into(holder.imageView);
+            }
+        }
+        
+        @Override
+        public int getItemCount() {
+            return imageUrls.size();
+        }
+        
+        static class ImageViewHolder extends RecyclerView.ViewHolder {
+            ImageView imageView;
+            
+            public ImageViewHolder(@NonNull View itemView) {
+                super(itemView);
+                imageView = itemView.findViewById(R.id.img_review_image);
             }
         }
     }

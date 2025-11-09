@@ -88,20 +88,16 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
-        ImageView cartButton = findViewById(R.id.img_cart);
-        if (cartButton != null) {
-            cartButton.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
-        }
-
-        ImageView homeButton = findViewById(R.id.nav_home_cs);
-        if (homeButton != null) {
-            homeButton.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
-        }
-
+        // Sử dụng NavigationHelper để setup tất cả navigation buttons
+        NavigationHelper navigationHelper = new NavigationHelper(this);
+        navigationHelper.setupNavigation();
+        
+        // Override user button behavior vì đã ở profile rồi
         ImageView userButton = findViewById(R.id.nav_user_cs);
         if (userButton != null) {
             userButton.setOnClickListener(v -> {
-                // Already on profile, do nothing or refresh
+                // Already on profile, refresh data
+                loadUserProfile();
             });
         }
     }

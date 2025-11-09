@@ -149,6 +149,19 @@ public class ProductDetailActivity extends AppCompatActivity implements
             iconFavoriteDetail.setOnClickListener(v -> toggleFavorite());
         }
 
+        // Setup notification button
+        ImageView iconNotification = findViewById(R.id.img_notification);
+        if (iconNotification != null) {
+            iconNotification.setOnClickListener(v -> {
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(this, NotificationActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem thông báo.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+
         // Ánh xạ nút Home (Footer)
         navHomeDetail = findViewById(R.id.nav_home_cs);
         if (navHomeDetail != null) {
@@ -157,6 +170,19 @@ public class ProductDetailActivity extends AppCompatActivity implements
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
+            });
+        }
+
+        // Setup user button (footer)
+        ImageView navUserDetail = findViewById(R.id.nav_user_cs);
+        if (navUserDetail != null) {
+            navUserDetail.setOnClickListener(v -> {
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(this, ProfileActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem Hồ sơ.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
             });
         }
 

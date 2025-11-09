@@ -3,7 +3,9 @@ package com.example.shopapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +23,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.squareup.picasso.Picasso;
+
+import android.text.TextUtils;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,10 +86,9 @@ public class MyReviewsActivity extends AppCompatActivity implements MyReviewsAda
     }
 
     private void setupNavigation() {
-        ImageView imgBack = findViewById(R.id.img_back);
-        if (imgBack != null) {
-            imgBack.setOnClickListener(v -> finish());
-        }
+        // Sử dụng NavigationHelper để setup tất cả navigation buttons
+        NavigationHelper navigationHelper = new NavigationHelper(this);
+        navigationHelper.setupNavigation();
     }
 
     private void setupRecyclerView() {
@@ -271,6 +277,7 @@ public class MyReviewsActivity extends AppCompatActivity implements MyReviewsAda
         TextView textComment = dialogView.findViewById(R.id.text_comment);
         TextView textDate = dialogView.findViewById(R.id.text_date);
         TextView textEdited = dialogView.findViewById(R.id.text_edited_status);
+        RecyclerView recyclerReviewImages = dialogView.findViewById(R.id.recycler_review_images);
 
         // Set data
         textRating.setText(String.format("%.1f ⭐", review.getRating()));
@@ -283,6 +290,16 @@ public class MyReviewsActivity extends AppCompatActivity implements MyReviewsAda
                     android.text.format.DateFormat.format("dd/MM/yyyy HH:mm", review.getUpdatedAt()));
         } else {
             textEdited.setVisibility(View.GONE);
+        }
+
+        // Handle images
+        if (review.getImages() != null && !review.getImages().isEmpty()) {
+            recyclerReviewImages.setVisibility(View.VISIBLE);
+            recyclerReviewImages.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            ReviewImageAdapter imageAdapter = new ReviewImageAdapter(review.getImages());
+            recyclerReviewImages.setAdapter(imageAdapter);
+        } else {
+            recyclerReviewImages.setVisibility(View.GONE);
         }
 
         // Load product name
@@ -302,6 +319,49 @@ public class MyReviewsActivity extends AppCompatActivity implements MyReviewsAda
                 .setView(dialogView)
                 .setPositiveButton("Đóng", null)
                 .show();
+    }
+    
+    // Adapter for review images in dialog
+    private static class ReviewImageAdapter extends RecyclerView.Adapter<ReviewImageAdapter.ImageViewHolder> {
+        private List<String> imageUrls;
+        
+        public ReviewImageAdapter(List<String> imageUrls) {
+            this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
+        }
+        
+        @NonNull
+        @Override
+        public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_review_image, parent, false);
+            return new ImageViewHolder(view);
+        }
+        
+        @Override
+        public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
+            String imageUrl = imageUrls.get(position);
+            if (!TextUtils.isEmpty(imageUrl)) {
+                Picasso.get()
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_placeholder)
+                        .error(R.drawable.ic_broken_image)
+                        .into(holder.imageView);
+            }
+        }
+        
+        @Override
+        public int getItemCount() {
+            return imageUrls.size();
+        }
+        
+        static class ImageViewHolder extends RecyclerView.ViewHolder {
+            ImageView imageView;
+            
+            public ImageViewHolder(@NonNull View itemView) {
+                super(itemView);
+                imageView = itemView.findViewById(R.id.img_review_image);
+            }
+        }
     }
 
     @Override

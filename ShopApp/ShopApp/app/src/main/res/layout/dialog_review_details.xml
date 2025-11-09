@@ -113,4 +113,14 @@
             tools:text="Sản phẩm rất tốt, chất lượng vượt mong đợi. Giao hàng nhanh, đóng gói cẩn thận. Tôi rất hài lòng với lần mua hàng này! Sẽ tiếp tục ủng hộ shop."/>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Review Images -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_review_images"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </LinearLayout>

@@ -69,46 +69,18 @@ public class AddressSelectionActivity extends AppCompatActivity implements Addre
     }
 
     private void setupNavigation() {
-        ImageView cartButton = findViewById(R.id.ic_cart);
-        ImageView homeButton = findViewById(R.id.nav_home_cs);
-        ImageView userButton = findViewById(R.id.nav_user_cs);
-        ImageView backButton = findViewById(R.id.img_back_arrow);
-        View headerLayout = findViewById(R.id.header_layout);
-        View footerLayout = findViewById(R.id.footer_layout);
-
+        NavigationHelper navigationHelper = new NavigationHelper(this);
+        
         // ✅ SỬA: Ẩn header và footer khi ở chế độ chọn địa chỉ
         if (isSelectionMode) {
-            // Ẩn hoặc vô hiệu hóa các nút navigation để tránh nhầm lẫn
-            if (headerLayout != null) headerLayout.setVisibility(View.GONE);
-            if (footerLayout != null) footerLayout.setVisibility(View.GONE);
-            if (cartButton != null) cartButton.setVisibility(View.GONE);
-            if (homeButton != null) homeButton.setVisibility(View.GONE);
-            if (userButton != null) userButton.setVisibility(View.GONE);
+            navigationHelper.hideHeaderAndFooter();
         } else {
-            // Chế độ quản lý thông thường
-            if (cartButton != null) {
-                cartButton.setOnClickListener(v -> {
-                    Log.d(TAG, "Cart button clicked");
-                    startActivity(new Intent(this, CartActivity.class));
-                });
-            }
-
-            if (homeButton != null) {
-                homeButton.setOnClickListener(v -> {
-                    Log.d(TAG, "Home button clicked");
-                    startActivity(new Intent(this, HomeActivity.class));
-                });
-            }
-
-            if (userButton != null) {
-                userButton.setOnClickListener(v -> {
-                    Log.d(TAG, "User button clicked");
-                    startActivity(new Intent(this, ProfileActivity.class));
-                });
-            }
+            // Chế độ quản lý thông thường - setup navigation
+            navigationHelper.setupNavigation();
         }
 
-        // Nút back luôn hoạt động
+        // Nút back luôn hoạt động với logic đặc biệt
+        ImageView backButton = findViewById(R.id.img_back_arrow);
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
                 Log.d(TAG, "Back button clicked - isSelectionMode: " + isSelectionMode);

@@ -53,4 +53,14 @@
         android:textSize="14sp"
         tools:text="Sản phẩm rất tốt, chất lượng vượt mong đợi. Giao hàng nhanh, đóng gói cẩn thận." />
 
+    <!-- Review Images -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_review_images"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </LinearLayout>

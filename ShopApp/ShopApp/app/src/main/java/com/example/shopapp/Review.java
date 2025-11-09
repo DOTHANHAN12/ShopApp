@@ -1,5 +1,7 @@
 package com.example.shopapp;
 
+import java.util.List;
+
 public class Review {
     private String userId;
     private String userName;
@@ -11,6 +13,7 @@ public class Review {
     private boolean isEdited;
     private long updatedAt;
     private String status;
+    private List<String> images;
 
     public enum Status {
         PENDING,
@@ -115,5 +118,13 @@ public class Review {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 }

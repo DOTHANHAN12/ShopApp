@@ -74,7 +74,7 @@ public class CategorySearchActivity extends AppCompatActivity {
 
         mapViews();
         setupSearchListener();
-        setupFooterNavigation();
+        setupNavigation();
 
         recyclerView = findViewById(R.id.recycler_category_grid);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
@@ -119,7 +119,12 @@ public class CategorySearchActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.nav_user_cs);
     }
 
-    private void setupFooterNavigation() {
+    private void setupNavigation() {
+        // Sử dụng NavigationHelper để setup tất cả navigation buttons
+        NavigationHelper navigationHelper = new NavigationHelper(this);
+        navigationHelper.setupNavigation();
+        
+        // Override home button để có logic đặc biệt (clear top)
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
                 Intent intent = new Intent(this, HomeActivity.class);
@@ -127,9 +132,6 @@ public class CategorySearchActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             });
-        }
-        if (navProfile != null) {
-            navProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         }
     }
 

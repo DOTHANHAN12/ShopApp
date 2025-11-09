@@ -1,40 +1,66 @@
 package com.example.shopapp;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Button;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Transaction;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class WriteReviewActivity extends AppCompatActivity {
 
     private static final String TAG = "WriteReviewActivity";
-    private static final long EDIT_TIME_LIMIT_HOURS = 12;
-
-    private RatingBar ratingBar;
-    private EditText editTextComment;
-    private Button btnSubmitReview;
+    private static final int PICK_IMAGE_REQUEST = 100;
+    private static final int MAX_IMAGES = 5;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
+
+    private RatingBar ratingBar;
+    private EditText editTextComment;
+    private MaterialButton btnSubmit;
+    private ImageView btnBack, imgProduct;
+    private TextView textProductName, textProductVariant, textRatingDescription;
+    private CardView btnAddPhoto;
+    private LinearLayout layoutImagePreview;
+    private CheckBox checkboxAnonymous;
 
     private String productId;
     private String orderId;
-    private Review existingReview; // To hold an existing review if found
-    private String existingReviewId; // To hold the ID of the existing review
+    private String productName;
+    private String productVariant;
+    private String productImageUrl;
+
+    private List<Uri> selectedImageUris = new ArrayList<>();
+    private List<String> uploadedImageUrls = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,199 +69,269 @@ public class WriteReviewActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
 
+        initViews();
+        getIntentData();
+        setupListeners();
+        displayProductInfo();
+    }
+
+    private void initViews() {
+        btnBack = findViewById(R.id.btn_back);
         ratingBar = findViewById(R.id.rating_bar_write_review);
         editTextComment = findViewById(R.id.edit_text_review_comment);
-        btnSubmitReview = findViewById(R.id.btn_submit_review);
+        btnSubmit = findViewById(R.id.btn_submit_review);
+        imgProduct = findViewById(R.id.img_product);
+        textProductName = findViewById(R.id.text_product_name);
+        textProductVariant = findViewById(R.id.text_product_variant);
+        textRatingDescription = findViewById(R.id.text_rating_description);
+        btnAddPhoto = findViewById(R.id.btn_add_photo);
+        layoutImagePreview = findViewById(R.id.layout_image_preview);
+        checkboxAnonymous = findViewById(R.id.checkbox_anonymous);
+    }
 
+    private void getIntentData() {
         productId = getIntent().getStringExtra("PRODUCT_ID");
-        orderId = getIntent().getStringExtra("ORDER_ID"); // Get Order ID
+        orderId = getIntent().getStringExtra("ORDER_ID");
+        productName = getIntent().getStringExtra("PRODUCT_NAME");
+        productVariant = getIntent().getStringExtra("PRODUCT_VARIANT");
+        productImageUrl = getIntent().getStringExtra("PRODUCT_IMAGE");
 
-        if (productId == null || orderId == null) {
-            Toast.makeText(this, "Product or Order ID is missing.", Toast.LENGTH_SHORT).show();
+        if (productId == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin sản phẩm", Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
-
-        checkExistingReview(); // Check for existing review when activity starts
-
-        btnSubmitReview.setOnClickListener(v -> submitOrUpdateReview());
     }
 
-    private void checkExistingReview() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return; // No user logged in
+    private void displayProductInfo() {
+        if (productName != null) {
+            textProductName.setText(productName);
         }
-
-        db.collection("products").document(productId).collection("reviews")
-                .whereEqualTo("userId", currentUser.getUid())
-                .whereEqualTo("orderId", orderId)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
-                        existingReview = doc.toObject(Review.class);
-                        existingReviewId = doc.getId();
-                        if (existingReview != null) {
-                            ratingBar.setRating(existingReview.getRating());
-                            editTextComment.setText(existingReview.getComment());
-                            btnSubmitReview.setText("Update Review");
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Error checking for existing review", e));
+        if (productVariant != null) {
+            textProductVariant.setText("Phân loại: " + productVariant);
+        }
+        if (productImageUrl != null && !productImageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(productImageUrl)
+                    .placeholder(R.drawable.ic_product_placeholder)
+                    .into(imgProduct);
+        }
     }
 
+    private void setupListeners() {
+        btnBack.setOnClickListener(v -> finish());
 
-    private void submitOrUpdateReview() {
-        if (existingReview != null) {
-            updateReview();
+        ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
+            updateRatingDescription(rating);
+        });
+
+        btnAddPhoto.setOnClickListener(v -> openImagePicker());
+
+        btnSubmit.setOnClickListener(v -> submitReview());
+    }
+
+    private void updateRatingDescription(float rating) {
+        String description;
+        if (rating >= 5) {
+            description = "⭐ Tuyệt vời";
+        } else if (rating >= 4) {
+            description = "😊 Hài lòng";
+        } else if (rating >= 3) {
+            description = "😐 Bình thường";
+        } else if (rating >= 2) {
+            description = "😕 Không hài lòng";
         } else {
-            submitNewReview();
+            description = "😞 Rất tệ";
+        }
+        textRatingDescription.setText(description);
+    }
+
+    private void openImagePicker() {
+        if (selectedImageUris.size() >= MAX_IMAGES) {
+            Toast.makeText(this, "Bạn chỉ có thể thêm tối đa " + MAX_IMAGES + " ảnh", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            if (imageUri != null) {
+                selectedImageUris.add(imageUri);
+                addImagePreview(imageUri);
+            }
         }
     }
 
-    private void updateReview() {
-        long currentTime = System.currentTimeMillis();
-        long reviewTime = existingReview.getTimestamp();
-        long hoursDifference = TimeUnit.MILLISECONDS.toHours(currentTime - reviewTime);
+    private void addImagePreview(Uri imageUri) {
+        View imagePreviewView = getLayoutInflater().inflate(R.layout.item_image_preview, layoutImagePreview, false);
+        ImageView imgPreview = imagePreviewView.findViewById(R.id.img_preview);
+        ImageView btnRemove = imagePreviewView.findViewById(R.id.btn_remove_image);
 
-        if (existingReview.isEdited()) {
-            Toast.makeText(this, "You have already edited this review once.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        Glide.with(this).load(imageUri).centerCrop().into(imgPreview);
 
-        if (hoursDifference >= EDIT_TIME_LIMIT_HOURS) {
-            Toast.makeText(this, "You can no longer edit this review. The time limit is 12 hours.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        float newRating = ratingBar.getRating();
-        String newComment = editTextComment.getText().toString().trim();
-        float oldRating = existingReview.getRating();
-
-
-        if (newRating == 0) {
-            Toast.makeText(this, "Please provide a rating.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (newComment.isEmpty()) {
-            Toast.makeText(this, "Please write a comment.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-
-        DocumentReference productRef = db.collection("products").document(productId);
-        DocumentReference reviewRef = productRef.collection("reviews").document(existingReviewId);
-
-        db.runTransaction((Transaction.Function<Void>) transaction -> {
-            DocumentSnapshot productSnapshot = transaction.get(productRef);
-
-            // Only adjust average rating if the review was previously approved
-            if (Review.Status.APPROVED.name().equals(existingReview.getStatus())) {
-                long totalReviews = productSnapshot.getLong("totalReviews");
-                double averageRating = productSnapshot.getDouble("averageRating");
-
-                // If there's only one review, the new average is 0, otherwise remove old rating
-                double newAverageRating = (totalReviews <= 1) ? 0 : ((averageRating * totalReviews) - oldRating) / (totalReviews - 1);
-                long newTotalReviews = totalReviews - 1;
-
-                transaction.update(productRef, "averageRating", newAverageRating);
-                transaction.update(productRef, "totalReviews", newTotalReviews);
-            }
-
-            // Update the review
-            transaction.update(reviewRef, "rating", newRating);
-            transaction.update(reviewRef, "comment", newComment);
-            transaction.update(reviewRef, "edited", true);
-            transaction.update(reviewRef, "updatedAt", System.currentTimeMillis());
-            transaction.update(reviewRef, "status", Review.Status.PENDING.name()); // Reset status to PENDING
-
-            return null;
-        }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(WriteReviewActivity.this, "Review updated and is pending approval.", Toast.LENGTH_SHORT).show();
-            finish();
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Error updating review: ", e);
-            Toast.makeText(WriteReviewActivity.this, "Failed to update review.", Toast.LENGTH_SHORT).show();
+        btnRemove.setOnClickListener(v -> {
+            selectedImageUris.remove(imageUri);
+            layoutImagePreview.removeView(imagePreviewView);
         });
+
+        // Add before the "Add Photo" button
+        int addButtonIndex = layoutImagePreview.indexOfChild(btnAddPhoto);
+        layoutImagePreview.addView(imagePreviewView, addButtonIndex);
     }
 
-
-    private void submitNewReview() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "You must be logged in.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Check order status first
-        db.collection("orders").document(orderId).get().addOnSuccessListener(orderSnapshot -> {
-            if (!orderSnapshot.exists()) {
-                Toast.makeText(this, "Order not found.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Order order = orderSnapshot.toObject(Order.class);
-            if (order == null || !"DELIVERED".equalsIgnoreCase(order.getOrderStatus())) {
-                Toast.makeText(this, "You can only review products from delivered orders.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Verify the product is in the order
-            boolean productInOrder = false;
-            for (Map<String, Object> item : order.getItems()) {
-                if (productId.equals(item.get("productId"))) {
-                    productInOrder = true;
-                    break;
-                }
-            }
-
-            if (!productInOrder) {
-                Toast.makeText(this, "You can only review products you have purchased.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            // Now proceed to submit the review
-            proceedWithNewReviewSubmission(currentUser);
-
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Error fetching order details", e);
-            Toast.makeText(this, "Could not verify order status.", Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void proceedWithNewReviewSubmission(FirebaseUser currentUser) {
+    private void submitReview() {
         float rating = ratingBar.getRating();
         String comment = editTextComment.getText().toString().trim();
-        String userId = currentUser.getUid();
-        String userName = currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "Anonymous";
 
         if (rating == 0) {
-            Toast.makeText(this, "Please provide a rating.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Vui lòng chọn số sao đánh giá", Toast.LENGTH_SHORT).show();
             return;
         }
+
         if (comment.isEmpty()) {
-            Toast.makeText(this, "Please write a comment.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Vui lòng nhập nhận xét của bạn", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // The constructor already sets the status to PENDING
-        Review review = new Review(userId, userName, rating, comment, System.currentTimeMillis(), productId, orderId);
+        btnSubmit.setEnabled(false);
+        btnSubmit.setText("Đang gửi...");
 
-        db.collection("products").document(productId)
-                .collection("reviews")
-                .add(review)
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Bạn cần đăng nhập để đánh giá", Toast.LENGTH_SHORT).show();
+            btnSubmit.setEnabled(true);
+            btnSubmit.setText("GỬI ĐÁNH GIÁ");
+            return;
+        }
+
+        // Upload images first if any
+        if (!selectedImageUris.isEmpty()) {
+            uploadImages(() -> saveReviewToFirestore(rating, comment, currentUser));
+        } else {
+            saveReviewToFirestore(rating, comment, currentUser);
+        }
+    }
+
+    private void uploadImages(Runnable onComplete) {
+        uploadedImageUrls.clear();
+        final int[] uploadCount = {0};
+
+        for (Uri imageUri : selectedImageUris) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                byte[] data = baos.toByteArray();
+
+                String imagePath = "reviews/" + productId + "/" + System.currentTimeMillis() + ".jpg";
+                StorageReference imageRef = storage.getReference().child(imagePath);
+
+                imageRef.putBytes(data)
+                        .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl()
+                                .addOnSuccessListener(uri -> {
+                                    uploadedImageUrls.add(uri.toString());
+                                    uploadCount[0]++;
+                                    if (uploadCount[0] == selectedImageUris.size()) {
+                                        onComplete.run();
+                                    }
+                                }))
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error uploading image", e);
+                            uploadCount[0]++;
+                            if (uploadCount[0] == selectedImageUris.size()) {
+                                onComplete.run();
+                            }
+                        });
+            } catch (IOException e) {
+                Log.e(TAG, "Error processing image", e);
+                uploadCount[0]++;
+                if (uploadCount[0] == selectedImageUris.size()) {
+                    onComplete.run();
+                }
+            }
+        }
+    }
+
+    private void saveReviewToFirestore(float rating, String comment, FirebaseUser currentUser) {
+        String userName = checkboxAnonymous.isChecked() ? "Người dùng ẩn danh" :
+                (currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "Người dùng");
+
+        Review review = new Review(
+                currentUser.getUid(),
+                userName,
+                rating,
+                comment,
+                System.currentTimeMillis(),
+                productId,
+                orderId
+        );
+
+        Map<String, Object> reviewData = new HashMap<>();
+        reviewData.put("userId", review.getUserId());
+        reviewData.put("userName", review.getUserName());
+        reviewData.put("rating", review.getRating());
+        reviewData.put("comment", review.getComment());
+        reviewData.put("timestamp", review.getTimestamp());
+        reviewData.put("productId", review.getProductId());
+        reviewData.put("orderId", review.getOrderId());
+        reviewData.put("status", "APPROVED"); // Auto approve for now
+        reviewData.put("isEdited", false);
+        reviewData.put("images", uploadedImageUrls);
+
+        db.collection("products").document(productId).collection("reviews")
+                .add(reviewData)
                 .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(WriteReviewActivity.this, "Review submitted and is pending approval.", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Review added successfully with ID: " + documentReference.getId());
+
+                    // Update product rating
+                    updateProductRating();
+
+                    Toast.makeText(this, "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();
+
+                    // Return to previous activity
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("review_submitted", true);
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error submitting review: ", e);
-                    Toast.makeText(WriteReviewActivity.this, "Failed to submit review.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error adding review", e);
+                    Toast.makeText(this, "Lỗi khi gửi đánh giá. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("GỬI ĐÁNH GIÁ");
+                });
+    }
+
+    private void updateProductRating() {
+        db.collection("products").document(productId).collection("reviews")
+                .whereEqualTo("status", "APPROVED")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        float totalRating = 0;
+                        int count = queryDocumentSnapshots.size();
+
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            Review review = doc.toObject(Review.class);
+                            totalRating += review.getRating();
+                        }
+
+                        float averageRating = totalRating / count;
+
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("averageRating", averageRating);
+                        updates.put("totalReviews", count);
+
+                        db.collection("products").document(productId).update(updates);
+                    }
                 });
     }
 }

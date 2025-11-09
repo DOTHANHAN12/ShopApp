@@ -45,6 +45,10 @@
             android:name=".MyReviewsActivity"
             android:exported="false" />
         <activity
+            android:name=".VNPayRetryActivity"
+            android:theme="@style/Theme.ShopApp"
+            android:exported="false"/>
+        <activity
             android:name=".WriteReviewActivity"
             android:exported="false" />
         <activity

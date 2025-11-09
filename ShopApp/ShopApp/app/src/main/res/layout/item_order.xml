@@ -2,10 +2,13 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_order_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,10 +16,12 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Header: Order ID & Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/text_order_id"
@@ -24,53 +29,126 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
                 tools:text="Mã đơn: #12345" />
 
-            <TextView
-                android:id="@+id/text_order_status"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_status_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                tools:text="DELIVERED" />
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FF9800">
+
+                <TextView
+                    android:id="@+id/text_order_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/white"
+                    tools:text="PENDING" />
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
 
+        <!-- Order Date -->
         <TextView
             android:id="@+id/text_order_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:drawablePadding="6dp"
+            app:drawableStartCompat="@drawable/ic_calendar"
+            app:drawableTint="#666666"
             tools:text="Ngày đặt: 01/01/2024" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
 
         <!-- RecyclerView for products in the order -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_order_products"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
+            android:nestedScrollingEnabled="false"/>
 
+        <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
+            android:background="#EEEEEE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
 
-        <TextView
-            android:id="@+id/text_order_total"
-            android:layout_width="wrap_content"
+        <!-- Total Amount -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:textStyle="bold"
-            tools:text="Tổng tiền: 200,000 VND" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <Button
-            android:id="@+id/btn_cancel_order"
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tổng tiền:"
+                android:textSize="14sp"
+                android:textColor="#666666"/>
+
+            <TextView
+                android:id="@+id/text_order_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#FF5722"
+                tools:text="200,000 VND" />
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="8dp"
-            android:text="Hủy đơn"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="end">
+
+            <!-- Button: Thanh toán lại (for FAILED_PAYMENT orders) -->
+            <Button
+                android:id="@+id/btn_retry_payment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💳 Thanh toán lại"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_primary"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Button: Hủy đơn -->
+            <Button
+                android:id="@+id/btn_cancel_order"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="❌ Hủy đơn"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_danger"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>

@@ -1,6 +1,6 @@
 package com.example.shopapp;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,6 +50,9 @@ public class FavoriteActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mapViews();
+        setupHeaderButtons();
+        setupFooterButtons();
+        styleHeaderAndFooter();
         setupRecyclerView();
         loadFavoriteItems();
     }
@@ -57,8 +61,110 @@ public class FavoriteActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_wish_list);
         textItemCount = findViewById(R.id.text_item_count);
         ImageView imgBack = findViewById(R.id.img_back);
+        if (imgBack != null) {
+            imgBack.setOnClickListener(v -> finish());
+        }
+    }
 
-        imgBack.setOnClickListener(v -> finish());
+    private void setupHeaderButtons() {
+        // Cart button
+        ImageView cartIcon = findViewById(R.id.img_cart);
+        if (cartIcon != null) {
+            cartIcon.setOnClickListener(v -> {
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(this, CartActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem Giỏ hàng.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+
+        // Favorite button - đã ở FavoriteActivity rồi nên không làm gì
+        ImageView favoriteIcon = findViewById(R.id.img_favorite);
+        if (favoriteIcon != null) {
+            favoriteIcon.setOnClickListener(v -> {
+                // Đã ở FavoriteActivity rồi, có thể refresh hoặc không làm gì
+                loadFavoriteItems();
+            });
+        }
+
+        // Notification button
+        ImageView notificationIcon = findViewById(R.id.img_notification);
+        if (notificationIcon != null) {
+            notificationIcon.setOnClickListener(v -> {
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(this, NotificationActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem thông báo.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+    }
+
+    private void setupFooterButtons() {
+        // Home button
+        ImageView homeIcon = findViewById(R.id.nav_home_cs);
+        if (homeIcon != null) {
+            homeIcon.setOnClickListener(v -> {
+                startActivity(new Intent(this, HomeActivity.class));
+            });
+        }
+
+        // User/Profile button
+        ImageView userIcon = findViewById(R.id.nav_user_cs);
+        if (userIcon != null) {
+            userIcon.setOnClickListener(v -> {
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(this, ProfileActivity.class));
+                } else {
+                    Toast.makeText(this, "Vui lòng đăng nhập để xem Hồ sơ.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
+            });
+        }
+
+        // Search button
+        View searchButton = findViewById(R.id.btn_search_footer);
+        if (searchButton != null) {
+            searchButton.setOnClickListener(v -> {
+                // Có thể mở search activity nếu cần
+            });
+        }
+    }
+
+    private void styleHeaderAndFooter() {
+        // Style favorite icon - active state
+        ImageView favoriteIcon = findViewById(R.id.img_favorite);
+        if (favoriteIcon != null) {
+            favoriteIcon.setImageResource(R.drawable.ic_favorite_filled);
+            favoriteIcon.setColorFilter(ContextCompat.getColor(this, R.color.iconActive));
+        }
+
+        // Style cart icon - inactive
+        ImageView cartIcon = findViewById(R.id.img_cart);
+        if (cartIcon != null) {
+            cartIcon.setColorFilter(ContextCompat.getColor(this, R.color.grey_darker));
+        }
+
+        // Style notification icon - inactive
+        ImageView notificationIcon = findViewById(R.id.img_notification);
+        if (notificationIcon != null) {
+            notificationIcon.setColorFilter(ContextCompat.getColor(this, R.color.grey_darker));
+        }
+
+        // Style home icon - inactive (since we're on wishlist page)
+        ImageView homeIcon = findViewById(R.id.nav_home_cs);
+        if (homeIcon != null) {
+            homeIcon.setColorFilter(ContextCompat.getColor(this, R.color.iconInactive));
+        }
+
+        // Style user icon - inactive
+        ImageView userIcon = findViewById(R.id.nav_user_cs);
+        if (userIcon != null) {
+            userIcon.setColorFilter(ContextCompat.getColor(this, R.color.grey_darker));
+        }
     }
 
     private void setupRecyclerView() {

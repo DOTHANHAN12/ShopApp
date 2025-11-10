@@ -56,7 +56,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView currentSelectedTab;
     private View searchButton;
     private ImageView iconProfile;
-    private Button btnTestNotification;
+//    private Button btnTestNotification;
 
     // Khai báo Icons Header
     private ImageView iconNotification;
@@ -103,7 +103,7 @@ public class HomeActivity extends AppCompatActivity {
         setupHeaderIcons();
 
         // Thêm listener cho nút test
-        btnTestNotification.setOnClickListener(v -> sendTestNotification());
+//        btnTestNotification.setOnClickListener(v -> sendTestNotification());
 
         // 2. Khởi tạo Adapter và ViewPager2
         adapter = new FeaturedProductAdapter(featuredProductsList, this::isOfferValid);
@@ -176,40 +176,40 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
-    private void sendTestNotification() {
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
-
-        String channelId = "fcm_default_channel";
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_notification)
-                        .setContentTitle("Thông báo kiểm tra (Local)")
-                        .setContentText("Nếu bạn thấy thông báo này, nghĩa là quyền và icon đã đúng.")
-                        .setAutoCancel(true)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setContentIntent(pendingIntent);
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "Thông báo chung",
-                    NotificationManager.IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(1, notificationBuilder.build());
-            Toast.makeText(this, "Đã gửi thông báo local!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Chưa được cấp quyền gửi thông báo.", Toast.LENGTH_LONG).show();
-        }
-    }
+//    private void sendTestNotification() {
+//        Intent intent = new Intent(this, HomeActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+//                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+//
+//        String channelId = "fcm_default_channel";
+//        NotificationCompat.Builder notificationBuilder =
+//                new NotificationCompat.Builder(this, channelId)
+//                        .setSmallIcon(R.drawable.ic_notification)
+//                        .setContentTitle("Thông báo kiểm tra (Local)")
+//                        .setContentText("Nếu bạn thấy thông báo này, nghĩa là quyền và icon đã đúng.")
+//                        .setAutoCancel(true)
+//                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                        .setContentIntent(pendingIntent);
+//
+//        NotificationManager notificationManager =
+//                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationChannel channel = new NotificationChannel(channelId,
+//                    "Thông báo chung",
+//                    NotificationManager.IMPORTANCE_HIGH);
+//            notificationManager.createNotificationChannel(channel);
+//        }
+//
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+//                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+//            notificationManager.notify(1, notificationBuilder.build());
+//            Toast.makeText(this, "Đã gửi thông báo local!", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(this, "Chưa được cấp quyền gửi thông báo.", Toast.LENGTH_LONG).show();
+//        }
+//    }
 
     private void mapViews() {
         viewPagerFeaturedProducts = findViewById(R.id.view_pager_featured_products);
@@ -218,7 +218,7 @@ public class HomeActivity extends AppCompatActivity {
         tabMen = findViewById(R.id.tab_men);
         tabKids = findViewById(R.id.tab_kids);
         tabBaby = findViewById(R.id.tab_baby);
-        btnTestNotification = findViewById(R.id.btn_test_notification);
+//        btnTestNotification = findViewById(R.id.btn_test_notification);
 
         searchButton = findViewById(R.id.btn_search_footer);
 
@@ -280,14 +280,6 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin cá nhân.", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(this, LoginActivity.class));
                 }
-            });
-        }
-
-        // NÚT BARCODE SCANNER
-        ImageView iconBarcode = findViewById(R.id.ic_barcode);
-        if (iconBarcode != null) {
-            iconBarcode.setOnClickListener(v -> {
-                startActivity(new Intent(this, BarcodeScannerActivity.class));
             });
         }
     }

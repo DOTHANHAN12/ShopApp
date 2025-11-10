@@ -91,7 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Sử dụng NavigationHelper để setup tất cả navigation buttons
         NavigationHelper navigationHelper = new NavigationHelper(this);
         navigationHelper.setupNavigation();
-        
+
         // Override user button behavior vì đã ở profile rồi
         ImageView userButton = findViewById(R.id.nav_user_cs);
         if (userButton != null) {

@@ -126,7 +126,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
             textLocation = itemView.findViewById(R.id.text_location);
             textEdit = itemView.findViewById(R.id.btn_edit_address);
             textDefaultTag = itemView.findViewById(R.id.label_default);
-            textAddressType = itemView.findViewById(R.id.text_address_type); // ✅ THÊM
+            textAddressType = itemView.findViewById(R.id.text_address_type  ); // ✅ THÊM
 
             radioButton.setClickable(false);
             radioButton.setFocusable(false);

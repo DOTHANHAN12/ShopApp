@@ -100,16 +100,16 @@
             </LinearLayout>
 
             <!-- Action Button -->
-            <Button
-                android:id="@+id/btn_add_to_cart"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:text="Add to Cart"
-                android:textSize="12sp"
-                android:textColor="@android:color/white"
-                android:background="@android:color/black"
-                android:textAllCaps="false"
-                android:layout_marginTop="6dp"/>
+<!--            <Button-->
+<!--                android:id="@+id/btn_add_to_cart"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="36dp"-->
+<!--                android:text="Add to Cart"-->
+<!--                android:textSize="12sp"-->
+<!--                android:textColor="@android:color/white"-->
+<!--                android:background="@android:color/black"-->
+<!--                android:textAllCaps="false"-->
+<!--                android:layout_marginTop="6dp"/>-->
 
         </LinearLayout>
 

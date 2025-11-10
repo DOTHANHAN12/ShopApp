@@ -1,11 +1,10 @@
-// src/components/OrderDetailModal.js
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
 
 // FIXED: Đã thêm PAID vào danh sách trạng thái
-const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'PAID', 'FAILED_PAYMENT']; 
+const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'DELIVERED', 'CANCELLED', 'PAID', 'FAILED_PAYMENT']; 
 
 // --- DARK/MINIMALIST STYLES CHO MODAL ---
 const modalStyles = {
@@ -47,24 +46,25 @@ const OrderDetailModal = ({ order, onClose, onSave }) => {
         }
     };
 
-    // HÀM XÂY DỰNG ĐỊA CHỈ CHI TIẾT
+    /**
+     * HÀM XÂY DỰNG ĐỊA CHỈ CHI TIẾT
+     * Sử dụng cấu trúc DB mới: streetAddress và fullLocation
+     */
     const getFullAddress = (addr) => {
         if (!addr) return "Không có địa chỉ";
         
-        const parts = [
-            addr.streetAddress || addr.street || '',
-            addr.ward || '', 
-            addr.district || '', 
-            addr.city || addr.province || '', 
-        ].filter(p => p); 
-
-        return `${addr.name || 'N/A'} - ${parts.join(', ')}`;
+        // Sử dụng streetAddress và fullLocation để xây dựng địa chỉ đầy đủ
+        const street = addr.streetAddress || 'N/A';
+        const locationDetails = addr.fullLocation || 'N/A';
+        
+        return `${street}, ${locationDetails}`;
     };
     
-    // LẤY THÔNG TIN KHÁCH HÀNG TỪ SHIPPING ADDRESS
+    // LẤY THÔNG TIN KHÁCH HÀNG
     const shipping = order.shippingAddress || {};
     const customerName = shipping.fullName || 'N/A';
     const customerPhone = shipping.phoneNumber || 'N/A';
+    // Email đã được gán vào object order trong OrderList.js
     const customerEmail = order.email || 'N/A'; 
 
 
@@ -95,7 +95,7 @@ const OrderDetailModal = ({ order, onClose, onSave }) => {
                     <p><strong>Tên người nhận:</strong> {customerName}</p>
                     <p><strong>SĐT:</strong> {customerPhone}</p>
                     <p><strong>Email:</strong> {customerEmail}</p>
-                    <p><strong>Địa chỉ:</strong> {getFullAddress(order.shippingAddress)}</p>
+                    <p><strong>Địa chỉ:</strong> {getFullAddress(order.shippingAddress)}</p> {/* Đã fix địa chỉ */}
                     <p><strong>Phương thức TT:</strong> {order.paymentMethod || 'COD'}</p>
                     <p><strong>Mã Voucher:</strong> {order.voucherCode || 'Không áp dụng'}</p>
                 </div>

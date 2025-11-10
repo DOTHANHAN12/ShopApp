@@ -23,10 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -198,16 +195,8 @@ public class ProductDetailActivity extends AppCompatActivity implements
         if (offer == null || offer.getStartDate() == null || offer.getEndDate() == null) {
             return false;
         }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date startDate = sdf.parse(offer.getStartDate());
-            Date endDate = sdf.parse(offer.getEndDate());
-            Date currentDate = new Date();
-            return !currentDate.before(startDate) && !currentDate.after(endDate);
-        } catch (ParseException e) {
-            Log.e(TAG, "Error parsing offer dates", e);
-            return false;
-        }
+        long currentTime = System.currentTimeMillis();
+        return currentTime >= offer.getStartDate() && currentTime <= offer.getEndDate();
     }
 
     private void addToCart() {
@@ -236,8 +225,11 @@ public class ProductDetailActivity extends AppCompatActivity implements
         // 1. TÍNH TOÁN GIÁ HIỂN THỊ CUỐI CÙNG
         double priceAtTimeOfAdd = currentSelectedVariant.price;
         if (currentProduct.getIsOfferStatus() && isOfferValid(currentProduct.getOffer())) {
-            double discount = currentProduct.getOffer().getOfferValue() / 100.0;
-            priceAtTimeOfAdd = currentSelectedVariant.price * (1.0 - discount);
+            OfferDetails offer = currentProduct.getOffer();
+            if (offer != null && offer.getOfferValue() != null) {
+                 double discount = offer.getOfferValue() / 100.0;
+                 priceAtTimeOfAdd = currentSelectedVariant.price * (1.0 - discount);
+            }
         }
 
         final String userId = user.getUid();
@@ -439,63 +431,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
                         if (document.exists()) {
                             try {
-                                currentProduct = new Product();
-                                currentProduct.setProductId(document.getString("productId"));
-                                currentProduct.setName(document.getString("name"));
-                                currentProduct.setDesc(document.getString("desc"));
-
-                                if (document.get("basePrice") instanceof Number) {
-                                    currentProduct.setBasePrice(((Number) document.get("basePrice")).doubleValue());
-                                }
-
-                                currentProduct.setMainImage(document.getString("mainImage"));
-                                currentProduct.setCategory(document.getString("category"));
-                                currentProduct.setType(document.getString("type"));
-                                currentProduct.setStatus(document.getString("status"));
-
-                                if (document.getBoolean("isOffer") != null) {
-                                    currentProduct.setIsOfferStatus(document.getBoolean("isOffer"));
-                                }
-
-                                if (document.get("averageRating") instanceof Number) {
-                                    currentProduct.setAverageRating(((Number) document.get("averageRating")).doubleValue());
-                                }
-
-                                currentProduct.setTotalReviews(document.getLong("totalReviews"));
-
-                                if (document.getBoolean("isFeatured") != null) {
-                                    currentProduct.setFeatured(document.getBoolean("isFeatured"));
-                                }
-
-                                currentProduct.setColorImages((Map<String, List<String>>) document.get("colorImages"));
-                                currentProduct.setCreatedAt(document.getLong("createdAt"));
-                                currentProduct.setUpdatedAt(document.getLong("updatedAt"));
-
-                                if (document.contains("offer")) {
-                                    currentProduct.setOffer(document.get("offer", OfferDetails.class));
-                                }
-
-                                if (document.contains("variants")) {
-                                    List<Map<String, Object>> variantMaps = (List<Map<String, Object>>) document.get("variants");
-                                    List<ProductVariant> variants = new ArrayList<>();
-                                    for (Map<String, Object> map : variantMaps) {
-                                        ProductVariant variant = new ProductVariant();
-                                        variant.setVariantId((String) map.get("variantId"));
-                                        variant.setSize((String) map.get("size"));
-                                        variant.setColor((String) map.get("color"));
-                                        variant.setQuantity((Long) map.get("quantity"));
-
-                                        if (map.get("price") instanceof Number) {
-                                            variant.setPrice(((Number) map.get("price")).doubleValue());
-                                        }
-
-                                        if (map.containsKey("status")) {
-                                            variant.setStatus((String) map.get("status"));
-                                        }
-                                        variants.add(variant);
-                                    }
-                                    currentProduct.setVariants(variants);
-                                }
+                                currentProduct = document.toObject(Product.class);
 
                                 if (currentProduct.getColorImages() != null && !currentProduct.getColorImages().isEmpty()) {
                                     displayProductData(currentProduct);
@@ -593,8 +529,10 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         if (isOffer && isOfferValid(offer)) {
             hasValidOffer = true;
-            double discount = offer.getOfferValue() / 100.0;
-            displayPrice = basePrice * (1.0 - discount);
+            if (offer != null && offer.getOfferValue() != null) {
+                double discount = offer.getOfferValue() / 100.0;
+                displayPrice = basePrice * (1.0 - discount);
+            }
         }
 
         // GÁN GIÁ HIỆN TẠI (ĐÃ GIẢM HOẶC BASE PRICE)
@@ -647,8 +585,11 @@ public class ProductDetailActivity extends AppCompatActivity implements
 
         if (currentProduct.getIsOfferStatus() && isOfferValid(currentProduct.getOffer())) {
             hasValidOffer = true;
-            double discount = currentProduct.getOffer().getOfferValue() / 100.0;
-            finalDisplayPrice = variantBasePrice * (1.0 - discount);
+            OfferDetails offer = currentProduct.getOffer();
+            if (offer != null && offer.getOfferValue() != null) {
+                double discount = offer.getOfferValue() / 100.0;
+                finalDisplayPrice = variantBasePrice * (1.0 - discount);
+            }
         }
 
         // 3. Cập nhật GIÁ HIỆN TẠI (Giá sau khi giảm)
@@ -743,6 +684,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
     private void setupRecommendation(String type) {
         db.collection("products")
                 .whereEqualTo("type", type)
+                .whereEqualTo("status", "Active") // ✅ LỌC SẢN PHẨM ACTIVE
                 .limit(6)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -756,21 +698,30 @@ public class ProductDetailActivity extends AppCompatActivity implements
                                     !recommendedProduct.getProductId().equals(currentProduct.productId) &&
                                     recommendedProduct.getMainImage() != null)
                             {
-                                // TÍNH GIÁ HIỂN THỊ CHO SẢN PHẨM ĐỀ XUẤT
-                                double recDisplayPrice = recommendedProduct.getBasePrice();
+
+                                // ✅ SỬA LỖI: TÍNH TOÁN GIÁ VÀ GỌI ĐÚNG CONSTRUCTOR
+                                double originalPrice = recommendedProduct.getBasePrice();
+                                double displayPrice = originalPrice;
+                                boolean hasOffer = false;
+
                                 if (recommendedProduct.getIsOfferStatus() && isOfferValid(recommendedProduct.getOffer())) {
-                                    double discount = recommendedProduct.getOffer().getOfferValue() / 100.0;
-                                    recDisplayPrice = recommendedProduct.getBasePrice() * (1.0 - discount);
+                                    OfferDetails offer = recommendedProduct.getOffer();
+                                    if (offer != null && offer.getOfferValue() != null) {
+                                        hasOffer = true;
+                                        double discount = offer.getOfferValue() / 100.0;
+                                        displayPrice = originalPrice * (1.0 - discount);
+                                    }
                                 }
-                                // KẾT THÚC LOGIC TÍNH GIÁ ĐỀ XUẤT
 
                                 recommendations.add(new Recommendation(
-                                        recommendedProduct.getProductId(), // Đã thêm productId
+                                        recommendedProduct.getProductId(),
                                         recommendedProduct.getName(),
-                                        recDisplayPrice, // Dùng giá đã tính toán
                                         recommendedProduct.getMainImage(),
                                         recommendedProduct.getCategory() + ", Size: S-XL",
-                                        "Various Colors"
+                                        "Various Colors",
+                                        displayPrice,
+                                        originalPrice,
+                                        hasOffer
                                 ));
                             }
                         }
@@ -778,7 +729,7 @@ public class ProductDetailActivity extends AppCompatActivity implements
                         if (!recommendations.isEmpty()) {
                             Log.d(TAG, "Đã tải " + recommendations.size() + " sản phẩm đề xuất cùng loại.");
                             recyclerRecommendations.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-                            recyclerRecommendations.setAdapter(new RecommendationAdapter(recommendations, this)); // Sửa lỗi ở đây
+                            recyclerRecommendations.setAdapter(new RecommendationAdapter(recommendations, this));
                         } else {
                             Log.d(TAG, "Không tìm thấy sản phẩm cùng loại để đề xuất.");
                         }

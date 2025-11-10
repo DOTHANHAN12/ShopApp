@@ -2,6 +2,7 @@ package com.example.shopapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,17 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
 
         holder.nameTextView.setText(rec.name);
         holder.sizeTextView.setText(rec.sizeRange);
-        holder.priceTextView.setText(String.format(Locale.getDefault(), "%,.0f VND", rec.price));
+
+        // ✅ SỬA LỖI: Cập nhật logic hiển thị giá
+        holder.priceTextView.setText(String.format(Locale.getDefault(), "%,.0f VND", rec.displayPrice));
+
+        if (rec.hasOffer) {
+            holder.originalPriceTextView.setVisibility(View.VISIBLE);
+            holder.originalPriceTextView.setText(String.format(Locale.getDefault(), "%,.0f VND", rec.originalPrice));
+            holder.originalPriceTextView.setPaintFlags(holder.originalPriceTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            holder.originalPriceTextView.setVisibility(View.GONE);
+        }
 
         if (rec.imageUrl != null && !rec.imageUrl.isEmpty()) {
             Picasso.get()
@@ -63,6 +74,7 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
         TextView nameTextView;
         TextView sizeTextView;
         TextView priceTextView;
+        TextView originalPriceTextView; // ✅ Ánh xạ TextView mới
 
         public RecommendationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -70,6 +82,7 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             nameTextView = itemView.findViewById(R.id.text_rec_product_name);
             sizeTextView = itemView.findViewById(R.id.text_rec_product_size);
             priceTextView = itemView.findViewById(R.id.text_rec_product_price);
+            originalPriceTextView = itemView.findViewById(R.id.text_rec_product_original_price); // ✅ Ánh xạ ID mới
         }
     }
 }

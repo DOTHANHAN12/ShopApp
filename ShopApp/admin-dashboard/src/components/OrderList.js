@@ -1,7 +1,6 @@
-// src/components/OrderList.js
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, doc, updateDoc, writeBatch } from 'firebase/firestore';
+// Thêm Firestore functions cần thiết
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore'; 
 import { db } from '../firebaseConfig'; 
 import { formatCurrency } from '../utils/format'; 
 import OrderDetailModal from './OrderDetailModal'; 
@@ -9,6 +8,7 @@ import OrderDetailModal from './OrderDetailModal';
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'PAID'];
 const ORDERS_PER_PAGE = 10;
 
+// (Giữ nguyên các styles ở đây)
 const statsStyles = {
     container: {
         display: 'grid',
@@ -109,21 +109,54 @@ const OrderList = () => {
         try {
             const ordersCollectionRef = collection(db, "orders");
             const orderSnapshot = await getDocs(ordersCollectionRef);
+            const userIds = new Set();
+            
+            // 1. Thu thập ID user/address từ các đơn hàng
+            orderSnapshot.docs.forEach(doc => {
+                const data = doc.data();
+                // Giả định userId trong đơn hàng là ID của document trong collection 'addresses'
+                if (data.userId) {
+                    userIds.add(data.userId); 
+                }
+            });
 
+            // 2. Lấy thông tin Email từ collection 'addresses'
+            const userEmailsMap = {};
+            if (userIds.size > 0) {
+                // Tối ưu hóa: Đọc song song tất cả document user/address cần thiết
+                const addressPromises = Array.from(userIds).map(id => getDoc(doc(db, "addresses", id)));
+                const addressSnapshots = await Promise.all(addressPromises);
+                
+                addressSnapshots.forEach(snapshot => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        const addressId = snapshot.id; 
+                        userEmailsMap[addressId] = data.email; // Lấy trường email
+                    }
+                });
+            }
+
+            // 3. Xử lý và gộp dữ liệu đơn hàng
             const ordersList = orderSnapshot.docs.map(doc => {
                 const data = doc.data();
                 const orderDate = data.createdAt ? new Date(Number(data.createdAt)) : null;
 
                 const shippingAddress = data.shippingAddress || {};
-                const shippingName = shippingAddress.name || shippingAddress.fullName || 'N/A';
-                const shippingCity = shippingAddress.city || shippingAddress.province || 'N/A';
+                // Đã fix để sử dụng trường có sẵn trong DB mới:
+                const shippingName = shippingAddress.fullName || 'N/A'; 
+                // Sử dụng fullLocation hoặc một phần địa chỉ chung
+                const shippingCity = shippingAddress.fullLocation?.split(',').pop()?.trim() || 'N/A'; 
                 
+                // Gán Email vào đơn hàng từ map đã đọc
+                const customerEmail = data.email || (data.userId ? userEmailsMap[data.userId] : 'N/A');
+
                 return { 
                     id: doc.id, 
                     ...data, 
                     orderDate, 
                     shippingName,
-                    shippingCity
+                    shippingCity, // Dùng cho hiển thị ngắn gọn trong bảng
+                    email: customerEmail, // Dùng cho OrderDetailModal
                 };
             });
 
@@ -145,6 +178,7 @@ const OrderList = () => {
 
         } catch (err) {
             console.error("Lỗi khi tải đơn hàng:", err);
+            // Cân nhắc thêm log chi tiết nếu lỗi truy vấn Firestore
         } finally {
             setLoading(false);
         }
@@ -156,7 +190,7 @@ const OrderList = () => {
 
     const filteredAndPaginatedOrders = useMemo(() => {
         let currentOrders = orders;
-
+        // (Giữ nguyên logic filter và pagination)
         if (searchTerm) {
             const lowerSearchTerm = searchTerm.toLowerCase();
             currentOrders = currentOrders.filter(o =>
@@ -318,7 +352,8 @@ const OrderList = () => {
                                 <strong>{formatCurrency(order.totalAmount)}</strong>
                             </td>
                             <td style={styles.td}>
-                                {order.shippingName} ({order.shippingCity})
+                                {/* Địa chỉ ngắn gọn */}
+                                {order.shippingName} ({order.shippingCity}) 
                             </td>
                             <td style={styles.td}>{order.paymentMethod || 'N/A'}</td>
                             <td style={styles.td}>

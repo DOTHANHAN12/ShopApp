@@ -269,6 +269,7 @@ public class ProductListActivity extends AppCompatActivity implements FilterSort
      */
     private void loadProducts() {
         Query query = db.collection("products")
+                .whereEqualTo("status", "Active") // ✅ LỌC SẢN PHẨM ACTIVE
                 .whereEqualTo("category", currentCategory);
 
         // Filter by type if specified

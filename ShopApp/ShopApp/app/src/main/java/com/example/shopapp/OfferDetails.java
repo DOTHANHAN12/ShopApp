@@ -3,16 +3,18 @@ package com.example.shopapp;
 // Model chi tiết cho thông tin khuyến mãi (Offer Details)
 public class OfferDetails {
     // Thuộc tính
-    public Long offerValue; // % giảm giá (vd: 20)
-    public String startDate;       // Thời gian bắt đầu (String YYYY-MM-DD)
-    public String endDate;         // Thời gian kết thúc (String YYYY-MM-DD)
+    public Long offerValue;
+    public String offerType;
+    public Long startDate;
+    public Long endDate;
 
     // Constructor rỗng bắt buộc cho Firestore
     public OfferDetails() {}
 
     // Constructor đầy đủ
-    public OfferDetails(Long offerValue, String startDate, String endDate) {
+    public OfferDetails(Long offerValue, String offerType, Long startDate, Long endDate) {
         this.offerValue = offerValue;
+        this.offerType = offerType;
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -28,17 +30,24 @@ public class OfferDetails {
         this.offerValue = offerValue;
     }
 
-    public String getStartDate() {
+    public String getOfferType() {
+        return offerType;
+    }
+    public void setOfferType(String offerType) {
+        this.offerType = offerType;
+    }
+
+    public Long getStartDate() {
         return startDate;
     }
-    public void setStartDate(String startDate) {
+    public void setStartDate(Long startDate) {
         this.startDate = startDate;
     }
 
-    public String getEndDate() {
+    public Long getEndDate() {
         return endDate;
     }
-    public void setEndDate(String endDate) {
+    public void setEndDate(Long endDate) {
         this.endDate = endDate;
     }
 }

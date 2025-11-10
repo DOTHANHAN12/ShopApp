@@ -255,6 +255,7 @@ public class CategorySearchActivity extends AppCompatActivity {
     private void loadSubCategoryData(String category) {
         db.collection("products")
                 .whereEqualTo("category", category)
+                .whereEqualTo("status", "Active") // ✅ LỌC SẢN PHẨM ACTIVE
                 .limit(200) // Increase limit to ensure all types are fetched
                 .get()
                 .addOnCompleteListener(task -> {

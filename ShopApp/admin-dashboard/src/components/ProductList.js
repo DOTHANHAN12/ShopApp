@@ -4,6 +4,7 @@ import { collection, getDocs, doc, deleteDoc, writeBatch } from 'firebase/firest
 import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
 import ProductManagementModal from './ProductManagementModal';
+import BatchUploadUniqloImages from './BatchUploadUniqloImages';
 
 // Hàm tính toán giá khuyến mãi - FIX
 const calculateFinalPrice = (basePrice, isOffer, offer) => {
@@ -178,21 +179,63 @@ const ProductList = () => {
         }
     };
 
+    const clearAllFeatured = async () => {
+        const BATCH_SIZE = 400;
+        const productsCollectionRef = collection(db, "products");
+        let confirm = window.confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ trạng thái nổi bật (Featured) khỏi database không?");
+        if (!confirm) return;
+
+        try {
+            console.log("Bắt đầu xóa toàn bộ trạng thái Featured...");
+            const productSnapshot = await getDocs(productsCollectionRef);
+            
+            let batch = writeBatch(db);
+            let count = 0;
+
+            productSnapshot.docs.forEach((productDoc) => {
+                const productRef = doc(db, 'products', productDoc.id);
+                batch.update(productRef, {
+                    isFeatured: false,
+                    updatedAt: Date.now()
+                });
+                count++;
+
+                if (count % BATCH_SIZE === 0) {
+                    batch.commit();
+                    batch = writeBatch(db);
+                }
+            });
+
+            if (count > 0) {
+                await batch.commit();
+            }
+
+            console.log(`✅ Hoàn tất xóa trạng thái Featured khỏi ${count} sản phẩm.`);
+            alert(`Hoàn tất xóa trạng thái Featured khỏi ${count} sản phẩm!`);
+            fetchProducts(); 
+
+        } catch (err) {
+            console.error("LỖI LỚN khi xóa Featured hàng loạt:", err);
+            alert(`LỖI: Không thể xóa trạng thái Featured.`);
+            return 0;
+        }
+    };
+
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const productsCollectionRef = collection(db, "products");
             const productSnapshot = await getDocs(productsCollectionRef);
 
-            const productsList = productSnapshot.docs.map(doc => {
-                const data = doc.data();
+            const productsList = productSnapshot.docs.map(docSnap => {
+                const data = docSnap.data();
                 const totalStock = data.variants ? data.variants.reduce((sum, v) => sum + (v.quantity || 0), 0) : 0;
                 
                 // ✅ FIX: Truyền đúng 3 tham số vào calculateFinalPrice
                 const finalPrice = calculateFinalPrice(data.basePrice, data.isOffer, data.offer);
 
                 return {
-                    id: doc.id,
+                    id: docSnap.id,
                     ...data,
                     totalStock,
                     listPrice: data.basePrice,
@@ -284,6 +327,9 @@ const ProductList = () => {
         <div style={{ padding: '20px', backgroundColor: '#1A1A1A', minHeight: '100vh', color: '#E0E0E0' }}>
             <h1 style={styles.title}>📦 Quản Lý Sản Phẩm</h1>
             
+            {/* BATCH UPLOAD UNIQLO IMAGES */}
+            <BatchUploadUniqloImages onComplete={fetchProducts} />
+            
             {/* STATS CARDS */}
             <div style={statsStyles.container}>
                 <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
@@ -295,13 +341,13 @@ const ProductList = () => {
                 <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
                     <div style={statsStyles.value}>{stats.active}</div>
                     <div style={statsStyles.label}>✅ Hoạt Động</div>
-                    <div style={statsStyles.description}>{((stats.active / stats.total) * 100).toFixed(0)}% tổng số</div>
+                    <div style={statsStyles.description}>{stats.total > 0 ? ((stats.active / stats.total) * 100).toFixed(0) : 0}% tổng số</div>
                 </div>
                 
                 <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
                     <div style={statsStyles.value}>{stats.withOffer}</div>
                     <div style={statsStyles.label}>🎁 Đang Khuyến Mãi</div>
-                    <div style={statsStyles.description}>{((stats.withOffer / stats.total) * 100).toFixed(0)}% có offer</div>
+                    <div style={statsStyles.description}>{stats.total > 0 ? ((stats.withOffer / stats.total) * 100).toFixed(0) : 0}% có offer</div>
                 </div>
                 
                 <div style={{...statsStyles.card, ...statsStyles.cardHover}}>
@@ -311,13 +357,20 @@ const ProductList = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '10px', flexWrap: 'wrap' }}>
                 <button 
                     onClick={clearAllOffers} 
                     style={styles.adminButton}
                     title="Xóa toàn bộ thông tin khuyến mãi"
                 >
                     ADMIN: CLEAR ALL OFFERS
+                </button>
+                <button 
+                    onClick={clearAllFeatured} 
+                    style={{...styles.adminButton, backgroundColor: '#FFD700', color: '#333'}}
+                    title="Xóa toàn bộ trạng thái nổi bật"
+                >
+                    ADMIN: CLEAR ALL FEATURED
                 </button>
             </div>
 
@@ -378,6 +431,7 @@ const ProductList = () => {
                                     src={product.mainImage || 'https://via.placeholder.com/50'}
                                     alt={product.name}
                                     style={styles.productImage}
+                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/50'; }}
                                 />
                             </td>
                             <td style={styles.td}>
@@ -435,6 +489,12 @@ const ProductList = () => {
                     ))}
                 </tbody>
             </table>
+
+            {filteredProducts.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                    <p>Không tìm thấy sản phẩm nào</p>
+                </div>
+            )}
 
             {managementModalProduct && (
                 <ProductManagementModal

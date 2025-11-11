@@ -5,21 +5,33 @@ import { db } from '../firebaseConfig';
 import { formatCurrency } from '../utils/format';
 import ProductManagementModal from './ProductManagementModal';
 
-// Hàm tính toán giá khuyến mãi
-const calculateFinalPrice = (basePrice, offer) => {
-    if (!offer || !offer.isOffer || !basePrice || basePrice <= 0) return basePrice;
+// Hàm tính toán giá khuyến mãi - FIX
+const calculateFinalPrice = (basePrice, isOffer, offer) => {
+    // Kiểm tra isOffer trước
+    if (!isOffer || !basePrice || basePrice <= 0) return basePrice;
     
-    const value = parseFloat(offer.offerValue) || 0;
+    // Nếu offer không tồn tại, return basePrice
+    if (!offer) return basePrice;
+    
+    // Parse giá trị khuyến mãi - offerValue có thể là Integer hoặc String từ Firestore
+    const offerValue = offer.offerValue;
+    const value = (typeof offerValue === 'number') ? offerValue : (parseFloat(offerValue) || 0);
     const price = parseFloat(basePrice);
+    
+    // Kiểm tra offerType
+    const offerType = offer.offerType || 'Percentage';
     
     let finalPrice = price;
 
-    if (offer.offerType === 'Percentage') {
+    if (offerType === 'Percentage') {
+        // Giảm theo phần trăm
         finalPrice = price - (price * value / 100);
-    } else if (offer.offerType === 'FlatAmount') {
+    } else if (offerType === 'FlatAmount') {
+        // Giảm theo số tiền cố định
         finalPrice = price - value;
     }
     
+    // Làm tròn đến 2 chữ số thập phân
     finalPrice = Math.round(finalPrice * 100) / 100;
     
     return Math.max(0, finalPrice);
@@ -176,13 +188,8 @@ const ProductList = () => {
                 const data = doc.data();
                 const totalStock = data.variants ? data.variants.reduce((sum, v) => sum + (v.quantity || 0), 0) : 0;
                 
-                const offerDetails = { 
-                    isOffer: data.isOffer, 
-                    offerType: data.offer?.offerType, 
-                    offerValue: data.offer?.offerValue 
-                };
-
-                const finalPrice = calculateFinalPrice(data.basePrice, offerDetails);
+                // ✅ FIX: Truyền đúng 3 tham số vào calculateFinalPrice
+                const finalPrice = calculateFinalPrice(data.basePrice, data.isOffer, data.offer);
 
                 return {
                     id: doc.id,
